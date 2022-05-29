@@ -8,5 +8,9 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
-    libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test
+    libraryDependencies ++= Seq(
+      "org.bytedeco" % "pytorch-platform" % "1.10.2-1.5.7",
+      "org.bytedeco" % "mkl-platform" % "2022.0-1.5.7",
+      "org.scalameta" %% "munit" % "0.7.29" % Test
+    )
   )
