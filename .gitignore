@@ -5,3 +5,4 @@ target/
 .bleep/
 .bloop/
 .metals
+*.worksheet.sc
