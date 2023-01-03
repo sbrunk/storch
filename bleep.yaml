@@ -1,37 +1,47 @@
 $schema: https://raw.githubusercontent.com/oyvindberg/bleep/master/schema.json
-$version: 0.0.1-M23
+$version: 0.0.1-M24
 jvm:
   name: graalvm-java17:22.3.0
 projects:
-  storch:
-    dependencies:
-    - org.bytedeco:pytorch-platform:1.13.0-1.5.9-SNAPSHOT
-    extends: template-storch
-  storch-gpu:
-    dependencies:
-    - org.bytedeco:pytorch-platform-gpu:1.13.0-1.5.9-SNAPSHOT
-    extends: template-storch
-    sources: ../storch
-  storch-test:
-    dependencies:
-    - org.scalameta::munit-scalacheck:0.7.29
-    - org.scalameta::munit:0.7.29
-    dependsOn: storch
-    extends: template-storch
-    isTestProject: true
   scripts:
     dependencies: build.bleep::bleep-core:${BLEEP_VERSION}
     platform:
       name: jvm
     scala:
       version: 3.2.1
-  vision:
+  storch:
+    dependencies:
+    - com.lihaoyi::sourcecode:0.2.8
+    - org.bytedeco:pytorch:1.13.0-1.5.9-SNAPSHOT
+    - org.typelevel::spire:0.18.0
+    extends: template-common
+  storch-cpu:
+    dependencies: org.bytedeco:pytorch-platform:1.13.0-1.5.9-SNAPSHOT
     dependsOn: storch
-    extends: template-vision
+    extends: template-common
+  storch-gpu:
+    dependencies: org.bytedeco:pytorch-platform-gpu:1.13.0-1.5.9-SNAPSHOT
+    dependsOn: storch
+    extends: template-common
+  storch-test:
+    dependencies:
+    - org.scalameta::munit-scalacheck:0.7.29
+    - org.scalameta::munit:0.7.29
+    dependsOn: storch-cpu
+    extends: template-common
+    isTestProject: true
+  vision:
+    dependencies:
+    - com.sksamuel.scrimage:scrimage-core:4.0.32
+    - com.sksamuel.scrimage:scrimage-webp:4.0.32
+    dependsOn: storch
+    extends: template-common
+  vision-cpu:
+    dependsOn: storch-cpu
+    extends: template-common
   vision-gpu:
     dependsOn: storch-gpu
-    extends: template-vision
-    sources: ../storch
+    extends: template-common
 resolvers: https://oss.sonatype.org/content/repositories/snapshots
 scripts:
   generate-resources:
@@ -44,13 +54,5 @@ templates:
     scala:
       options: -encoding utf8 -groups -snippet-compiler:compile
       version: 3.2.1
-  template-storch:
-    dependencies:
-    - com.lihaoyi::sourcecode:0.2.8
-    - org.typelevel::spire:0.18.0
-    extends: template-common
   template-vision:
-    dependencies:
-    - com.sksamuel.scrimage:scrimage-core:4.0.32
-    - com.sksamuel.scrimage:scrimage-webp:4.0.32
     extends: template-common
