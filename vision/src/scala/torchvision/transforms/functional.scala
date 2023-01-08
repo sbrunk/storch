@@ -1,5 +1,4 @@
-package torchvision
-package transforms
+package torchvision.transforms
 
 import torch.*
 
