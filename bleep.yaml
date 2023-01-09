@@ -12,16 +12,22 @@ projects:
   storch:
     dependencies:
     - com.lihaoyi::sourcecode:0.2.8
-    - org.bytedeco:pytorch:1.13.0-1.5.9-SNAPSHOT
+    - org.bytedeco:pytorch:1.13.1-1.5.9-SNAPSHOT
     - org.typelevel::spire:0.18.0
     extends: template-common
   storch-cpu:
-    dependencies: org.bytedeco:pytorch-platform:1.13.0-1.5.9-SNAPSHOT
+    dependencies: org.bytedeco:pytorch-platform:1.13.1-1.5.9-SNAPSHOT
     dependsOn: storch
     extends: template-common
   storch-gpu:
-    dependencies: org.bytedeco:pytorch-platform-gpu:1.13.0-1.5.9-SNAPSHOT
+    dependencies:
+    - org.bytedeco:pytorch-platform-gpu:1.13.1-1.5.9-SNAPSHOT
     dependsOn: storch
+    extends: template-common
+  storch-cuda118:
+    dependencies:
+      - org.bytedeco:cuda-platform-redist:11.8-8.6-1.5.9-SNAPSHOT
+    dependsOn: storch-gpu
     extends: template-common
   storch-test:
     dependencies:
