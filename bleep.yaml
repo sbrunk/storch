@@ -4,7 +4,11 @@ jvm:
   name: graalvm-java17:22.3.0
 projects:
   scripts:
-    dependencies: build.bleep::bleep-core:${BLEEP_VERSION}
+    dependencies:
+    - build.bleep::bleep-core:${BLEEP_VERSION}
+    - build.bleep::bleep-plugin-mdoc:${BLEEP_VERSION}
+    - com.lihaoyi::os-lib:0.9.0
+    dependsOn: storch-cpu
     platform:
       name: jvm
     scala:
@@ -52,6 +56,9 @@ resolvers: https://oss.sonatype.org/content/repositories/snapshots
 scripts:
   generate-resources:
     main: scripts.GenerateResources
+    project: scripts
+  generate-docs:
+    main: scripts.GenDocumentation
     project: scripts
 templates:
   template-common:
