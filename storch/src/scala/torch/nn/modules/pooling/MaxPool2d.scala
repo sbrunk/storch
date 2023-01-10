@@ -1,15 +1,17 @@
 package torch
 package nn
+package modules
+package pooling
 
-import org.bytedeco.pytorch.MaxPool2dImpl
 import org.bytedeco.javacpp.LongPointer
-
-import torch.internal.NativeConverters.toNative
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.MaxPool2dOptions
+import org.bytedeco.pytorch.{MaxPool2dImpl, MaxPool2dOptions}
+import torch.internal.NativeConverters.toNative
+import torch.nn.modules.{HasParams, TensorModule}
+import torch.{BFloat16, Float32, Float64, Tensor}
 
 /** Applies a 2D max pooling over an input signal composed of several input planes. */
-final case class MaxPool2d[ParamType <: BFloat16 | Float32 | Float64](
+final case class MaxPool2d[ParamType <: BFloat16 | Float32 | Float64 : Default](
     kernelSize: Int | (Int, Int),
     stride: Option[Int | (Int, Int)] = None,
     padding: Int | (Int, Int) = 0,

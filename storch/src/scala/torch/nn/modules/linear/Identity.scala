@@ -1,7 +1,11 @@
 package torch
 package nn
+package modules
+package linear
 
 import org.bytedeco.pytorch.IdentityImpl
+import torch.nn.modules.Module
+import torch.{DType, Tensor}
 
 /** A placeholder identity operator that is argument-insensitive.
  *

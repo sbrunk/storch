@@ -1,20 +1,23 @@
 package torch
 package nn
+package modules
+package conv
 
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.{Conv2dImpl, Conv2dOptions, IdentityImpl}
+import org.bytedeco.pytorch.*
 import sourcecode.Name
-import torch.nn.Conv2d.PaddingMode
-import org.bytedeco.pytorch.{kZeros, kReflect, kReplicate, kCircular}
+import torch.Tensor
 import torch.internal.NativeConverters.toNative
+import torch.nn.modules.conv.Conv2d.PaddingMode
+import torch.nn.modules.{HasParams, TensorModule}
 
 /** Applies a 2D convolution over an input signal composed of several input planes.
   *
   * @group nn_conv
   * 
   */
-case class Conv2d[ParamType <: FloatNN | ComplexNN](
+case class Conv2d[ParamType <: FloatNN | ComplexNN : Default](
     inChannels: Long,
     outChannels: Long,
     kernelSize: Int | (Int, Int),

@@ -1,7 +1,8 @@
-package torch
-package nn
+package torch.nn.modules.activation
 
 import org.bytedeco.pytorch.SoftmaxImpl
+import torch.nn.modules.Module
+import torch.{DType, Tensor}
 
 /** Applies the Softmax function to an n-dimensional input Tensor rescaling them so that the elements of the
   * n-dimensional output Tensor lie in the range [0,1] and sum to 1.

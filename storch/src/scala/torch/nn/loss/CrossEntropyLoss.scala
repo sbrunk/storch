@@ -3,7 +3,7 @@ package nn
 package loss
 
 import org.bytedeco.pytorch.CrossEntropyLossImpl
-import torch.nn.Module
+import torch.nn.modules.Module
 import torch.{DType, Tensor}
 
 /** This criterion computes the cross entropy loss between input and target. */

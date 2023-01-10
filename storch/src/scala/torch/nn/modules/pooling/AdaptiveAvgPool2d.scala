@@ -3,7 +3,6 @@ package nn
 package modules
 package pooling
 
-import torch.nn.HasParams
 import org.bytedeco.pytorch.AdaptiveAvgPool2dImpl
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch

@@ -10,9 +10,9 @@ class MaxPoolSuite extends munit.FunSuite {
     val m1     = MaxPool2d[Float32](3, stride=Some(2))
     assertEquals(m1(input).shape, Seq[Long](1, 3, 121, 121))
     // pool of non-square window
-    val m2 = nn.MaxPool2d[Float32]((3, 2), stride=Some(2, 1))
+    val m2 = MaxPool2d[Float32]((3, 2), stride=Some(2, 1))
     assertEquals(m2(input).shape, Seq[Long](1, 3, 121, 243))
-    val m3 = nn.MaxPool2d[Float32](3)
+    val m3 = MaxPool2d[Float32](3)
     assertEquals(m3(input).shape, Seq[Long](1, 3, 81, 81))
   }
 }

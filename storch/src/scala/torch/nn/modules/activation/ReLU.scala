@@ -1,9 +1,9 @@
-package torch
-package nn
+package torch.nn.modules.activation
 
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.ReLUImpl
-import org.bytedeco.pytorch.ReLUOptions
+import org.bytedeco.pytorch.{ReLUImpl, ReLUOptions}
+import torch.nn.modules.Module
+import torch.{DType, Tensor}
 
 /** Applies the rectified linear unit function element-wise:
   *

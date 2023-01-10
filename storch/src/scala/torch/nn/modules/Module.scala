@@ -1,14 +1,15 @@
 package torch
 package nn
+package modules
 
 import org.bytedeco.javacpp.CharPointer
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{Conv2dImpl, InputArchive, OutputArchive}
+import torch.{DType, Device, Tensor}
 
 import java.nio.CharBuffer
+import scala.collection.immutable.{SeqMap, TreeSeqMap}
 import scala.reflect.ClassTag
-import scala.collection.immutable.TreeSeqMap
-import scala.collection.immutable.SeqMap
 
 abstract class Module extends Cloneable {
 
@@ -33,7 +34,7 @@ abstract class Module extends Cloneable {
   def parameters: Seq[Tensor[_]] = parameters(recurse = true)
 
   def parameters(recurse: Boolean): Seq[Tensor[_]] =
-    nativeModule.parameters().get().map(Tensor.apply[DType](_))
+    nativeModule.parameters().get().map(Tensor.apply[DType])
 
   // TODO make strict a parameter
   // TODO improve error handling
@@ -106,13 +107,23 @@ abstract class Module extends Cloneable {
     doSummarize(0)
 }
 
-trait HasParams[ParamType <: FloatNN | ComplexNN] extends Module:
+/** Default tensor type for floating point module parameters.
+  *
+  * Defaults to float32 but can be overriden by providing a given
+  */
+trait Default[+D <: FloatNN | ComplexNN]:
+  def dtype: D
+object Default:
+  given f32: Default[Float32] = new Default[Float32] { def dtype = float32 }
+
+
+trait HasParams[ParamType <: FloatNN | ComplexNN : Default] extends Module:
   override def parameters(recurse: Boolean): Seq[Tensor[ParamType]] =
     nativeModule.parameters(recurse).get().toSeq.map(Tensor.apply[ParamType])
   override def parameters: Seq[Tensor[ParamType]] = parameters(recurse = true)
   transparent inline def paramType = deriveDType[ParamType]
 
-trait HasWeight[ParamType <: FloatNN]:
+trait HasWeight[ParamType <: FloatNN | ComplexNN]:
   def weight: Tensor[ParamType]
 
 trait TensorModule[D <: DType] extends Module with (Tensor[D] => Tensor[D]):

@@ -1,14 +1,14 @@
 package torch
 package nn
+package modules
+package batchnorm
 
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.{Conv2dImpl, Conv2dOptions, IdentityImpl}
 import sourcecode.Name
-import torch.nn.Conv2d.PaddingMode
-import org.bytedeco.pytorch.{kZeros, kReflect, kReplicate, kCircular}
 import org.bytedeco.pytorch.BatchNorm2dImpl
 import org.bytedeco.pytorch.BatchNormOptions
+import torch.nn.modules.{HasParams, HasWeight, TensorModule}
 
 
 // format: off
@@ -86,7 +86,7 @@ Examples:
   * TODO use dtype
   */
 // format: on
-case class BatchNorm2d[ParamType <: FloatNN](
+case class BatchNorm2d[ParamType <: FloatNN | ComplexNN : Default](
     numFeatures: Int,
     eps: Double = 1e-05,
     momentum: Double = 0.1,

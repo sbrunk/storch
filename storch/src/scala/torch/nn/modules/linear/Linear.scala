@@ -1,8 +1,12 @@
 package torch
 package nn
+package modules
+package linear
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{LinearImpl, LinearOptions}
+import torch.Tensor
+import torch.nn.modules.{HasParams, TensorModule}
 
 /** Applies a linear transformation to the incoming data: $y = xA^T + b$
   *
@@ -27,11 +31,11 @@ import org.bytedeco.pytorch.{LinearImpl, LinearOptions}
   * @param bias
   *   If set to ``false``, the layer will not learn an additive bias. Default: ``true``
   */
-class Linear[ParamType <: FloatNN](
+class Linear[ParamType <: FloatNN: Default](
     inFeatures: Long,
     outFeatures: Long,
     bias: Boolean = true,
-    //dtype: ParamType = defaultDType
+    //dtype: ParamType = defaultDType[ParamType]
 ) extends HasParams[ParamType] with (TensorModule[ParamType]):
   private val options = new LinearOptions(inFeatures, outFeatures)
   options.bias().put(bias)

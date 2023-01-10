@@ -293,20 +293,6 @@ type DTypeOrDeriveArange[T <: DType | Derive, Start <: ScalaType, End <: ScalaTy
     case Derive => DerivedArangeType[Start, End, Step]
     case T      => TensorType[T]
 
-/** Default tensor type for tensor creation ops.
-  *
-  * Defaults to float32 but can be overriden by providing a given
-  */
-trait Default[+T <: DType]:
-  def dtype: T
-object Default:
-  given f32: Default[Float32] = new Default[Float32] { def dtype = float32 }
-
-transparent inline def defaultDType[T <: DType] = summonFrom {
-  case x: Default[T] => x.dtype
-  case _             => deriveDType[T]
-}
-
 /** Type of the output tensor based on PyTorch type promotion rules
   *
   * This is a type-level implementation of the PyTorch op data type promotion rules via match types.
