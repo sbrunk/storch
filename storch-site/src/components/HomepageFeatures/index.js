@@ -4,32 +4,34 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'Build deep learning models in Scala',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+          Storch provides GPU accelerated tensor operations, automatic differentiation,
+          and a neural network API for building and training machine learning models.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Get the best out of PyTorch & Scala',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Storch aims to be close to the original PyTorch API, while still leveraging Scala's powerful type
+        system for safer tensor operations.
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Powered by LibTorch & JavaCPP',
+    Svg: require('@site/static/img/PyTorch_logo_icon.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        <p>Storch is based on <a href="https://pytorch.org/cppdocs/">LibTorch</a> the C++ library underlying PyTorch.</p>
+
+        <p><a href="https://github.com/bytedeco/javacpp">JavaCPP</a> provides us with generated JVM bindings and seamless,
+        multiplatform interop with native code, including CUDA support for GPU acceleration.</p>
       </>
     ),
   },
