@@ -11,7 +11,7 @@ import java.nio.CharBuffer
 import scala.collection.immutable.{SeqMap, TreeSeqMap}
 import scala.reflect.ClassTag
 
-abstract class Module extends Cloneable {
+abstract class Module {
 
   protected[torch] var _nativeModule                   = pytorch.Module()
   private[torch] def nativeModule: pytorch.Module      = _nativeModule // = pytorch.Module()

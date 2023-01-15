@@ -12,7 +12,7 @@ import torch.{DType, Tensor}
  *  @group nn_linear
  *
  */
-class Identity(args: Any*) extends Module:
+final class Identity(args: Any*) extends Module:
   override val nativeModule: IdentityImpl = IdentityImpl()
 
   def forward[D <: DType](t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))

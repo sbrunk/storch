@@ -86,7 +86,7 @@ Examples:
   * TODO use dtype
   */
 // format: on
-case class BatchNorm2d[ParamType <: FloatNN | ComplexNN : Default](
+final class BatchNorm2d[ParamType <: FloatNN | ComplexNN : Default](
     numFeatures: Int,
     eps: Double = 1e-05,
     momentum: Double = 0.1,

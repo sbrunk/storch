@@ -16,7 +16,7 @@ import org.bytedeco.pytorch.LongOptional
   * The output is of size H x W, for any input size. The number of output features is equal to the number of input
   * planes.
   */
-case class AdaptiveAvgPool2d(outputSize: Int | Option[Int] | (Option[Int], Option[Int]) | (Int, Int)) extends Module {
+final class AdaptiveAvgPool2d(outputSize: Int | Option[Int] | (Option[Int], Option[Int]) | (Int, Int)) extends Module {
 
   private def nativeOutputSize = outputSize match
     case (h, w): (Int, Int) => new LongOptionalVector(new LongOptional(h), new LongOptional(w))

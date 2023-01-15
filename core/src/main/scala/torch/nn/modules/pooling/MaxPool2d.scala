@@ -11,7 +11,7 @@ import torch.nn.modules.{HasParams, TensorModule}
 import torch.{BFloat16, Float32, Float64, Tensor}
 
 /** Applies a 2D max pooling over an input signal composed of several input planes. */
-final case class MaxPool2d[ParamType <: BFloat16 | Float32 | Float64 : Default](
+final class MaxPool2d[ParamType <: BFloat16 | Float32 | Float64 : Default](
     kernelSize: Int | (Int, Int),
     stride: Option[Int | (Int, Int)] = None,
     padding: Int | (Int, Int) = 0,

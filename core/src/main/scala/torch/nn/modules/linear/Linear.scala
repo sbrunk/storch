@@ -31,7 +31,7 @@ import torch.nn.modules.{HasParams, TensorModule}
   * @param bias
   *   If set to ``false``, the layer will not learn an additive bias. Default: ``true``
   */
-class Linear[ParamType <: FloatNN: Default](
+final class Linear[ParamType <: FloatNN: Default](
     inFeatures: Long,
     outFeatures: Long,
     bias: Boolean = true,

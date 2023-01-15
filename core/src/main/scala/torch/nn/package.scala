@@ -6,11 +6,17 @@ package torch
   * 
   */
 package object nn {
-  type AdaptiveAvgPool2d = modules.pooling.AdaptiveAvgPool2d
-  val AdaptiveAvgPool2d = modules.pooling.AdaptiveAvgPool2d
-  type GroupNorm[ParamType <: DType] = modules.GroupNorm[ParamType]
-  val GroupNorm = modules.GroupNorm
+  export modules.Module
+  export modules.Default
 
-  type Sequential[D <: DType] = modules.container.Sequential[D]
-  val Sequential = modules.container.Sequential
+  export modules.activation.Softmax
+  export modules.activation.ReLU
+  export modules.batchnorm.BatchNorm2d
+  export modules.container.Sequential
+  export modules.conv.Conv2d
+  export modules.linear.Linear
+  export modules.linear.Identity
+  export modules.normalization.GroupNorm
+  export modules.pooling.AdaptiveAvgPool2d
+  export modules.pooling.MaxPool2d
 }

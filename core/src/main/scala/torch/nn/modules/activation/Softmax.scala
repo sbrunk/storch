@@ -11,6 +11,6 @@ import torch.{DType, Tensor}
   *
   * When the input Tensor is a sparse tensor then the unspecifed values are treated as ``-inf``.
   */
-class Softmax(dim: Int) extends Module:
+final class Softmax(dim: Int) extends Module:
   override val nativeModule: SoftmaxImpl         = SoftmaxImpl(dim)
   def apply[D <: DType](t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))

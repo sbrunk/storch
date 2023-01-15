@@ -17,7 +17,7 @@ import torch.nn.modules.{HasParams, TensorModule}
   * @group nn_conv
   * 
   */
-case class Conv2d[ParamType <: FloatNN | ComplexNN : Default](
+final class Conv2d[ParamType <: FloatNN | ComplexNN : Default](
     inChannels: Long,
     outChannels: Long,
     kernelSize: Int | (Int, Int),
@@ -46,7 +46,6 @@ case class Conv2d[ParamType <: FloatNN | ComplexNN : Default](
   nativeModule.asModule.to(paramType.toScalarType)
 
   override def registerWithParent[M <: pytorch.Module](parent: M)(using name: sourcecode.Name): Unit =
-    // println(s"registering ${name.value}: $this with $parent")
     parent.register_module(name.value, nativeModule)
 
   def apply(t: Tensor[ParamType]): Tensor[ParamType] = Tensor(nativeModule.forward(t.native))

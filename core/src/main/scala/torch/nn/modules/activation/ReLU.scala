@@ -9,7 +9,7 @@ import torch.{DType, Tensor}
   *
   * $\text{ReLU}(x) = (x)^+ = \max(0, x)$
   */
-final case class ReLU(inplace: Boolean = false) extends Module:
+final class ReLU(inplace: Boolean = false) extends Module:
   private val options = new ReLUOptions()
   options.inplace().put(inplace)
 
