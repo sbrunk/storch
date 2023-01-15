@@ -54,59 +54,5 @@ val z = (x matmul w) + b
 // [3,2513, 4,2490, 2,8640]
 ```
 
-One notable difference is that tensors in Storch are statically typed regarding the underlying `dtype`.
-So you'll see `Tensor[Float32]` or `Tensor[Int8]` instead of just `Tensor`.
 
-Tracking the data type at compile time enables us to catch certain errors earlier. For instance, `torch.rand` is only implemented for float types and the following will trigger a runtime error in PyTorch:
-```python
-torch.rand([3,3], dtype=torch.int32) # RuntimeError: "check_uniform_bounds" not implemented for 'Int'
-```
 
-In Storch, the same code does not compile:
-```scala
-torch.rand(Seq(3,3), dtype=torch.int32) // compile error
-```
-
-Example module:
-```scala
-class LeNet[D <: BFloat16 | Float32] extends nn.Module:
-  val conv1 = register(nn.Conv2d[D](1, 6, 5))
-  val pool  = nn.MaxPool2d[D]((2, 2))
-  val conv2 = register(nn.Conv2d[D](6, 16, 5))
-  val fc1   = register(nn.Linear[D](16 * 4 * 4, 120))
-  val fc2   = register(nn.Linear[D](120, 84))
-  val fc3   = register(nn.Linear[D](84, 10))
-
-  def apply(i: Tensor[D]): Tensor[D] =
-    var x = pool(F.relu(conv1(i)))
-    x = pool(F.relu(conv2(x)))
-    x = x.view(-1, 16 * 4 * 4)
-    x = F.relu(fc1(x))
-    x = F.relu(fc2(x))
-    x = fc3(x)
-    x
-```
-
-Storch is powered by [LibTorch](https://pytorch.org/cppdocs/index.html), the C++ library underlying PyTorch and [JavaCPP](https://github.com/bytedeco/javacpp), which provides generated Java bindings for LibTorch as well as important utilities to integrate with native code on the JVM.
-
-## Installation
-
-As Storch is still in an early stage of development, there are no published artifacts available yet, so you'll have to build Storch from source.
-
-### Building from source
-
-Storch uses [Bleep](https://bleep.build/docs/) as build tool. The build is defined in `bleep.yaml`.
-Don't worry if you are not familiar with Bleep, it's refreshingly simple and easy to use.
-
-1. Install [Coursier](https://get-coursier.io/docs/cli-installation)
-2. Install Bleep
-   ```bash
-   cs install --channel https://raw.githubusercontent.com/oyvindberg/bleep/master/coursier-channel.json bleep
-   ```
-3. Clone the Storch repo
-4. Build Storch and publish it locally
-   ```bash
-   bleep publish-local
-   ```
-
-Now you're ready to use Storch.

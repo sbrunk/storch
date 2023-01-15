@@ -9,7 +9,7 @@ lazy val commonSettings = Seq(
   organization := "dev.storch",
   version := "0.1.0-SNAPSHOT",
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
-  javaCppPresetLibs ++= Seq((if (enableGPU.value) "pytorch-gpu" else "pytorch") -> "1.13.1", "mkl" -> "2022.2", "openblas" -> "0.3.21"),
+  javaCppPresetLibs ++= Seq((if (enableGPU.value) "pytorch-gpu" else "pytorch") -> "1.13.1", /*"mkl" -> "2022.2",*/ "openblas" -> "0.3.21"),
   javaCppVersion := "1.5.9-SNAPSHOT",
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
@@ -60,6 +60,7 @@ lazy val docs = project
   .settings(commonSettings)
   .settings(
     mdocVariables := Map(
-      "VERSION" -> version.value
+      "VERSION" -> version.value,
+      "JAVACPP_VERSION" -> javaCppVersion.value
     )
   )

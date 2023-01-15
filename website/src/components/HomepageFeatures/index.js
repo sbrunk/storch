@@ -4,7 +4,7 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Build deep learning models in Scala',
+    title: 'Build Deep Learning Models in Scala',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
@@ -14,7 +14,7 @@ const FeatureList = [
     ),
   },
   {
-    title: 'Get the best out of PyTorch & Scala',
+    title: 'Get the Best out of PyTorch',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
@@ -28,10 +28,9 @@ const FeatureList = [
     Svg: require('@site/static/img/PyTorch_logo_icon.svg').default,
     description: (
       <>
-        <p>Storch is based on <a href="https://pytorch.org/cppdocs/">LibTorch</a> the C++ library underlying PyTorch.</p>
-
-        <p><a href="https://github.com/bytedeco/javacpp">JavaCPP</a> provides us with generated JVM bindings and seamless,
-        multiplatform interop with native code, including CUDA support for GPU acceleration.</p>
+        Storch is based on <a href="https://pytorch.org/cppdocs/">LibTorch</a>, the C++ library underlying PyTorch.
+        JVM bindings for LibTorch are provided by <a href="https://github.com/bytedeco/javacpp">JavaCPP</a> for seamless,
+        multiplatform interop with native code & CUDA support.
       </>
     ),
   },
