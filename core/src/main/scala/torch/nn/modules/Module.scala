@@ -17,23 +17,23 @@ abstract class Module {
   private[torch] def nativeModule: pytorch.Module      = _nativeModule // = pytorch.Module()
   private var childModules: TreeSeqMap[String, Module] = TreeSeqMap.empty
 
-  def namedBuffers(recurse: Boolean = true): SeqMap[String, Tensor[_]] =
+  def namedBuffers(recurse: Boolean = true): SeqMap[String, Tensor[?]] =
     val buffers = nativeModule.named_buffers(recurse)
     TreeSeqMap.from((0 until buffers.size().toInt).map { i =>
       val item = buffers.get(i)
       (item.key().getString(), Tensor.apply[DType](item.access()))
     })
 
-  def namedParameters(recurse: Boolean = true): SeqMap[String, Tensor[_]] =
+  def namedParameters(recurse: Boolean = true): SeqMap[String, Tensor[?]] =
     val params = nativeModule.named_parameters(recurse)
     TreeSeqMap.from((0 until params.size().toInt).map { i =>
       val item = params.get(i)
       (item.key().getString(), Tensor.apply[DType](item.access()))
     })
 
-  def parameters: Seq[Tensor[_]] = parameters(recurse = true)
+  def parameters: Seq[Tensor[?]] = parameters(recurse = true)
 
-  def parameters(recurse: Boolean): Seq[Tensor[_]] =
+  def parameters(recurse: Boolean): Seq[Tensor[?]] =
     nativeModule.parameters().get().map(Tensor.apply[DType])
 
   // TODO make strict a parameter

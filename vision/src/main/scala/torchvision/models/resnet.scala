@@ -187,12 +187,12 @@ object resnet:
 
     for (m <- modules)
       m match
-        case m: Conv2d[_] =>
+        case m: Conv2d[?] =>
           nn.init.kaimingNormal_(m.weight, mode = Mode.FanOut, nonlinearity = NonLinearity.ReLU)
-        case m: BatchNorm2d[_] =>
+        case m: BatchNorm2d[?] =>
           nn.init.constant_(m.weight, 1)
           nn.init.constant_(m.bias, 0)
-        case m: nn.GroupNorm[_] =>
+        case m: nn.GroupNorm[?] =>
           nn.init.constant_(m.weight, 1)
           nn.init.constant_(m.bias, 0)
         case _ =>
@@ -203,9 +203,9 @@ object resnet:
     if zeroInitResidual then
       for (m <- modules)
         m match
-          case m: Bottleneck[_] if m.bn3.weight.dtype != DType.undefined =>
+          case m: Bottleneck[?] if m.bn3.weight.dtype != DType.undefined =>
             nn.init.constant_(m.bn3.weight, 0)
-          case m: Bottleneck[_] if m.bn2.weight.dtype != DType.undefined =>
+          case m: Bottleneck[?] if m.bn2.weight.dtype != DType.undefined =>
             nn.init.constant_(m.bn2.weight, 0)
 
     private def makeLayer(

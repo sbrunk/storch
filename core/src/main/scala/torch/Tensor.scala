@@ -138,7 +138,7 @@ sealed abstract class Tensor[D <: DType](/* private[torch]  */ val native: pytor
     *   if `true` and this copy is between CPU and GPU, the copy may occur asynchronously with respect to the host. For
     *   other cases, this argument has no effect.
     */
-  def copy_(src: Tensor[_], nonBlocking: Boolean = false): this.type =
+  def copy_(src: Tensor[?], nonBlocking: Boolean = false): this.type =
     native.copy_(src.native, nonBlocking)
     this
 
@@ -150,7 +150,7 @@ sealed abstract class Tensor[D <: DType](/* private[torch]  */ val native: pytor
   // def dtype: T = deriveDType[T]
 
   /** Computes element-wise equality */
-  def eq(other: Tensor[_]): Tensor[Bool] = Tensor(native.eq(other.native))
+  def eq(other: Tensor[?]): Tensor[Bool] = Tensor(native.eq(other.native))
 
   /** True if `other` has the same size and elements as this tensor, false otherwise. */
   def equal(other: Tensor[D]) = native.equal(other.native)
@@ -257,7 +257,7 @@ sealed abstract class Tensor[D <: DType](/* private[torch]  */ val native: pytor
       for (i <- indices) yield i match
         case None =>
           new pytorch.TensorIndex()
-        case t: Tensor[_] =>
+        case t: Tensor[?] =>
           new pytorch.TensorIndex(t.native)
         case singleton: Int =>
           new pytorch.TensorIndex(singleton)

@@ -20,7 +20,7 @@ import org.bytedeco.pytorch.Scalar
 
 // TODO implement remaining init functions
 object init:
-  def kaimingNormal_(t: Tensor[_], a: Double = 0, mode: Mode = Mode.FanIn, nonlinearity: NonLinearity = NonLinearity.LeakyReLU): Unit =
+  def kaimingNormal_(t: Tensor[?], a: Double = 0, mode: Mode = Mode.FanIn, nonlinearity: NonLinearity = NonLinearity.LeakyReLU): Unit =
     torchNative.kaiming_normal_(t.native, a, mode.toNative, nonlinearity.toNative)
 
   enum Mode:
@@ -46,4 +46,4 @@ object init:
     )
     
   // TODO valid for all scala types
-  def constant_(t: Tensor[_], fillValue: Double) = torchNative.constant_(t.native, Scalar(fillValue)): Unit
+  def constant_(t: Tensor[?], fillValue: Double) = torchNative.constant_(t.native, Scalar(fillValue)): Unit

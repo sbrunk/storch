@@ -11,5 +11,5 @@ import torch.{DType, Tensor}
 final class CrossEntropyLoss extends Module {
   override private[torch] val nativeModule: CrossEntropyLossImpl = CrossEntropyLossImpl()
 
-  def apply[D <: DType](input: Tensor[D], target: Tensor[_]): Tensor[D] = Tensor(nativeModule.forward(input.native, target.native))
+  def apply[D <: DType](input: Tensor[D], target: Tensor[?]): Tensor[D] = Tensor(nativeModule.forward(input.native, target.native))
 }
