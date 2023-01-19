@@ -1,16 +1,13 @@
----
-sidebar_position: 1
----
-
 # About
 
 Storch is a Scala library for fast tensor computations and deep learning, based on [PyTorch](https://pytorch.org/).
 
 Like PyTorch, Storch provides
-* A NumPy like API for working with tensors
-* GPU support
-* Automatic differentiation
-* A neural network API for building and training neural networks.
+
+  * A NumPy like API for working with tensors
+  * GPU support
+  * Automatic differentiation
+  * A neural network API for building and training neural networks.
 
 Storch aims to stay close to the original PyTorch API to make porting existing models and the life of people already familiar with PyTorch easier.
 

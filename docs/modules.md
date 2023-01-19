@@ -2,11 +2,11 @@
 
 Storch provides a neural network module API with building blocks for creating stateful neural network architectures.
 
-:::caution
+@:callout(warning)
 
 The module API is still work in progress and might change significantly.
 
-:::
+@:@
 
 ## Simple custom module example
 

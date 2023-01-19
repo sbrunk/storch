@@ -1,13 +1,34 @@
+import sbt._
+
+import Keys._
+import MdocPlugin.autoImport._
+import LaikaPlugin.autoImport._
+
+ThisBuild / tlBaseVersion := "0.0" // your current series x.y
+
+ThisBuild / organization := "dev.storch"
+ThisBuild / organizationName := "Storch"
+ThisBuild / startYear := Some(2022)
+ThisBuild / licenses := Seq(License.Apache2)
+ThisBuild / developers := List(
+  // your GitHub handle and name
+  tlGitHubDev("sbrunk", "Sören Brunk")
+)
+
+// publish to s01.oss.sonatype.org (set to true to publish to oss.sonatype.org instead)
+ThisBuild / tlSonatypeUseLegacyHost := false
+
+// publish website from this branch
+ThisBuild / tlSitePublishBranch := Some("main")
+
 val scrImageVersion = "4.0.32"
 ThisBuild / scalaVersion := "3.2.1"
+ThisBuild / githubWorkflowJavaVersions += JavaSpec.temurin("11")
 
 val enableGPU = settingKey[Boolean]("enable or disable GPU support")
 
 lazy val commonSettings = Seq(
   enableGPU := true,
-  scalaVersion := "3.2.1",
-  organization := "dev.storch",
-  version := "0.1.0-SNAPSHOT",
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
   javaCppPresetLibs ++= Seq((if (enableGPU.value) "pytorch-gpu" else "pytorch") -> "1.13.1", /*"mkl" -> "2022.2",*/ "openblas" -> "0.3.21"),
   javaCppVersion := "1.5.9-SNAPSHOT",
@@ -41,7 +62,6 @@ lazy val vision = project
   )
   .dependsOn(core)
 
-
 lazy val examples = project
   .in(file("examples"))
   .settings(commonSettings)
@@ -54,13 +74,20 @@ lazy val examples = project
   .dependsOn(vision)
 
 lazy val docs = project
-  .in(file("storch-docs"))
-  .dependsOn(vision)
-  .enablePlugins(MdocPlugin, DocusaurusPlugin)
+  .in(file("site"))
+  .enablePlugins(ScalaUnidocPlugin, TypelevelSitePlugin, StorchSitePlugin)
   .settings(commonSettings)
   .settings(
-    mdocVariables := Map(
-      "VERSION" -> version.value,
+    mdocVariables ++= Map(
       "JAVACPP_VERSION" -> javaCppVersion.value
-    )
+    ),
+    ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(examples),
+    Laika/sourceDirectories ++= Seq(sourceDirectory.value),
+    laikaIncludeAPI := true,
+    laikaGenerateAPI / mappings := (ScalaUnidoc / packageDoc / mappings).value
   )
+  .dependsOn(vision)
+
+lazy val root = project
+  .in(file("."))
+  .aggregate(core, vision, examples, docs)
