@@ -7,7 +7,7 @@ import LaikaPlugin.autoImport._
 ThisBuild / tlBaseVersion := "0.0" // your current series x.y
 
 ThisBuild / organization := "dev.storch"
-ThisBuild / organizationName := "Storch"
+ThisBuild / organizationName := "storch.dev"
 ThisBuild / startYear := Some(2022)
 ThisBuild / licenses := Seq(License.Apache2)
 ThisBuild / developers := List(
