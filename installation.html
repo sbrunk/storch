@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 0.18.1 + Helium Theme" />
+    <title>Installation</title>
+    
+      <meta name="author" content="Sören Brunk"/>
+    
+    
+      <meta name="description" content="docs"/>
+    
+    
+    
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+    
+    <link rel="stylesheet" type="text/css" href="helium/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="helium/laika-helium.css" />
+    <link rel="stylesheet" type="text/css" href="site/styles.css" />
+    <script src="helium/laika-helium.js"></script>
+    
+    
+    <script> /* for avoiding page load transitions */ </script>
+  </head>
+
+  <body>
+
+    <header id="top-bar">
+
+      <div class="row">
+        <a id="nav-icon">
+          <i class="icofont-laika" title="Navigation">&#xefa2;</i>
+        </a>
+        
+      </div>
+
+      <a class="icon-link" href="index.html"><i class="icofont-laika" title="Home">&#xef47;</i></a>
+
+      <span class="row links"><a class="icon-link svg-link" href="api/index.html"><span title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
+  </g>
+</svg></span></a><a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
+  </g>
+</svg></span></a></span>
+
+    </header>
+
+    <nav id="sidebar">
+
+      <div class="row">
+        <a class="icon-link svg-link" href="api/index.html"><span title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
+  </g>
+</svg></span></a><a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
+  </g>
+</svg></span></a>
+      </div>
+
+      <ul class="nav-list">
+        <li class="level1"><a href="about.html">About</a></li>
+        <li class="level1 active"><a href="#">Installation</a></li>
+        <li class="level1"><a href="modules.html">Modules</a></li>
+      </ul>
+
+      <ul class="nav-list">
+        <li class="level1 nav-header">Related Projects</li>
+        
+          <li class="level2"><a href="https://github.com/bytedeco/javacpp">JavaCPP</a></li>
+        
+      </ul>
+
+    </nav>
+
+    <div id="container">
+
+      <nav id="page-nav">
+        <p class="header"><a href="#">Installation</a></p>
+
+        <ul class="nav-list">
+          <li class="level1"><a href="#adding-the-native-pytorch-libraries">Adding the native PyTorch libraries</a></li>
+          <li class="level2"><a href="#via-pytorch-platform-1">Via PyTorch platform</a></li>
+          <li class="level2"><a href="#via-classifier-1">Via classifier</a></li>
+          <li class="level2"><a href="#automatically-detect-your-platform-1">Automatically detect your platform</a></li>
+          <li class="level1"><a href="#enable-gpu-support">Enable GPU support</a></li>
+          <li class="level2"><a href="#via-pytorch-platform-2">Via PyTorch platform</a></li>
+          <li class="level2"><a href="#via-classifier-2">Via classifier</a></li>
+          <li class="level2"><a href="#automatically-detect-your-platform-2">Automatically detect your platform</a></li>
+          <li class="level1"><a href="#running-tensor-operations-on-the-gpu">Running tensor operations on the GPU</a></li>
+        </ul>
+
+        <p class="footer"></p>
+      </nav>
+
+      <main class="content">
+
+        <h1 id="installation" class="title">Installation</h1>
+        <p>As Storch is still in an early stage of development, there are no published artifacts available yet. So for the time
+        being, you have to build it from source:</p>
+        <pre class="keep-together pdf epub"><code class="bash">git clone https://github.com/sbrunk/storch
+cd storch
+sbt publishLocal</code></pre>
+        <p>Then, add Storch as a dependency to your project:</p>
+        <div class="tab-container" data-tab-group="build-tool">
+          <ul class="tab-group">
+            <li class="tab active" data-choice-name="sbt"><a href="#">sbt</a></li>
+            <li class="tab" data-choice-name="scala-cli"><a href="#">Scala CLI</a></li>
+          </ul>
+          <div class="tab-content active" data-choice-name="sbt">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-36c0c1b-SNAPSHOT&quot;</span><span>
+)</span></code></pre>
+          </div>
+          <div class="tab-content" data-choice-name="scala-cli">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using scala &quot;3&quot;
+//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::storch:0.0-36c0c1b-SNAPSHOT&quot;</span></code></pre>
+          </div>
+        </div>
+        
+        <h2 id="adding-the-native-pytorch-libraries" class="section">Adding the native PyTorch libraries<a class="anchor-link right" href="#adding-the-native-pytorch-libraries"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>To use Storch, we also need to depend on the native PyTorch libraries (LibTorch),
+        which are provided by the <a href="https://github.com/bytedeco/javacpp">JavaCPP</a> project, as part of their autogenerated Java bindings.
+        There are multiple ways to add the native libraries.</p>
+        <div class="callout info">
+          <i class="icofont-laika">&#xef4e;</i>
+          <p>Why doesn&#39;t Storch just depend on the native PyTorch libraries itself?</p>
+          <p>Because these are native C++ libraries, which are different for each operating system and architecture.
+          Furthermore, there are variants for CPU and GPUs which are incompatible with each other.
+          We don&#39;t want to force users on Storch to use one variant over another, so you&#39;ll have to add the native dependency yourself.</p>
+        </div>
+        
+        <h3 id="via-pytorch-platform-1" class="section">Via PyTorch platform<a class="anchor-link right" href="#via-pytorch-platform-1"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <p>The easiest and most portable way to depend on the native library is via the PyTorch platform dependency:</p>
+        <div class="tab-container" data-tab-group="build-tool">
+          <ul class="tab-group">
+            <li class="tab active" data-choice-name="sbt"><a href="#">sbt</a></li>
+            <li class="tab" data-choice-name="scala-cli"><a href="#">Scala CLI</a></li>
+          </ul>
+          <div class="tab-content active" data-choice-name="sbt">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
+</span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-36c0c1b-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch-platform&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span>
+)
+</span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
+          </div>
+          <div class="tab-content" data-choice-name="scala-cli">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::storch:0.0-36c0c1b-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:pytorch-platform:1.13.1-1.5.9-SNAPSHOT&quot;</span></code></pre>
+          </div>
+        </div>
+        <p>There is one downside to this approach. Because <code>pytorch-platform</code> depends on the native libraries for all supported
+        platforms, it will download and cache <strong>all</strong> these libraries, no matter on which platform you actually are.</p>
+        <p>One way to avoid the overhead, is to explicitly depend on the native libraries for <strong>your</strong> platform instead of using
+        <code>pytorch-platform</code>.</p>
+        
+        <h3 id="via-classifier-1" class="section">Via classifier<a class="anchor-link right" href="#via-classifier-1"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <p>This can be done by providing dependency classifiers specifically for your platform.
+        Currently supported are <code>linux-x86_64</code>, <code>macosx-x86_64</code> and <code>windows-x86_64</code>.</p>
+        <div class="tab-container" data-tab-group="build-tool">
+          <ul class="tab-group">
+            <li class="tab active" data-choice-name="sbt"><a href="#">sbt</a></li>
+            <li class="tab" data-choice-name="scala-cli"><a href="#">Scala CLI</a></li>
+          </ul>
+          <div class="tab-content active" data-choice-name="sbt">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
+</span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-36c0c1b-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>
+)
+</span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
+          </div>
+          <div class="tab-content" data-choice-name="scala-cli">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::storch:0.0-36c0c1b-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:openblas:0.3.21-1.5.9-SNAPSHOT,classifier=linux-x86_64&quot;
+//&gt; using lib &quot;org.bytedeco:pytorch:1.13.1-1.5.9-SNAPSHOT,classifier=linux-x86_64&quot;</span></code></pre>
+          </div>
+        </div>
+        <p>Now we&#39;re only downloading the native libraries for a single platform. The downside though is that the build is not portable anymore.
+        Fortunately for sbt and Gradle, there&#39;s a solution available as a build plugin.</p>
+        
+        <h3 id="automatically-detect-your-platform-1" class="section">Automatically detect your platform<a class="anchor-link right" href="#automatically-detect-your-platform-1"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <p>The <a href="https://github.com/bytedeco/sbt-javacpp">SBT-JavaCPP</a> will automatically detect the current platform and set the right classifier.</p>
+        <p><code>project/plugins.sbt</code>:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">addSbtPlugin</span><span>(</span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;sbt-javacpp&quot;</span><span> % </span><span class="string-literal">&quot;1.17&quot;</span><span>)</span></code></pre>
+        <p><code>build.sbt</code>:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
+</span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-36c0c1b-SNAPSHOT&quot;</span><span>
+)
+</span><span class="identifier">javaCppPresetLibs</span><span> ++= </span><span class="type-name">Seq</span><span>(</span><span class="string-literal">&quot;pytorch&quot;</span><span> -&gt; </span><span class="string-literal">&quot;1.13.1&quot;</span><span>)
+</span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
+        <p>If you&#39;re using Gradle, you can use the <a href="https://github.com/bytedeco/gradle-javacpp">Gradle JavaCPP</a> plugin to do the same.</p>
+        
+        <h2 id="enable-gpu-support" class="section">Enable GPU support<a class="anchor-link right" href="#enable-gpu-support"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>Storch supports GPU accelerated tensor operations for Nvidia GPUs via CUDA. JavaCPP also provides matching CUDA toolkit
+        distribution including cuDNN, helping you to avoid having to mess with local CUDA installations.</p>
+        
+        <h3 id="via-pytorch-platform-2" class="section">Via PyTorch platform<a class="anchor-link right" href="#via-pytorch-platform-2"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <div class="tab-container" data-tab-group="build-tool">
+          <ul class="tab-group">
+            <li class="tab active" data-choice-name="sbt"><a href="#">sbt</a></li>
+            <li class="tab" data-choice-name="scala-cli"><a href="#">Scala CLI</a></li>
+          </ul>
+          <div class="tab-content active" data-choice-name="sbt">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
+</span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-36c0c1b-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch-platform-gpu&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda-platform-redist&quot;</span><span> % </span><span class="string-literal">&quot;11.8-8.6-1.5.9-SNAPSHOT&quot;</span><span>
+)
+</span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
+          </div>
+          <div class="tab-content" data-choice-name="scala-cli">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::storch:0.0-36c0c1b-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:pytorch-platform-gpu:1.13.1-1.5.9-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:cuda-platform-redist:11.8-8.6-1.5.9-SNAPSHOT&quot;</span></code></pre>
+          </div>
+        </div>
+        <p>This approach should work on any platform with CUDA support (Linux and Windows) but it causes even more overhead than
+        the CPU variants as CUDA is quite large. So, to save space and bandwidth you might want to use one of the options below
+        which work</p>
+        
+        <h3 id="via-classifier-2" class="section">Via classifier<a class="anchor-link right" href="#via-classifier-2"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <p>This can be done by providing dependency classifiers specifically for your platform.
+        Currently supported are <code>linux-x86_64-gpu</code>, <code>windows-x86_64-gpu</code>.</p>
+        <div class="tab-container" data-tab-group="build-tool">
+          <ul class="tab-group">
+            <li class="tab active" data-choice-name="sbt"><a href="#">sbt</a></li>
+            <li class="tab" data-choice-name="scala-cli"><a href="#">Scala CLI</a></li>
+          </ul>
+          <div class="tab-content active" data-choice-name="sbt">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
+</span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-36c0c1b-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64-gpu&quot;</span><span>
+)
+</span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
+          </div>
+          <div class="tab-content" data-choice-name="scala-cli">
+            <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::storch:0.0-36c0c1b-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:pytorch:1.13.1-1.5.9-SNAPSHOT,classifier=linux-x86_64-gpu&quot;</span></code></pre>
+          </div>
+        </div>
+        
+        <h3 id="automatically-detect-your-platform-2" class="section">Automatically detect your platform<a class="anchor-link right" href="#automatically-detect-your-platform-2"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <p>The <a href="https://github.com/bytedeco/sbt-javacpp">SBT-JavaCPP</a> also works with the GPU variant by adding <code>pytorch-gpu</code>
+        instead of <code>pytorch</code> to <code>javaCppPresetLibs</code>.</p>
+        <p><code>project/plugins.sbt</code>:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">addSbtPlugin</span><span>(</span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;sbt-javacpp&quot;</span><span> % </span><span class="string-literal">&quot;1.17&quot;</span><span>)</span></code></pre>
+        <p><code>build.sbt</code>:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
+</span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-36c0c1b-SNAPSHOT&quot;</span><span>
+)
+</span><span class="identifier">javaCppPresetLibs</span><span> ++= </span><span class="type-name">Seq</span><span>(</span><span class="string-literal">&quot;pytorch-gpu&quot;</span><span> -&gt; </span><span class="string-literal">&quot;1.13.1&quot;</span><span>)
+</span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
+        
+        <h2 id="running-tensor-operations-on-the-gpu" class="section">Running tensor operations on the GPU<a class="anchor-link right" href="#running-tensor-operations-on-the-gpu"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>You can create tensors directly on the GPU:</p>
+        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.</span><span class="type-name">Device</span><span>.{</span><span class="type-name">CPU</span><span>, </span><span class="type-name">CUDA</span><span>}
+</span><span class="keyword">val</span><span> </span><span class="identifier">device</span><span> = </span><span class="keyword">if</span><span> </span><span class="identifier">torch</span><span>.</span><span class="identifier">cuda</span><span>.</span><span class="identifier">isAvailable</span><span> </span><span class="keyword">then</span><span> </span><span class="type-name">CUDA</span><span> </span><span class="keyword">else</span><span> </span><span class="type-name">CPU</span><span>
+</span><span class="comment">// device: Device = Device(device = CUDA, index = -1)
+</span><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">3</span><span>,</span><span class="number-literal">3</span><span>), </span><span class="identifier">device</span><span>=</span><span class="identifier">device</span><span>)
+</span><span class="comment">// res1: Tensor[Float32] = dtype=float32, shape=[3, 3], device=CUDA 
+// [[0.3990, 0.5167, 0.0249],
+//  [0.9401, 0.9459, 0.7967],
+//  [0.4150, 0.8203, 0.2290]]
+</span><span>
+</span><span class="comment">// Use device index if you have multiple GPUs
+</span><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">3</span><span>,</span><span class="number-literal">3</span><span>), </span><span class="identifier">device</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="type-name">Device</span><span>(</span><span class="identifier">torch</span><span>.</span><span class="type-name">DeviceType</span><span>.</span><span class="type-name">CUDA</span><span>, </span><span class="number-literal">0</span><span>: </span><span class="type-name">Byte</span><span>))
+</span><span class="comment">// res2: Tensor[Float32] = dtype=float32, shape=[3, 3], device=CUDA 
+// [[0.9722, 0.7910, 0.4690],
+//  [0.3300, 0.3345, 0.3783],
+//  [0.7640, 0.6405, 0.1103]]</span></code></pre>
+        <p>Or move them from the CPU:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">cpuTensor</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="type-name">Tensor</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">1</span><span>,</span><span class="number-literal">2</span><span>,</span><span class="number-literal">3</span><span>))
+</span><span class="comment">// cpuTensor: Tensor[Int32] = dtype=int32, shape=[3], device=CPU 
+// [1, 2, 3]
+</span><span class="keyword">val</span><span> </span><span class="identifier">gpuTensor</span><span> = </span><span class="identifier">cpuTensor</span><span>.</span><span class="identifier">to</span><span>(</span><span class="identifier">device</span><span>=</span><span class="identifier">device</span><span>)
+</span><span class="comment">// gpuTensor: Tensor[Int32] = dtype=int32, shape=[3], device=CUDA 
+// [1, 2, 3]</span></code></pre>
+
+        <hr style="margin-top: 30px"/>
+        <footer style="font-size: 90%; text-align: center">
+          Storch is a <a href="https://typelevel.org/">Typelevel</a> project distributed under the <a href="https://www.apache.org/licenses/LICENSE-2.0.txt">Apache-2.0</a> license.
+        </footer>
+
+      </main>
+
+    </div>
+
+  </body>
+</html>
