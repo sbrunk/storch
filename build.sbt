@@ -32,7 +32,10 @@ val enableGPU = settingKey[Boolean]("enable or disable GPU support")
 lazy val commonSettings = Seq(
   enableGPU := false,
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
-  javaCppPresetLibs ++= Seq((if (enableGPU.value) "pytorch-gpu" else "pytorch") -> "1.13.1", /*"mkl" -> "2022.2",*/ "openblas" -> "0.3.21"),
+  javaCppPresetLibs ++= Seq(
+    (if (enableGPU.value) "pytorch-gpu" else "pytorch") -> "1.13.1",
+    /*"mkl" -> "2022.2",*/ "openblas" -> "0.3.21"
+  ),
   javaCppVersion := "1.5.9-SNAPSHOT",
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
@@ -84,7 +87,7 @@ lazy val docs = project
       "JAVACPP_VERSION" -> javaCppVersion.value
     ),
     ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(examples),
-    Laika/sourceDirectories ++= Seq(sourceDirectory.value),
+    Laika / sourceDirectories ++= Seq(sourceDirectory.value),
     laikaIncludeAPI := true,
     laikaGenerateAPI / mappings := (ScalaUnidoc / packageDoc / mappings).value
   )

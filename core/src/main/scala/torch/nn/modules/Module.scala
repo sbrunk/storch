@@ -29,8 +29,8 @@ import scala.reflect.ClassTag
 
 abstract class Module {
 
-  protected[torch] var _nativeModule                   = pytorch.Module()
-  private[torch] def nativeModule: pytorch.Module      = _nativeModule // = pytorch.Module()
+  protected[torch] var _nativeModule = pytorch.Module()
+  private[torch] def nativeModule: pytorch.Module = _nativeModule // = pytorch.Module()
   private var childModules: TreeSeqMap[String, Module] = TreeSeqMap.empty
 
   def namedBuffers(recurse: Boolean = true): SeqMap[String, Tensor[?]] =
@@ -56,7 +56,7 @@ abstract class Module {
   // TODO improve error handling
   def loadStateDict(stateDict: Map[String, Tensor[DType]]): Unit =
     val tensorsToLoad = namedParameters() ++ namedBuffers()
-    //assert(stateDict.keySet -- tensorsToLoad.keySet == Set.empty, s"keys missing in state dict: ${tensorsToLoad.keySet -- stateDict.keySet}")
+    // assert(stateDict.keySet -- tensorsToLoad.keySet == Set.empty, s"keys missing in state dict: ${tensorsToLoad.keySet -- stateDict.keySet}")
     for ((key, param) <- tensorsToLoad if stateDict.contains(key))
       noGrad {
         param.copy_(stateDict(key))
@@ -67,14 +67,17 @@ abstract class Module {
   def modules: Seq[Module] = modules(recurse = true)
 
   def namedChildren: SeqMap[String, Module] = childModules
-  def namedModules: SeqMap[String, Module]  = namedChildren.flatMap((name, module) => module.namedModules)
+  def namedModules: SeqMap[String, Module] =
+    namedChildren.flatMap((name, module) => module.namedModules)
 
   def copy(): this.type =
     val clone = super.clone().asInstanceOf[Module]
     clone._nativeModule = _nativeModule.clone()
     clone.asInstanceOf[this.type]
 
-  protected[torch] def registerWithParent[T <: pytorch.Module](parent: T)(using name: sourcecode.Name): Unit =
+  protected[torch] def registerWithParent[T <: pytorch.Module](parent: T)(using
+      name: sourcecode.Name
+  ): Unit =
     parent.register_module(name.value, nativeModule)
 
   def register[M <: Module](child: M)(using name: sourcecode.Name) =
@@ -83,7 +86,9 @@ abstract class Module {
     child.registerWithParent(this.nativeModule)
     child
 
-  def register[D <: DType](t: Tensor[D], requiresGrad: Boolean = true)(using name: sourcecode.Name): Tensor[D] =
+  def register[D <: DType](t: Tensor[D], requiresGrad: Boolean = true)(using
+      name: sourcecode.Name
+  ): Tensor[D] =
     nativeModule.register_parameter(name.value, t.native, requiresGrad)
     t
 
@@ -94,7 +99,7 @@ abstract class Module {
   def train(on: Boolean = true): Unit = nativeModule.train(on)
 
   def to(device: Device): this.type =
-    //val nativeCopy = nativeModule.clone()
+    // val nativeCopy = nativeModule.clone()
     nativeModule.asModule.to(device.toNative)
     // copy
     // val clone: this.type = copy()
@@ -132,8 +137,7 @@ trait Default[+D <: FloatNN | ComplexNN]:
 object Default:
   given f32: Default[Float32] = new Default[Float32] { def dtype = float32 }
 
-
-trait HasParams[ParamType <: FloatNN | ComplexNN : Default] extends Module:
+trait HasParams[ParamType <: FloatNN | ComplexNN: Default] extends Module:
   override def parameters(recurse: Boolean): Seq[Tensor[ParamType]] =
     nativeModule.parameters(recurse).get().toSeq.map(Tensor.apply[ParamType])
   override def parameters: Seq[Tensor[ParamType]] = parameters(recurse = true)

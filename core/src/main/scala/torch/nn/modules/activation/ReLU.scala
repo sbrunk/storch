@@ -31,7 +31,9 @@ final class ReLU(inplace: Boolean = false) extends Module:
 
   override protected[torch] val nativeModule: ReLUImpl = ReLUImpl()
 
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using name: sourcecode.Name): Unit =
+  override def registerWithParent[M <: pytorch.Module](parent: M)(using
+      name: sourcecode.Name
+  ): Unit =
     // println(s"registering ${name.value}: $this with $parent")
     parent.register_module(name.value, nativeModule)
 

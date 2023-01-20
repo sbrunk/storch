@@ -36,12 +36,12 @@ class TensorSuite extends ScalaCheckSuite {
   test("arange") {
     val t0 = arange(0, 10)
     t0.toSeq == Seq.range(0, 10)
-    val t1 = arange(0,10,2)
-    t1.toSeq == Seq.range(0,10,2)
+    val t1 = arange(0, 10, 2)
+    t1.toSeq == Seq.range(0, 10, 2)
   }
 
   test("tensor properties") {
-    val t = ones(Seq(2, 3), dtype=float32)
+    val t = ones(Seq(2, 3), dtype = float32)
     assertEquals(t.size, Seq[Long](2, 3))
     assertEquals(t.device, Device(DeviceType.CPU, -1: Byte))
     assertEquals(t.numel, 2L * 3)
@@ -80,14 +80,14 @@ class TensorSuite extends ScalaCheckSuite {
 
   test("toBuffer") {
     val content = Seq(1, 2, 3, 4)
-    val t       = Tensor.apply(1, 2, 3, 4)
-    val b       = t.toBuffer
-    val a       = new Array[Int](content.length)
+    val t = Tensor.apply(1, 2, 3, 4)
+    val b = t.toBuffer
+    val a = new Array[Int](content.length)
     b.get(a)
     assertEquals(content, a.toSeq)
   }
 
   test("+") {
-     assertEquals((Tensor(1) + 2).item, 3)
+    assertEquals((Tensor(1) + 2).item, 3)
   }
 }

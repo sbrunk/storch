@@ -26,13 +26,17 @@ import org.bytedeco.pytorch.{ScalarTypeOptional, TensorOptional}
 
 /** Applies a softmax followed by a logarithm.
   *
-  * While mathematically equivalent to log(softmax(x)), doing these two operations separately is slower and numerically
-  * unstable. This function uses an alternative formulation to compute the output and gradient correctly.
+  * While mathematically equivalent to log(softmax(x)), doing these two operations separately is
+  * slower and numerically unstable. This function uses an alternative formulation to compute the
+  * output and gradient correctly.
   *
   * See `torch.nn.LogSoftmax` for more details.
   */
-def logSoftmax[In <: DType, Out <: DType](input: Tensor[In], dim: Long)(dtype: Out = input.dtype): Tensor[Out] =
-  val nativeDType = if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(dtype.toScalarType)
+def logSoftmax[In <: DType, Out <: DType](input: Tensor[In], dim: Long)(
+    dtype: Out = input.dtype
+): Tensor[Out] =
+  val nativeDType =
+    if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(dtype.toScalarType)
   Tensor(torchNative.log_softmax(input.native, dim, nativeDType))
 
   /** Applies the rectified linear unit function element-wise.
@@ -48,6 +52,9 @@ def sigmoid[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.sigmoi
 def relu[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.relu(input.native))
 
 /** Applies a softmax function. */
-def softmax[In <: DType, Out <: DType](input: Tensor[In], dim: Long)(dtype: Out = input.dtype): Tensor[Out] =
-  val nativeDType = if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(dtype.toScalarType)
+def softmax[In <: DType, Out <: DType](input: Tensor[In], dim: Long)(
+    dtype: Out = input.dtype
+): Tensor[Out] =
+  val nativeDType =
+    if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(dtype.toScalarType)
   Tensor(torchNative.softmax(input.native, dim, nativeDType))

@@ -102,13 +102,15 @@ Examples:
   * TODO use dtype
   */
 // format: on
-final class BatchNorm2d[ParamType <: FloatNN | ComplexNN : Default](
+final class BatchNorm2d[ParamType <: FloatNN | ComplexNN: Default](
     numFeatures: Int,
     eps: Double = 1e-05,
     momentum: Double = 0.1,
     affine: Boolean = true,
     trackRunningStats: Boolean = true
-) extends HasParams[ParamType] with HasWeight[ParamType] with TensorModule[ParamType]:
+) extends HasParams[ParamType]
+    with HasWeight[ParamType]
+    with TensorModule[ParamType]:
 
   private val options = new BatchNormOptions(numFeatures)
   options.eps().put(eps)
@@ -119,12 +121,14 @@ final class BatchNorm2d[ParamType <: FloatNN | ComplexNN : Default](
   override private[torch] val nativeModule: BatchNorm2dImpl = BatchNorm2dImpl(options)
   nativeModule.asModule.to(paramType.toScalarType)
 
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using name: sourcecode.Name): Unit =
+  override def registerWithParent[M <: pytorch.Module](parent: M)(using
+      name: sourcecode.Name
+  ): Unit =
     parent.register_module(name.value, nativeModule)
 
   // TODO weight, bias etc. are undefined if affine = false. We need to take that into account
   val weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)
-  val bias: Tensor[ParamType]   = Tensor[ParamType](nativeModule.bias)
+  val bias: Tensor[ParamType] = Tensor[ParamType](nativeModule.bias)
   // TODO running_mean, running_var, num_batches_tracked
 
   def apply(t: Tensor[ParamType]): Tensor[ParamType] = Tensor(nativeModule.forward(t.native))

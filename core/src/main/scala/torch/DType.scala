@@ -20,7 +20,16 @@ import org.bytedeco.javacpp.{DoublePointer, FloatPointer}
 import org.bytedeco.pytorch.global.torch.ScalarType
 import org.bytedeco.pytorch.Scalar
 
-import java.nio.{Buffer, ByteBuffer, CharBuffer, DoubleBuffer, FloatBuffer, IntBuffer, LongBuffer, ShortBuffer}
+import java.nio.{
+  Buffer,
+  ByteBuffer,
+  CharBuffer,
+  DoubleBuffer,
+  FloatBuffer,
+  IntBuffer,
+  LongBuffer,
+  ShortBuffer
+}
 import scala.annotation.{targetName, unused}
 import scala.reflect.ClassTag
 import spire.math.*
@@ -132,67 +141,67 @@ object DType:
     case ScalarType.Half          => float16
     case ScalarType.Undefined     => undefined
     case ScalarType.NumOptions    => numoptions
-  case object int8       extends Int8       /* 0, */
-  case object uint8      extends UInt8      /* 1, */
-  case object int16      extends Int16      /* 2, */
-  case object int32      extends Int32      /* 3, */
-  case object int64      extends Int64      /* 4, */
-  case object float32    extends Float32    /* 5, */
-  case object float64    extends Float64    /* 6, */
-  case object complex32  extends Complex32  /* 7, */
-  case object complex64  extends Complex64  /* 8, */
+  case object int8 extends Int8 /* 0, */
+  case object uint8 extends UInt8 /* 1, */
+  case object int16 extends Int16 /* 2, */
+  case object int32 extends Int32 /* 3, */
+  case object int64 extends Int64 /* 4, */
+  case object float32 extends Float32 /* 5, */
+  case object float64 extends Float64 /* 6, */
+  case object complex32 extends Complex32 /* 7, */
+  case object complex64 extends Complex64 /* 8, */
   case object complex128 extends Complex128 /* 9, */
-  case object bool       extends Bool       /* 10 */
-  case object qint8      extends QInt8      /* 11 */
-  case object quint8     extends QUInt8     /* 12 */
-  case object qint32     extends QInt32     /* 13 */
-  case object bfloat16   extends BFloat16   /* 14 */
-  case object quint4x2   extends QUInt4x2   /* 15 */
-  case object quint2x4   extends QUInt2x4   /* 15 */
-  case object float16    extends Float16    /* 16, */
-  case object undefined  extends Undefined  /* 17 */
+  case object bool extends Bool /* 10 */
+  case object qint8 extends QInt8 /* 11 */
+  case object quint8 extends QUInt8 /* 12 */
+  case object qint32 extends QInt32 /* 13 */
+  case object bfloat16 extends BFloat16 /* 14 */
+  case object quint4x2 extends QUInt4x2 /* 15 */
+  case object quint2x4 extends QUInt2x4 /* 15 */
+  case object float16 extends Float16 /* 16, */
+  case object undefined extends Undefined /* 17 */
   case object numoptions extends NumOptions /* 18 */
 
-sealed abstract class Int8       extends DType /* 0, Byte */
-sealed abstract class UInt8      extends DType /* 1, Char */
-sealed abstract class Int16      extends DType /* 2, Short */
-sealed abstract class Int32      extends DType /* 3, Int */
-sealed abstract class Int64      extends DType /* 4, Long */
-sealed abstract class Float32    extends DType /* 5, Float */
-sealed abstract class Float64    extends DType /* 6, Double */
-sealed abstract class Complex32  extends DType /* 7, ComplexHalf */
-sealed abstract class Complex64  extends DType /* 8, ComplexFloat */
+sealed abstract class Int8 extends DType /* 0, Byte */
+sealed abstract class UInt8 extends DType /* 1, Char */
+sealed abstract class Int16 extends DType /* 2, Short */
+sealed abstract class Int32 extends DType /* 3, Int */
+sealed abstract class Int64 extends DType /* 4, Long */
+sealed abstract class Float32 extends DType /* 5, Float */
+sealed abstract class Float64 extends DType /* 6, Double */
+sealed abstract class Complex32 extends DType /* 7, ComplexHalf */
+sealed abstract class Complex64 extends DType /* 8, ComplexFloat */
 sealed abstract class Complex128 extends DType /* 9, ComplexDouble */
-sealed abstract class Bool       extends DType /* 10 */
-sealed abstract class QInt8      extends DType /* 11 */
-sealed abstract class QUInt8     extends DType /* 12 */
-sealed abstract class QInt32     extends DType /* 13 */
-sealed abstract class BFloat16   extends DType /* 14 */
-sealed abstract class QUInt4x2   extends DType /* 15 */
-sealed abstract class QUInt2x4   extends DType /* 16 */
-sealed abstract class Float16    extends DType /* 17, Half */
-sealed abstract class Undefined  extends DType /* 18 */
+sealed abstract class Bool extends DType /* 10 */
+sealed abstract class QInt8 extends DType /* 11 */
+sealed abstract class QUInt8 extends DType /* 12 */
+sealed abstract class QInt32 extends DType /* 13 */
+sealed abstract class BFloat16 extends DType /* 14 */
+sealed abstract class QUInt4x2 extends DType /* 15 */
+sealed abstract class QUInt2x4 extends DType /* 16 */
+sealed abstract class Float16 extends DType /* 17, Half */
+sealed abstract class Undefined extends DType /* 18 */
 sealed abstract class NumOptions extends DType /* 18 */
 
-val int8: Int8             = DType.int8
-val uint8: UInt8           = DType.uint8
-val int16: Int16           = DType.int16
-val int32: Int32           = DType.int32
-val int64: Int64           = DType.int64
-val float32: Float32       = DType.float32
-val float64: Float64       = DType.float64
-val complex32: Complex32   = DType.complex32
-val complex64: Complex64   = DType.complex64
+val int8: Int8 = DType.int8
+val uint8: UInt8 = DType.uint8
+val int16: Int16 = DType.int16
+val int32: Int32 = DType.int32
+val int64: Int64 = DType.int64
+val float32: Float32 = DType.float32
+val float64: Float64 = DType.float64
+val complex32: Complex32 = DType.complex32
+val complex64: Complex64 = DType.complex64
 val complex128: Complex128 = DType.complex128
-val bool: Bool             = DType.bool
-val qint8: QInt8           = DType.qint8
-val quint8: QUInt8         = DType.quint8
-val qint32: QInt32         = DType.qint32
-val bfloat16: BFloat16     = DType.bfloat16
-val quint4x2: QUInt4x2     = DType.quint4x2
-val quint2x4: QUInt2x4     = DType.quint2x4
-val float16: Float16       = DType.float16
-val undefined: Undefined   = DType.undefined
+val bool: Bool = DType.bool
+val qint8: QInt8 = DType.qint8
+val quint8: QUInt8 = DType.quint8
+val qint32: QInt32 = DType.qint32
+val bfloat16: BFloat16 = DType.bfloat16
+val quint4x2: QUInt4x2 = DType.quint4x2
+val quint2x4: QUInt2x4 = DType.quint2x4
+val float16: Float16 = DType.float16
+val undefined: Undefined = DType.undefined
 val numoptions: NumOptions = DType.numoptions
 
 sealed class Derive private ()
@@ -206,7 +215,8 @@ type IntNN = Int8 | UInt8 | Int16 | Int32 | Int64
 
 type ComplexNN = Complex32 | Complex64 | Complex128
 
-type ScalaType = Boolean | Byte | Short | Int | Long | Float | Double | Complex[Float] | Complex[Double]
+type ScalaType = Boolean | Byte | Short | Int | Long | Float | Double | Complex[Float] |
+  Complex[Double]
 
 type DTypeToScala[T <: DType] <: ScalaType = T match
   case Int8       => Byte
@@ -236,15 +246,15 @@ type ScalaToDType[S <: ScalaType] <: DType = S match
   case Complex[Double] => Complex128
 
 def scalaToDType[S <: ScalaType](s: S): DType = s match
-  case _: Byte => int8
-  case _: Short => int16
-  case _: Int => int32
-  case _: Long => int64
-  case _: Float => float32
-  case _: Double => float64
-  case _: Boolean => bool
+  case _: Byte                       => int8
+  case _: Short                      => int16
+  case _: Int                        => int32
+  case _: Long                       => int64
+  case _: Float                      => float32
+  case _: Double                     => float64
+  case _: Boolean                    => bool
   case Complex(_: Double, _: Double) => complex128
-  case Complex(_: Float, _: Float) => complex64
+  case Complex(_: Float, _: Float)   => complex64
 
 type TensorType[T] <: DType = T match
   case Int8       => Int8
@@ -267,7 +277,7 @@ type TensorType[T] <: DType = T match
   case Float16    => Float16
   case Undefined  => Undefined
   case NumOptions => NumOptions
-  case DType => DType
+  case DType      => DType
 
 type DTypeOrDeriveFromScalar[T <: DType | Derive, U <: ScalaType] <: DType = T match
   case Derive => ScalaToDType[U]
@@ -299,12 +309,17 @@ type DerivedArangeType[Start <: ScalaType, End <: ScalaType, Step <: ScalaType] 
   PromotedDType[ScalaToDType[Start], PromotedDType[ScalaToDType[End], ScalaToDType[Step]]]
 
 private[torch] def derivedArangeType[Start <: ScalaType, End <: ScalaType, Step <: ScalaType](
-  start: Start,
-  end: End,
-  step: Step
+    start: Start,
+    end: End,
+    step: Step
 ): DType = promotedDType(scalaToDType(start), promotedDType(scalaToDType(end), scalaToDType(step)))
 
-type DTypeOrDeriveArange[T <: DType | Derive, Start <: ScalaType, End <: ScalaType, Step <: ScalaType] <: DType =
+type DTypeOrDeriveArange[
+    T <: DType | Derive,
+    Start <: ScalaType,
+    End <: ScalaType,
+    Step <: ScalaType
+] <: DType =
   T match
     case Derive => DerivedArangeType[Start, End, Step]
     case T      => TensorType[T]
@@ -318,46 +333,46 @@ type DTypeOrDeriveArange[T <: DType | Derive, Start <: ScalaType, End <: ScalaTy
   *   rules](https://github.com/pytorch/pytorch/blob/fb6749d977e33b5f463c2d0a1b56a939428105e5/c10/core/ScalarType.h#L423-L444)
   */
 type Promoted[T <: DType, U <: DType] <: DType = (T, U) match
-  case (T, T) => T
-  case (U, U) => U
-  case (Undefined, U) | (T, Undefined)                       => Undefined
-  case (Bool, U)                                                   => U
-  case (T, Bool)                                                   => T
+  case (T, T)                                    => T
+  case (U, U)                                    => U
+  case (Undefined, U) | (T, Undefined)           => Undefined
+  case (Bool, U)                                 => U
+  case (T, Bool)                                 => T
   case (Int8, UInt8) | (UInt8, Int8)             => Int16
-  case (Int8, U)                                                   => U
-  case (T, Int8)                                                   => T
-  case (UInt8, U)                                                  => U
-  case (T, UInt8)                                                  => T
-  case (Int16, U)                                                  => U
-  case (T, Int16)                                                  => T
-  case (Int32, U)                                                  => U
-  case (T, Int32)                                                  => T
-  case (Int64, U)                                                  => U
-  case (T, Int64)                                                  => T
+  case (Int8, U)                                 => U
+  case (T, Int8)                                 => T
+  case (UInt8, U)                                => U
+  case (T, UInt8)                                => T
+  case (Int16, U)                                => U
+  case (T, Int16)                                => T
+  case (Int32, U)                                => U
+  case (T, Int32)                                => T
+  case (Int64, U)                                => U
+  case (T, Int64)                                => T
   case (Float16, BFloat16) | (BFloat16, Float16) => Float32
-  case (Float16, U)                                                => U
-  case (T, Float16)                                                => T
+  case (Float16, U)                              => U
+  case (T, Float16)                              => T
   // case (Float32, Float32)                                                  => Float32
-  case (Float32, U)                                                => U
-  case (T, Float32)                                                => T
-  case (Float64, U)                                                => U
-  case (T, Float64)                                                => T
-  case (Complex32, U)                                              => U
-  case (T, Complex32)                                              => T
-  case (Complex64, U)                                              => U
-  case (T, Complex64)                                              => T
-  case (Complex128, U)                                             => U
-  case (T, Complex128)                                             => T
-  case _                                                           => DType
+  case (Float32, U)    => U
+  case (T, Float32)    => T
+  case (Float64, U)    => U
+  case (T, Float64)    => T
+  case (Complex32, U)  => U
+  case (T, Complex32)  => T
+  case (Complex64, U)  => U
+  case (T, Complex64)  => T
+  case (Complex128, U) => U
+  case (T, Complex128) => T
+  case _               => DType
 
 type Sum[D <: DType] <: DType = D match
   case Bool | IntNN => Int64
-  case D => D
+  case D            => D
 
 private[torch] type TypedBuffer[T <: ScalaType] <: Buffer = T match
-  case Short => ShortBuffer
-  case Int   => IntBuffer
-  case Long  => LongBuffer
+  case Short  => ShortBuffer
+  case Int    => IntBuffer
+  case Long   => LongBuffer
   case Float  => FloatBuffer
   case Double => DoubleBuffer
   // case Complex[Float]   => FloatBuffer

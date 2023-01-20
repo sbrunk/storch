@@ -26,7 +26,11 @@ import torch.internal.NativeConverters.toOptional
 
 // Linear functions
 
-def linear[D <: DType](input: Tensor[D], weight: Tensor[D], bias: Tensor[D] | Option[Tensor[D]] = None): Tensor[D] =
+def linear[D <: DType](
+    input: Tensor[D],
+    weight: Tensor[D],
+    bias: Tensor[D] | Option[Tensor[D]] = None
+): Tensor[D] =
   Tensor(
     torchNative.linear(input.native, weight.native, toOptional(bias))
   )

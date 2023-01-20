@@ -7,7 +7,6 @@ import org.typelevel.sbt.TypelevelSitePlugin
 import org.typelevel.sbt.TypelevelSitePlugin.autoImport._
 import laika.sbt.LaikaPlugin.autoImport._
 
-
 import laika.helium.config._
 import laika.ast.Path._
 import laika.ast._
@@ -30,22 +29,20 @@ object StorchSitePlugin extends AutoPlugin {
 
   override def requires = TypelevelSitePlugin
   override def projectSettings = Seq(
-
     tlSiteRelatedProjects := Seq(
       "JavaCPP" -> new URL("https://github.com/bytedeco/javacpp")
     ),
-
-
     laikaConfig := LaikaConfig.defaults
-      .withConfigValue(Selections(
-        SelectionConfig("build-tool",
-          ChoiceConfig("sbt", "sbt"),
-          ChoiceConfig("scala-cli", "Scala CLI")
-        ).withSeparateEbooks
-      )),
-
-
-      tlSiteHeliumConfig := Helium.defaults.site
+      .withConfigValue(
+        Selections(
+          SelectionConfig(
+            "build-tool",
+            ChoiceConfig("sbt", "sbt"),
+            ChoiceConfig("scala-cli", "Scala CLI")
+          ).withSeparateEbooks
+        )
+      ),
+    tlSiteHeliumConfig := Helium.defaults.site
       .metadata(
         title = Some("Storch"),
         authors = developers.value.map(_.name),
@@ -80,14 +77,20 @@ object StorchSitePlugin extends AutoPlugin {
             HeliumIcon.api,
             options = Styles("svg-link")
           ),
-          IconLink.external(scmInfo.value.fold("https://github.com/sbrunk/storch")(_.browseUrl.toString), HeliumIcon.github, options = Styles("svg-link"))
+          IconLink.external(
+            scmInfo.value.fold("https://github.com/sbrunk/storch")(_.browseUrl.toString),
+            HeliumIcon.github,
+            options = Styles("svg-link")
+          )
           //            IconLink.external("https://discord.gg/XF3CXcMzqD", HeliumIcon.chat),
           //            IconLink.external("https://twitter.com/typelevel", HeliumIcon.twitter)
         )
       )
       .site
       .landingPage(
-        logo = Some(Image.internal(Root / "img" / "storch.svg", height = Some(Length(400, LengthUnit.px)))),
+        logo = Some(
+          Image.internal(Root / "img" / "storch.svg", height = Some(Length(400, LengthUnit.px)))
+        ),
         title = Some("Storch"),
         subtitle = Some("GPU Accelerated Deep Learning for Scala 3"),
         license = Some("Apache 2"),

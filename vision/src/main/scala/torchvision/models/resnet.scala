@@ -55,12 +55,12 @@ object resnet:
     )
 
   /** 1x1 convolution */
-  def conv1x1[D <: FloatNN : Default](inPlanes: Int, outPlanes: Int, stride: Int = 1): Conv2d[D] =
+  def conv1x1[D <: FloatNN: Default](inPlanes: Int, outPlanes: Int, stride: Int = 1): Conv2d[D] =
     Conv2d[D](inPlanes, outPlanes, kernelSize = 1, stride = stride, bias = false)
 
   sealed abstract class BlockBuilder:
     val expansion: Int
-    def apply[D <: BFloat16 | Float32 | Float64 : Default](
+    def apply[D <: BFloat16 | Float32 | Float64: Default](
         inplanes: Int,
         planes: Int,
         stride: Int = 1,
@@ -68,10 +68,13 @@ object resnet:
         groups: Int = 1,
         baseWidth: Int = 64,
         dilation: Int = 1,
-        normLayer: (Int => HasWeight[D] & TensorModule[D]) = (numFeatures => BatchNorm2d(numFeatures))
+        normLayer: (Int => HasWeight[D] & TensorModule[D]) =
+          (numFeatures => BatchNorm2d(numFeatures))
     ): TensorModule[D] = this match
-      case BasicBlock => new BasicBlock(inplanes, planes, stride, downsample, groups, baseWidth, dilation, normLayer)
-      case Bottleneck => new Bottleneck(inplanes, planes, stride, downsample, groups, baseWidth, dilation, normLayer)
+      case BasicBlock =>
+        new BasicBlock(inplanes, planes, stride, downsample, groups, baseWidth, dilation, normLayer)
+      case Bottleneck =>
+        new Bottleneck(inplanes, planes, stride, downsample, groups, baseWidth, dilation, normLayer)
 
   object BasicBlock extends BlockBuilder:
     override val expansion: Int = 1
@@ -96,10 +99,10 @@ object resnet:
     if dilation > 1 then throw new NotImplementedError("Dilation > 1 not supported in BasicBlock")
     // Both conv1 and downsample layers downsample the input when stride != 1
     val conv1 = register(conv3x3[D](inplanes, planes, stride))
-    val bn1   = register(normLayer(planes))
-    val relu  = register(ReLU(inplace = true))
+    val bn1 = register(normLayer(planes))
+    val relu = register(ReLU(inplace = true))
     val conv2 = register(conv3x3[D](planes, planes))
-    val bn2   = register(normLayer(planes))
+    val bn2 = register(normLayer(planes))
     downsample.foreach(downsample => register(downsample)(using Name("downsample")))
 
     def apply(x: Tensor[D]): Tensor[D] =
@@ -123,12 +126,13 @@ object resnet:
     override def toString(): String = getClass().getSimpleName()
   }
 
-  /** Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2) while original
-    * implementation places the stride at the first 1x1 convolution(self.conv1) according to "Deep residual learning for
-    * image recognition"https://arxiv.org/abs/1512.03385. This variant is also known as ResNet V1.5 and improves accuracy
-    * according to https://ngc.nvidia.com/catalog/model-scripts/nvidia:resnet_50_v1_5_for_pytorch.
+  /** Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
+    * while original implementation places the stride at the first 1x1 convolution(self.conv1)
+    * according to "Deep residual learning for image recognition"https://arxiv.org/abs/1512.03385.
+    * This variant is also known as ResNet V1.5 and improves accuracy according to
+    * https://ngc.nvidia.com/catalog/model-scripts/nvidia:resnet_50_v1_5_for_pytorch.
     */
-  class Bottleneck[D <: BFloat16 | Float32 | Float64 : Default](
+  class Bottleneck[D <: BFloat16 | Float32 | Float64: Default](
       inplanes: Int,
       planes: Int,
       stride: Int = 1,
@@ -143,12 +147,12 @@ object resnet:
     val width = (planes * (baseWidth / 64.0)).toInt * groups
     // Both self.conv2 and self.downsample layers downsample the input when stride != 1
     val conv1 = register(conv1x1(inplanes, width))
-    val bn1   = register(normLayer(width))
+    val bn1 = register(normLayer(width))
     val conv2 = register(conv3x3(width, width, stride, groups, dilation))
-    val bn2   = register(normLayer(width))
+    val bn2 = register(normLayer(width))
     val conv3 = register(conv1x1(width, planes * expansion))
-    val bn3   = register(normLayer(planes * expansion))
-    val relu  = register(ReLU(inplace = true))
+    val bn3 = register(normLayer(planes * expansion))
+    val relu = register(ReLU(inplace = true))
     downsample.foreach(downsample => register(downsample)(using Name("downsample")))
 
     def apply(x: Tensor[D]): Tensor[D] =
@@ -187,19 +191,25 @@ object resnet:
       replaceStrideWithDilation: (Boolean, Boolean, Boolean) = (false, false, false),
       normLayer: (Int => HasWeight[D] & TensorModule[D]) = (numFeatures => BatchNorm2d(numFeatures))
   ) extends Module {
-    var inplanes  = 64
-    var dilation  = 1
+    var inplanes = 64
+    var dilation = 1
     val baseWidth = widthPerGroup
-    val conv1     = register(Conv2d(3, inplanes, kernelSize = 7, stride = 2, padding = 3, bias = false))
-    val bn1       = register(normLayer(inplanes))
-    val relu      = register(ReLU(inplace = true))
-    val maxpool   = register(MaxPool2d(kernelSize = 3, stride = Some(2), padding = 1))
-    val layer1    = register(makeLayer(block, 64, layers(0)))
-    val layer2    = register(makeLayer(block, 128, layers(1), stride = 2, dilate = replaceStrideWithDilation(0)))
-    val layer3    = register(makeLayer(block, 256, layers(2), stride = 2, dilate = replaceStrideWithDilation(1)))
-    val layer4    = register(makeLayer(block, 512, layers(3), stride = 2, dilate = replaceStrideWithDilation(2)))
-    val avgpool   = register(AdaptiveAvgPool2d((1, 1)))
-    val fc        = register(Linear(512 * block.expansion, numClasses))
+    val conv1 = register(Conv2d(3, inplanes, kernelSize = 7, stride = 2, padding = 3, bias = false))
+    val bn1 = register(normLayer(inplanes))
+    val relu = register(ReLU(inplace = true))
+    val maxpool = register(MaxPool2d(kernelSize = 3, stride = Some(2), padding = 1))
+    val layer1 = register(makeLayer(block, 64, layers(0)))
+    val layer2 = register(
+      makeLayer(block, 128, layers(1), stride = 2, dilate = replaceStrideWithDilation(0))
+    )
+    val layer3 = register(
+      makeLayer(block, 256, layers(2), stride = 2, dilate = replaceStrideWithDilation(1))
+    )
+    val layer4 = register(
+      makeLayer(block, 512, layers(3), stride = 2, dilate = replaceStrideWithDilation(2))
+    )
+    val avgpool = register(AdaptiveAvgPool2d((1, 1)))
+    val fc = register(Linear(512 * block.expansion, numClasses))
 
     for (m <- modules)
       m match
@@ -232,8 +242,8 @@ object resnet:
         dilate: Boolean = false
     ): Sequential[D] = {
       var downsample: Option[TensorModule[D]] = None
-      val previous_dilation                   = this.dilation
-      var _stride: Int                        = stride
+      val previous_dilation = this.dilation
+      var _stride: Int = stride
       if dilate then
         this.dilation *= stride
         _stride = 1
@@ -291,23 +301,33 @@ object resnet:
       forwardImpl(x)
   }
 
-  /** ResNet-18 from [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf). */
+  /** ResNet-18 from [Deep Residual Learning for Image
+    * Recognition](https://arxiv.org/pdf/1512.03385.pdf).
+    */
   def resnet18[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
     ResNet(BasicBlock, Seq(2, 2, 2, 2), numClasses)
 
-  /** ResNet-34 from [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf). */
+  /** ResNet-34 from [Deep Residual Learning for Image
+    * Recognition](https://arxiv.org/pdf/1512.03385.pdf).
+    */
   def resnet34[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
     ResNet(BasicBlock, Seq(3, 4, 6, 3), numClasses = numClasses)
 
-  /** ResNet-50 from [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf) */
+  /** ResNet-50 from [Deep Residual Learning for Image
+    * Recognition](https://arxiv.org/pdf/1512.03385.pdf)
+    */
   def resnet50[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
     ResNet(Bottleneck, Seq(3, 4, 6, 3), numClasses = numClasses)
 
-  /** ResNet-101 from [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf) */
+  /** ResNet-101 from [Deep Residual Learning for Image
+    * Recognition](https://arxiv.org/pdf/1512.03385.pdf)
+    */
   def resnet101[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
     ResNet(Bottleneck, Seq(3, 4, 23, 3), numClasses = numClasses)
 
-  /** ResNet-152 from [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf) */
+  /** ResNet-152 from [Deep Residual Learning for Image
+    * Recognition](https://arxiv.org/pdf/1512.03385.pdf)
+    */
   def resnet152[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
     ResNet(Bottleneck, Seq(3, 8, 36, 3), numClasses = numClasses)
 

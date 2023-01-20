@@ -31,9 +31,8 @@ import torch.nn.modules.{HasParams, TensorModule}
 /** Applies a 2D convolution over an input signal composed of several input planes.
   *
   * @group nn_conv
-  * 
   */
-final class Conv2d[ParamType <: FloatNN | ComplexNN : Default](
+final class Conv2d[ParamType <: FloatNN | ComplexNN: Default](
     inChannels: Long,
     outChannels: Long,
     kernelSize: Int | (Int, Int),
@@ -43,7 +42,8 @@ final class Conv2d[ParamType <: FloatNN | ComplexNN : Default](
     groups: Int = 1,
     bias: Boolean = true,
     paddingMode: PaddingMode = PaddingMode.Zeros
-) extends HasParams[ParamType] with TensorModule[ParamType]:
+) extends HasParams[ParamType]
+    with TensorModule[ParamType]:
 
   private val options = new Conv2dOptions(inChannels, outChannels, toNative(kernelSize))
   options.stride().put(toNative(stride))
@@ -52,23 +52,26 @@ final class Conv2d[ParamType <: FloatNN | ComplexNN : Default](
   options.groups().put(groups)
   options.bias().put(bias)
   private val paddingModeNative = paddingMode match
-    case PaddingMode.Zeros => new kZeros
-    case PaddingMode.Reflect => new kReflect
+    case PaddingMode.Zeros     => new kZeros
+    case PaddingMode.Reflect   => new kReflect
     case PaddingMode.Replicate => new kReplicate
-    case PaddingMode.Circular => new kCircular
+    case PaddingMode.Circular  => new kCircular
   options.padding_mode().put(paddingModeNative)
 
   override private[torch] val nativeModule: Conv2dImpl = Conv2dImpl(options)
   nativeModule.asModule.to(paramType.toScalarType)
 
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using name: sourcecode.Name): Unit =
+  override def registerWithParent[M <: pytorch.Module](parent: M)(using
+      name: sourcecode.Name
+  ): Unit =
     parent.register_module(name.value, nativeModule)
 
   def apply(t: Tensor[ParamType]): Tensor[ParamType] = Tensor(nativeModule.forward(t.native))
 
   val weight = Tensor[ParamType](nativeModule.weight)
 
-  override def toString = s"Conv2d($inChannels, $outChannels, kernelSize=$kernelSize, stride=$stride, padding=$padding, bias=$bias)"
+  override def toString =
+    s"Conv2d($inChannels, $outChannels, kernelSize=$kernelSize, stride=$stride, padding=$padding, bias=$bias)"
 
 object Conv2d:
   enum PaddingMode:

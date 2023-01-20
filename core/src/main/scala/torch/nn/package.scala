@@ -15,11 +15,9 @@
  */
 
 package torch
-/** 
-  * 
-  * @groupname nn_conv Convolution Layers
+
+/** @groupname nn_conv Convolution Layers
   * @groupname nn_linear Linear Layers
-  * 
   */
 package object nn {
   export modules.Module

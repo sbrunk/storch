@@ -24,10 +24,9 @@ import torch.nn.modules.Module
 import torch.{DType, Tensor}
 
 /** A placeholder identity operator that is argument-insensitive.
- *
- *  @group nn_linear
- *
- */
+  *
+  * @group nn_linear
+  */
 final class Identity(args: Any*) extends Module:
   override val nativeModule: IdentityImpl = IdentityImpl()
 

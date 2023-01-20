@@ -20,9 +20,30 @@ import org.bytedeco.javacpp.*
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.global.torch as torchNative
 import org.bytedeco.pytorch.global.torch.{ScalarType, toComplexType}
-import org.bytedeco.pytorch.{BoolOptional, DeviceOptional, LayoutOptional, LinearImpl, LogSoftmaxFuncOptions, LongOptional, MemoryFormatOptional, Module, Scalar, ScalarTypeOptional, TensorArrayRef, TensorVector}
+import org.bytedeco.pytorch.{
+  BoolOptional,
+  DeviceOptional,
+  LayoutOptional,
+  LinearImpl,
+  LogSoftmaxFuncOptions,
+  LongOptional,
+  MemoryFormatOptional,
+  Module,
+  Scalar,
+  ScalarTypeOptional,
+  TensorArrayRef,
+  TensorVector
+}
 
-import java.nio.{ByteBuffer, CharBuffer, DoubleBuffer, FloatBuffer, IntBuffer, LongBuffer, ShortBuffer}
+import java.nio.{
+  ByteBuffer,
+  CharBuffer,
+  DoubleBuffer,
+  FloatBuffer,
+  IntBuffer,
+  LongBuffer,
+  ShortBuffer
+}
 import scala.annotation.{targetName, varargs}
 import scala.reflect.ClassTag
 import ScalarUtils.toScalar
@@ -49,7 +70,8 @@ import scala.util.Using
 // // TODO frombuffer
 // def zeros(size: Int*): Tensor[Float32] = zeros(size.map(_.toLong))
 
-/** Returns a tensor filled with the scalar value `0`, with the shape defined by the variable argument `size`.
+/** Returns a tensor filled with the scalar value `0`, with the shape defined by the variable
+  * argument `size`.
   * @param size
   *   a sequence of integers defining the shape of the output tensor.
   * @tparam T
@@ -63,7 +85,10 @@ def zeros[D <: DType](
     requiresGrad: Boolean = false
 ): Tensor[D] =
   Tensor(
-    torchNative.torch_zeros(size.toArray, NativeConverters.tensorOptions(dtype, layout, device, requiresGrad))
+    torchNative.torch_zeros(
+      size.toArray,
+      NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
+    )
   )
 
 def zerosLike[D <: DType, D2 <: DType | Derive](
@@ -91,7 +116,8 @@ def zerosLike[D <: DType, D2 <: DType | Derive](
     )
   )
 
-/** Returns a tensor filled with the scalar value `1`, with the shape defined by the variable argument `size`.
+/** Returns a tensor filled with the scalar value `1`, with the shape defined by the variable
+  * argument `size`.
   * @param size
   *   a sequence of integers defining the shape of the output tensor.
   * @tparam T
@@ -184,8 +210,14 @@ def linspace[D <: DType](
     device: Device = CPU,
     requiresGrad: Boolean = false
 ): Tensor[D] =
-  Tensor(torchNative.torch_linspace(new Scalar(start), new Scalar(end), steps,
-    NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)))
+  Tensor(
+    torchNative.torch_linspace(
+      new Scalar(start),
+      new Scalar(end),
+      steps,
+      NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
+    )
+  )
 
 def logspace[D <: DType](
     start: Double,
@@ -196,8 +228,15 @@ def logspace[D <: DType](
     layout: Layout = Strided,
     device: Device = CPU,
     requiresGrad: Boolean = false
-) = Tensor(torchNative.torch_logspace(new Scalar(start), new Scalar(end), steps, base,
-      NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)))
+) = Tensor(
+  torchNative.torch_logspace(
+    new Scalar(start),
+    new Scalar(end),
+    steps,
+    base,
+    NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
+  )
+)
 def eye[D <: DType](
     n: Long,
     dtype: D = float32,
@@ -222,15 +261,17 @@ def empty[D <: DType](
   Tensor(
     torchNative.torch_empty(
       size.toArray,
-      NativeConverters.tensorOptions(dtype, layout, device, requiresGrad).pinned_memory(BoolOptional(pinMemory)),
+      NativeConverters
+        .tensorOptions(dtype, layout, device, requiresGrad)
+        .pinned_memory(BoolOptional(pinMemory)),
       new MemoryFormatOptional(memoryFormat.toNative)
     )
   )
 
 /** Returns an uninitialized tensor with the same size as input.
   *
-  * `torch.empty_like(input)` is equivalent to `torch.empty(input.size(), dtype=input.dtype, layout=input.layout,
-  * device=input.device`).
+  * `torch.empty_like(input)` is equivalent to `torch.empty(input.size(), dtype=input.dtype,
+  * layout=input.layout, device=input.device`).
   */
 def emptyLike[D <: DType, D2 <: DType | Derive](
     input: Tensor[D],
@@ -258,7 +299,8 @@ def emptyLike[D <: DType, D2 <: DType | Derive](
   )
 // // TODO emptyStrided
 
-/** Creates a tensor of size `size` filled with `fillValue`. The tensor's dtype is inferred from `fillValue`.
+/** Creates a tensor of size `size` filled with `fillValue`. The tensor's dtype is inferred from
+  * `fillValue`.
   *
   * @param size
   *   a sequence of integers defining the shape of the output tensor.
@@ -273,7 +315,8 @@ def emptyLike[D <: DType, D2 <: DType | Derive](
   * @param requiresGrad
   *   If autograd should record operations on the returned tensor.
   * @tparam T
-  *   the data type of the returned tensor, or `Default` if the type should be derived from `fillValue`.
+  *   the data type of the returned tensor, or `Default` if the type should be derived from
+  *   `fillValue`.
   * @tparam U
   *   the data type of `fillValue`.
   * @return
@@ -308,7 +351,7 @@ def full[D <: DType | Derive, U <: ScalaType](
 def pickleLoad(data: Array[Byte]): SeqMap[String, Tensor[DType]] =
   val dict: GenericDict = torchNative.pickle_load(data).toGenericDict()
   // We need to extract the members in one go or we risk too early deallocation of native objects here
-  val buffer   = new Array[(IValue, IValue)](dict.size().toInt)
+  val buffer = new Array[(IValue, IValue)](dict.size().toInt)
   val nativeIt = dict.begin()
   for (i <- 0 until buffer.size)
     buffer(i) = (nativeIt.access().key(), nativeIt.access().value())
@@ -323,7 +366,7 @@ def pickleLoad(path: Path): Map[String, Tensor[DType]] =
   pickleLoad(data)
 
 def pickle_save(tensors: SeqMap[String, Tensor[DType]]) =
-  tensors.map { (k,v) =>
+  tensors.map { (k, v) =>
     (IValue(k), IValue(v.native))
   }
 
@@ -352,7 +395,10 @@ def rand[D <: FloatNN | ComplexNN](
     requiresGrad: Boolean = false
 ): Tensor[D] =
   Tensor(
-    torchNative.torch_rand(size.toArray, NativeConverters.tensorOptions(dtype, layout, device, requiresGrad))
+    torchNative.torch_rand(
+      size.toArray,
+      NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
+    )
   )
 
 def randn[D <: FloatNN](
@@ -363,7 +409,10 @@ def randn[D <: FloatNN](
     requiresGrad: Boolean = false
 ): Tensor[D] =
   Tensor(
-    torchNative.torch_rand(size.toArray, NativeConverters.tensorOptions(dtype, layout, device, requiresGrad))
+    torchNative.torch_rand(
+      size.toArray,
+      NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
+    )
   )
 
 /** Returns a random permutation of integers from 0 to n - 1.
@@ -379,7 +428,10 @@ def randperm[D <: DType](
     pinMemory: Boolean = false
 ): Tensor[D] =
   Tensor(
-    torchNative.torch_randperm(n, NativeConverters.tensorOptions(dtype, layout, device, requiresGrad, pinMemory))
+    torchNative.torch_randperm(
+      n,
+      NativeConverters.tensorOptions(dtype, layout, device, requiresGrad, pinMemory)
+    )
   )
 
 // End Creation Ops
@@ -405,11 +457,11 @@ def manualSeed(seed: Long) = torchNative.manual_seed(seed)
 /** Disable gradient calculation for [[op]].
   *
   * Disabling gradient calculation is useful for inference, when you are sure that you will not call
-  * `Tensor.backward()`. It will reduce memory consumption for computations that would otherwise have
-  * `requiresGrad=true`.
+  * `Tensor.backward()`. It will reduce memory consumption for computations that would otherwise
+  * have `requiresGrad=true`.
   *
-  * In this mode, the result of every computation will have `requiresGrad=false`, even when the inputs have
-  * `requiresGrad=true`.
+  * In this mode, the result of every computation will have `requiresGrad=false`, even when the
+  * inputs have `requiresGrad=true`.
   *
   * This context manager is thread local; it will not affect computation in other threads.
   *
@@ -417,8 +469,8 @@ def manualSeed(seed: Long) = torchNative.manual_seed(seed)
   */
 def noGrad[A](op: => A): A = {
   import org.bytedeco.pytorch.NoGradGuard
-  Using.resource(NoGradGuard()) {
-    _ => op
+  Using.resource(NoGradGuard()) { _ =>
+    op
   }
 }
 

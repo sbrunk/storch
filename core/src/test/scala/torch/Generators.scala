@@ -21,14 +21,14 @@ import org.scalacheck.Arbitrary
 
 object Generators:
   val genDeviceType: Gen[DeviceType] = Gen.oneOf(DeviceType.values)
-  val genIndex: Gen[Byte]            = Gen.chooseNum(-1, Byte.MaxValue)
-  val genCpuIndex: Gen[Byte]         = Gen.chooseNum[Byte](-1, 0)
+  val genIndex: Gen[Byte] = Gen.chooseNum(-1, Byte.MaxValue)
+  val genCpuIndex: Gen[Byte] = Gen.chooseNum[Byte](-1, 0)
   val genDevice: Gen[Device] = for
     deviceType <- genDeviceType // Arbitrary(genDeviceType).arbitrary
-    i          <- if deviceType == DeviceType.CPU then genCpuIndex else genIndex
+    i <- if deviceType == DeviceType.CPU then genCpuIndex else genIndex
   yield Device(deviceType, i)
-  val genDimSize          = Gen.choose(0L, 30L)
-  val genTensorSize       = Gen.choose(0, 5).flatMap(listSize => Gen.listOfN(listSize, genDimSize))
+  val genDimSize = Gen.choose(0L, 30L)
+  val genTensorSize = Gen.choose(0, 5).flatMap(listSize => Gen.listOfN(listSize, genDimSize))
   given Arbitrary[Device] = Arbitrary(genDevice)
 
   val genDType = Gen.oneOf(
@@ -48,7 +48,7 @@ object Generators:
     // qint32,
     bfloat16,
     // quint4x2,
-    float16,
+    float16
     // undefined,
     // numoptions
   )

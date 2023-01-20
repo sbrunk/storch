@@ -26,9 +26,11 @@ abstract class Optimizer {
   /** Performs a single optimization step (parameter update).
     *
     * @note
-    *   Unless otherwise specified, this function should not modify the ``.grad`` field of the parameters.
+    *   Unless otherwise specified, this function should not modify the ``.grad`` field of the
+    *   parameters.
     */
   def step(): Unit = native.step()
+
   /** Sets the gradients of all optimized `Tensor`s to zero. */
   def zeroGrad(): Unit = native.zero_grad()
 }

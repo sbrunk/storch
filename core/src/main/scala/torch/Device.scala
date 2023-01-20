@@ -20,11 +20,13 @@ import org.bytedeco.pytorch
 import scala.collection.immutable.ArraySeq
 
 enum DeviceType:
-  case CPU, CUDA, MKLDNN, OPENGL, OPENCL, IDEEP, HIP, FPGA, ORT, XLA, Vulkan, Metal, XPU, MLC, Meta, HPU, VE, Lazy,
+  case CPU, CUDA, MKLDNN, OPENGL, OPENCL, IDEEP, HIP, FPGA, ORT, XLA, Vulkan, Metal, XPU, MLC, Meta,
+    HPU, VE, Lazy,
     COMPILE_TIME_MAX_DEVICE_TYPES
 
 object DeviceType:
-  val deviceTypesLowerCase: Seq[String] = ArraySeq.unsafeWrapArray(DeviceType.values).map(_.toString.toLowerCase)
+  val deviceTypesLowerCase: Seq[String] =
+    ArraySeq.unsafeWrapArray(DeviceType.values).map(_.toString.toLowerCase)
   def apply(v: String): DeviceType =
     val index = deviceTypesLowerCase.indexOf(v)
     if index == -1 then DeviceType.valueOf(v)

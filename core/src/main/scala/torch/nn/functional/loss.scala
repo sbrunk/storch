@@ -18,7 +18,6 @@ package torch
 package nn
 package functional
 
-
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.TensorOptional
@@ -32,10 +31,17 @@ import org.bytedeco.pytorch.BCEWithLogitsLossOptions
   *
   * TODO support weight, reduction, pos_weight
   */
- def binaryCrossEntropyWithLogits[I <: BFloat16 | Float32 | Float64, O <: BFloat16 | Float16 | Float32 | Float64](
-     input: Tensor[I],
-     target: Tensor[O]
- ): Tensor[O] =
-   Tensor(
-     torchNative.binary_cross_entropy_with_logits(input.native, target.native, BCEWithLogitsLossOptions())
-   )
+def binaryCrossEntropyWithLogits[
+    I <: BFloat16 | Float32 | Float64,
+    O <: BFloat16 | Float16 | Float32 | Float64
+](
+    input: Tensor[I],
+    target: Tensor[O]
+): Tensor[O] =
+  Tensor(
+    torchNative.binary_cross_entropy_with_logits(
+      input.native,
+      target.native,
+      BCEWithLogitsLossOptions()
+    )
+  )
