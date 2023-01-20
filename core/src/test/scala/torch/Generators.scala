@@ -16,11 +16,12 @@
 
 package torch
 
-import org.scalacheck.Gen
-import org.scalacheck.Arbitrary
+import org.scalacheck.{Arbitrary, Gen}
+
+import scala.collection.immutable.ArraySeq
 
 object Generators:
-  val genDeviceType: Gen[DeviceType] = Gen.oneOf(DeviceType.values)
+  val genDeviceType: Gen[DeviceType] = Gen.oneOf(ArraySeq.unsafeWrapArray(DeviceType.values))
   val genIndex: Gen[Byte] = Gen.chooseNum(-1, Byte.MaxValue)
   val genCpuIndex: Gen[Byte] = Gen.chooseNum[Byte](-1, 0)
   val genDevice: Gen[Device] = for
