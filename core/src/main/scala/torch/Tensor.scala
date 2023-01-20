@@ -35,6 +35,7 @@ import org.bytedeco.pytorch.NoGradGuard
 import ScalarUtils.toScalar
 
 import java.nio.{Buffer, ByteBuffer, CharBuffer, DoubleBuffer, FloatBuffer, IntBuffer, LongBuffer, ShortBuffer}
+import scala.collection.immutable.ArraySeq
 import scala.reflect.ClassTag
 import scala.annotation.{targetName, unused}
 import org.bytedeco.pytorch.global.torch.DeviceType
@@ -256,7 +257,7 @@ sealed abstract class Tensor[D <: DType](/* private[torch]  */ val native: pytor
 
   def squeeze: Tensor[D] = Tensor(native.squeeze())
 
-  def size: Seq[Long] = native.sizes.vec.get
+  def size: Seq[Long] = ArraySeq.unsafeWrapArray(native.sizes.vec.get)
 
   def std: Tensor[D] = Tensor[D](native.std())
 
@@ -362,7 +363,7 @@ sealed abstract class Tensor[D <: DType](/* private[torch]  */ val native: pytor
       case NumOptions    => ???
     out.asInstanceOf[Array[DTypeToScala[D]]]
 
-  def toSeq: Seq[DTypeToScala[D]] = toArray
+  def toSeq: Seq[DTypeToScala[D]] = ArraySeq.unsafeWrapArray(toArray)
 
   /** Returns a summary of the contents of this tensor.
     *

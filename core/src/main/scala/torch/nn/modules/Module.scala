@@ -24,7 +24,7 @@ import org.bytedeco.pytorch.{Conv2dImpl, InputArchive, OutputArchive}
 import torch.{DType, Device, Tensor}
 
 import java.nio.CharBuffer
-import scala.collection.immutable.{SeqMap, TreeSeqMap}
+import scala.collection.immutable.{ArraySeq, SeqMap, TreeSeqMap}
 import scala.reflect.ClassTag
 
 abstract class Module {
@@ -50,7 +50,7 @@ abstract class Module {
   def parameters: Seq[Tensor[?]] = parameters(recurse = true)
 
   def parameters(recurse: Boolean): Seq[Tensor[?]] =
-    nativeModule.parameters().get().map(Tensor.apply[DType])
+    ArraySeq.unsafeWrapArray(nativeModule.parameters().get).map(Tensor.apply[DType])
 
   // TODO make strict a parameter
   // TODO improve error handling
