@@ -131,7 +131,9 @@ If you're using Gradle, you can use the [Gradle JavaCPP](https://github.com/byte
 
 ## Enable GPU support
 
-Storch supports GPU accelerated tensor operations for Nvidia GPUs via CUDA.
+Storch supports GPU accelerated tensor operations for Nvidia GPUs via CUDA. JavaCPP also provides matching CUDA toolkit
+distribution including cuDNN, helping you to avoid having to mess with local CUDA installations.
+
 
 ### Via PyTorch platform
 
@@ -143,7 +145,8 @@ Storch supports GPU accelerated tensor operations for Nvidia GPUs via CUDA.
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 libraryDependencies += Seq(
   "dev.storch" % "storch:@VERSION@",
-  "org.bytedeco" % "pytorch-platform-gpu" % "1.13.1-@JAVACPP_VERSION@"
+  "org.bytedeco" % "pytorch-platform-gpu" % "1.13.1-@JAVACPP_VERSION@",
+  "org.bytedeco" % "cuda-platform-redist" % "11.8-8.6-@JAVACPP_VERSION@"
 )
 fork := true
 ```
@@ -153,12 +156,14 @@ fork := true
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::storch:@VERSION@"
 //> using lib "org.bytedeco:pytorch-platform-gpu:1.13.1-@JAVACPP_VERSION@"
+//> using lib "org.bytedeco:cuda-platform-redist:11.8-8.6-@JAVACPP_VERSION@"
 ```
 
 @:@
 
-This approach should work on any platform with CUDA support (Linux and Windows), but it causes even more overhead than
-the CPU variants.
+This approach should work on any platform with CUDA support (Linux and Windows) but it causes even more overhead than
+the CPU variants as CUDA is quite large. So, to save space and bandwidth you might want to use one of the options below
+which work
 
 ### Via classifier
 
@@ -214,16 +219,29 @@ torch.manualSeed(0)
 ```
 
 You can create tensors directly on the GPU:
-```scala mdoc
+```scala
 import torch.Device.{CPU, CUDA}
 val device = if torch.cuda.isAvailable then CUDA else CPU
+// device: Device = Device(device = CUDA, index = -1)
 torch.rand(Seq(3,3), device=device)
+// res1: Tensor[Float32] = dtype=float32, shape=[3, 3], device=CUDA 
+// [[0.3990, 0.5167, 0.0249],
+//  [0.9401, 0.9459, 0.7967],
+//  [0.4150, 0.8203, 0.2290]]
 
 // Use device index if you have multiple GPUs
 torch.rand(Seq(3,3), device=torch.Device(torch.DeviceType.CUDA, 0: Byte))
+// res2: Tensor[Float32] = dtype=float32, shape=[3, 3], device=CUDA 
+// [[0.9722, 0.7910, 0.4690],
+//  [0.3300, 0.3345, 0.3783],
+//  [0.7640, 0.6405, 0.1103]]
 ```
 Or move them from the CPU:
-```scala mdoc
+```scala
 val cpuTensor = torch.Tensor(Seq(1,2,3))
+// cpuTensor: Tensor[Int32] = dtype=int32, shape=[3], device=CPU 
+// [1, 2, 3]
 val gpuTensor = cpuTensor.to(device=device)
+// gpuTensor: Tensor[Int32] = dtype=int32, shape=[3], device=CUDA 
+// [1, 2, 3]
 ```
