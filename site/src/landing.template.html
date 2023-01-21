@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="${?laika.site.metadata.language}">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 0.18.2 + Helium Theme" />
+    <title>${?laika.site.metadata.title}</title>
+    @:for(laika.site.metadata.authors)
+      <meta name="author" content="${_}"/>
+    @:@
+    @:for(laika.site.metadata.description)
+      <meta name="description" content="${_}"/>
+    @:@
+    @:for(helium.favIcons)
+      <link rel="icon" @:attribute(sizes, _.sizes) @:attribute(type, _.type) href="@:path(_.target)"/>
+    @:@
+    @:for(helium.webFonts)
+      <link rel="stylesheet" href="${_}">
+    @:@
+    @:linkCSS { paths = ${helium.site.includeCSS} }
+    @:for(laika.versions)
+    <link rel="stylesheet" type="text/css" href="${_.currentVersion.pathSegment}/helium/landing.page.css" />
+    @:empty
+    <link rel="stylesheet" type="text/css" href="helium/landing.page.css" />
+    @:@
+    @:linkJS { paths = ${helium.site.includeJS} }
+    <script> /* for avoiding page load transitions */ </script>
+  </head>
+
+  <body>
+
+    <div id="header">
+      <div id="header-left">
+        @:for(helium.landingPage.logo) ${_} @:@
+        @:for(helium.landingPage.title) <h1>${_}</h1> @:@
+        @:for(helium.landingPage.subtitle) <h2>${_}</h2> @:@
+      </div>
+      <div id="header-right">
+        @:for(helium.landingPage.latestReleases)
+          <p>${_.title}</p>
+          <p class="large">${_.version}</p>
+        @:@
+        @:for(helium.landingPage.license)
+          <p>License</p>
+          <p class="large">${_}</p>
+        @:@
+        @:if(helium.landingPage.documentationLinks)
+          <div id="docs">
+            <p>Documentation</p>
+            <ul>
+              @:for(helium.landingPage.documentationLinks)
+                <li>${_}</li>
+              @:@
+            </ul>
+          </div>
+        @:@
+        @:for(helium.landingPage.projectLinks)
+          <p class="medium">${_}</p>
+        @:@
+      </div>
+    </div>
+    ${?cursor.currentDocument.fragments.header}
+    @:for(helium.landingPage.teaserRows)
+      <div class="teasers">
+        @:for(_.teasers)
+          <div class="teaser">
+            <h2>${_.title}</h2>
+            <p>${_.description}</p>
+          </div>
+        @:@
+      </div>
+    @:@
+    ${cursor.currentDocument.content}
+
+    <p style="text-align: center; font-size: xx-small;"><a href="https://commons.wikimedia.org/wiki/File:Torch.svg">Torch</a> by Mailtoanton / CC BY-SA 3.0</p>
+
+  </body>
+</html>
