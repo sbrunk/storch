@@ -75,6 +75,8 @@
       <ul class="nav-list">
         <li class="level1 nav-header">Related Projects</li>
         
+          <li class="level2"><a href="https://pytorch.org/">PyTorch</a></li>
+        
           <li class="level2"><a href="https://github.com/bytedeco/javacpp">JavaCPP</a></li>
         
       </ul>
@@ -95,7 +97,7 @@
           <li class="level2"><a href="#via-pytorch-platform-2">Via PyTorch platform</a></li>
           <li class="level2"><a href="#via-classifier-2">Via classifier</a></li>
           <li class="level2"><a href="#automatically-detect-your-platform-2">Automatically detect your platform</a></li>
-          <li class="level1"><a href="#running-tensor-operations-on-the-gpu">Running tensor operations on the GPU</a></li>
+          <li class="level2"><a href="#running-tensor-operations-on-the-gpu">Running tensor operations on the GPU</a></li>
         </ul>
 
         <p class="footer"></p>
@@ -117,13 +119,13 @@ sbt publishLocal</code></pre>
           </ul>
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-c697319-SNAPSHOT&quot;</span><span>
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-abd6e27-SNAPSHOT&quot;</span><span>
 )</span></code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using scala &quot;3&quot;
 //&gt; using repository &quot;sonatype:snapshots&quot;
-//&gt; using lib &quot;dev.storch::storch:0.0-c697319-SNAPSHOT&quot;</span></code></pre>
+//&gt; using lib &quot;dev.storch::storch:0.0-abd6e27-SNAPSHOT&quot;</span></code></pre>
           </div>
         </div>
         
@@ -149,14 +151,14 @@ sbt publishLocal</code></pre>
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-c697319-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-abd6e27-SNAPSHOT&quot;</span><span>,
   </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch-platform&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span>
 )
 </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using repository &quot;sonatype:snapshots&quot;
-//&gt; using lib &quot;dev.storch::storch:0.0-c697319-SNAPSHOT&quot;
+//&gt; using lib &quot;dev.storch::storch:0.0-abd6e27-SNAPSHOT&quot;
 //&gt; using lib &quot;org.bytedeco:pytorch-platform:1.13.1-1.5.9-SNAPSHOT&quot;</span></code></pre>
           </div>
         </div>
@@ -176,7 +178,7 @@ sbt publishLocal</code></pre>
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-c697319-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-abd6e27-SNAPSHOT&quot;</span><span>,
   </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span>,
   </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>
 )
@@ -184,7 +186,7 @@ sbt publishLocal</code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using repository &quot;sonatype:snapshots&quot;
-//&gt; using lib &quot;dev.storch::storch:0.0-c697319-SNAPSHOT&quot;
+//&gt; using lib &quot;dev.storch::storch:0.0-abd6e27-SNAPSHOT&quot;
 //&gt; using lib &quot;org.bytedeco:openblas:0.3.21-1.5.9-SNAPSHOT,classifier=linux-x86_64&quot;
 //&gt; using lib &quot;org.bytedeco:pytorch:1.13.1-1.5.9-SNAPSHOT,classifier=linux-x86_64&quot;</span></code></pre>
           </div>
@@ -199,7 +201,7 @@ sbt publishLocal</code></pre>
         <p><code>build.sbt</code>:</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-c697319-SNAPSHOT&quot;</span><span>
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-abd6e27-SNAPSHOT&quot;</span><span>
 )
 </span><span class="identifier">javaCppPresetLibs</span><span> ++= </span><span class="type-name">Seq</span><span>(</span><span class="string-literal">&quot;pytorch&quot;</span><span> -&gt; </span><span class="string-literal">&quot;1.13.1&quot;</span><span>)
 </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
@@ -218,7 +220,7 @@ sbt publishLocal</code></pre>
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-c697319-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-abd6e27-SNAPSHOT&quot;</span><span>,
   </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch-platform-gpu&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span>,
   </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda-platform-redist&quot;</span><span> % </span><span class="string-literal">&quot;11.8-8.6-1.5.9-SNAPSHOT&quot;</span><span>
 )
@@ -226,7 +228,7 @@ sbt publishLocal</code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using repository &quot;sonatype:snapshots&quot;
-//&gt; using lib &quot;dev.storch::storch:0.0-c697319-SNAPSHOT&quot;
+//&gt; using lib &quot;dev.storch::storch:0.0-abd6e27-SNAPSHOT&quot;
 //&gt; using lib &quot;org.bytedeco:pytorch-platform-gpu:1.13.1-1.5.9-SNAPSHOT&quot;
 //&gt; using lib &quot;org.bytedeco:cuda-platform-redist:11.8-8.6-1.5.9-SNAPSHOT&quot;</span></code></pre>
           </div>
@@ -246,7 +248,7 @@ sbt publishLocal</code></pre>
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-c697319-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-abd6e27-SNAPSHOT&quot;</span><span>,
   </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span>,
   </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;1.13.1-1.5.9-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64-gpu&quot;</span><span>
 )
@@ -254,7 +256,7 @@ sbt publishLocal</code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using repository &quot;sonatype:snapshots&quot;
-//&gt; using lib &quot;dev.storch::storch:0.0-c697319-SNAPSHOT&quot;
+//&gt; using lib &quot;dev.storch::storch:0.0-abd6e27-SNAPSHOT&quot;
 //&gt; using lib &quot;org.bytedeco:pytorch:1.13.1-1.5.9-SNAPSHOT,classifier=linux-x86_64-gpu&quot;</span></code></pre>
           </div>
         </div>
@@ -267,12 +269,12 @@ sbt publishLocal</code></pre>
         <p><code>build.sbt</code>:</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> += </span><span class="string-literal">&quot;Sonatype OSS Snapshots&quot;</span><span> </span><span class="identifier">at</span><span> </span><span class="string-literal">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span><span>
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-c697319-SNAPSHOT&quot;</span><span>
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> % </span><span class="string-literal">&quot;storch:0.0-abd6e27-SNAPSHOT&quot;</span><span>
 )
 </span><span class="identifier">javaCppPresetLibs</span><span> ++= </span><span class="type-name">Seq</span><span>(</span><span class="string-literal">&quot;pytorch-gpu&quot;</span><span> -&gt; </span><span class="string-literal">&quot;1.13.1&quot;</span><span>)
 </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
         
-        <h2 id="running-tensor-operations-on-the-gpu" class="section">Running tensor operations on the GPU<a class="anchor-link right" href="#running-tensor-operations-on-the-gpu"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <h3 id="running-tensor-operations-on-the-gpu" class="section">Running tensor operations on the GPU<a class="anchor-link right" href="#running-tensor-operations-on-the-gpu"><i class="icofont-laika">&#xef71;</i></a></h3>
         <p>You can create tensors directly on the GPU:</p>
         <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.</span><span class="type-name">Device</span><span>.{</span><span class="type-name">CPU</span><span>, </span><span class="type-name">CUDA</span><span>}
 </span><span class="keyword">val</span><span> </span><span class="identifier">device</span><span> = </span><span class="keyword">if</span><span> </span><span class="identifier">torch</span><span>.</span><span class="identifier">cuda</span><span>.</span><span class="identifier">isAvailable</span><span> </span><span class="keyword">then</span><span> </span><span class="type-name">CUDA</span><span> </span><span class="keyword">else</span><span> </span><span class="type-name">CPU</span><span>
