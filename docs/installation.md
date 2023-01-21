@@ -212,7 +212,7 @@ javaCppPresetLibs ++= Seq("pytorch-gpu" -> "1.13.1")
 fork := true
 ```
 
-## Running tensor operations on the GPU
+### Running tensor operations on the GPU
 
 ```scala mdoc:invisible
 torch.manualSeed(0)

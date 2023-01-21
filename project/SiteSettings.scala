@@ -30,6 +30,7 @@ object StorchSitePlugin extends AutoPlugin {
   override def requires = TypelevelSitePlugin
   override def projectSettings = Seq(
     tlSiteRelatedProjects := Seq(
+      "PyTorch" -> new URL("https://pytorch.org/"),
       "JavaCPP" -> new URL("https://github.com/bytedeco/javacpp")
     ),
     laikaConfig := LaikaConfig.defaults
@@ -59,18 +60,11 @@ object StorchSitePlugin extends AutoPlugin {
         anchorPlacement = laika.helium.config.AnchorPlacement.Right
       )
       //        .site
-      //        .darkMode
-      //        .disabled
-      //        .site
       //        .favIcons(
       //          Favicon.external("https://typelevel.org/img/favicon.png", "32x32", "image/png")
       //        )
       .site
       .topNavigationBar(
-        //          homeLink = ImageLink.external(
-        //            "https://storch.dev",
-        //            Image.internal(Root / "img" / "Storch.svg", height = Some(Length(40, LengthUnit.px)))
-        //          ),
         navLinks = Seq(
           IconLink.internal(
             Root / "api" / "index.html",
@@ -107,10 +101,13 @@ object StorchSitePlugin extends AutoPlugin {
           TextLink.internal(Root / "installation.md", "Getting Started"),
           TextLink.internal(Root / "api" / "index.html", "API (Scaladoc)")
         ),
-        //          projectLinks = Seq(
-        //            IconLink.internal(Root / "modules.md", HeliumIcon.demo),
-        //            ButtonLink.external("http://somewhere.com/", "Somewhere")
-        //          ),
+        projectLinks = Seq(
+          IconLink.external(
+            scmInfo.value.fold("https://github.com/sbrunk/storch")(_.browseUrl.toString),
+            HeliumIcon.github,
+            options = Styles("svg-link")
+          )
+        ),
         teasers = Seq(
           Teaser(
             "Build Deep Learning Models in Scala",
