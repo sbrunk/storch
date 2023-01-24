@@ -22,15 +22,16 @@ ThisBuild / tlSonatypeUseLegacyHost := false
 ThisBuild / tlSitePublishBranch := Some("main")
 
 val scrImageVersion = "4.0.32"
-ThisBuild / scalaVersion := "3.2.1"
+ThisBuild / scalaVersion := "3.2.2"
 
 ThisBuild / githubWorkflowJavaVersions += JavaSpec.temurin("11")
 ThisBuild / githubWorkflowPublishTargetBranches := Seq() // disable publishing until publishing infra is ready
 
 val enableGPU = settingKey[Boolean]("enable or disable GPU support")
 
+ThisBuild / enableGPU := false
+
 lazy val commonSettings = Seq(
-  enableGPU := false,
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
   javaCppPresetLibs ++= Seq(
     (if (enableGPU.value) "pytorch-gpu" else "pytorch") -> "1.13.1",

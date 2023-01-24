@@ -55,6 +55,13 @@ import scala.reflect.Typeable
 import internal.NativeConverters
 import torch.Device.CPU
 import torch.Layout.Strided
+import org.bytedeco.pytorch.ByteArrayRef
+import org.bytedeco.pytorch.ShortArrayRef
+import org.bytedeco.pytorch.BoolArrayRef
+import org.bytedeco.pytorch.IntArrayRef
+import org.bytedeco.pytorch.LongArrayRef
+import org.bytedeco.pytorch.FloatArrayRef
+import org.bytedeco.pytorch.DoubleArrayRef
 
 case class TensorTuple[D <: DType](
     values: Tensor[D],
@@ -64,8 +71,7 @@ case class TensorTuple[D <: DType](
 /** A [[torch.Tensor]] is a multi-dimensional matrix containing elements of a single data type. */
 sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pytorch.Tensor):
 
-  def ==(other: ScalaType): Tensor[Bool] = Tensor(native.eq(toScalar(other)))
-  def ==(other: this.type): Tensor[Bool] = Tensor(native.eq(other.native))
+  def ==(other: ScalaType): Tensor[Bool] = eq(other)
 
   @targetName("add")
   def +[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
@@ -122,6 +128,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   /** Computes the absolute value of each element. */
   def abs: Tensor[D] = Tensor(native.abs())
 
+  def acos: Tensor[D] = Tensor(native.acos())
+
   /** Tests if all elements of this tensor evaluate to `true`. */
   def all: Tensor[Bool] = Tensor(native.all())
 
@@ -151,6 +159,15 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   )
 
   def backward(): Unit = native.backward()
+
+  /** Returns a new Tensor, detached from the current graph.
+    *
+    * The result will never require gradient.
+    *
+    * This method also affects forward mode AD gradients and the result will never have forward mode
+    * AD gradients.
+    */
+  def detach(): Tensor[D] = Tensor(native.detach())
 
   /** Returns a copy of `input`.
     *
@@ -187,10 +204,21 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   // def dtype: T = deriveDType[T]
 
   /** Computes element-wise equality */
+  def eq(other: ScalaType): Tensor[Bool] = Tensor(native.eq(toScalar(other)))
+
+  /** Computes element-wise equality
+    *
+    * The argument can be a tensor whose shape is broadcastable with this tensor.
+    */
   def eq(other: Tensor[?]): Tensor[Bool] = Tensor(native.eq(other.native))
 
+  override def equals(that: Any): Boolean =
+    that match
+      case t: Tensor[?] if dtype == t.dtype => native.equal(t.native)
+      case _                                => false
+
   /** True if `other` has the same size and elements as this tensor, false otherwise. */
-  def equal(other: Tensor[D]) = native.equal(other.native)
+  def equal(other: Tensor[D]): Boolean = native.equal(other.native)
 
   def flatten: Tensor[D] = Tensor(native.flatten())
 
@@ -198,13 +226,17 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     native.flatten(startDim, endDim)
   )
 
-  def grad: Tensor[D] = Tensor(native.grad())
+  /** This function returns an undefined tensor by default and returns a defined tensor the first
+    * time a call to backward() computes gradients for this Tensor. The attribute will then contain
+    * the gradients computed and future calls to backward() will accumulate (add) gradients into it.
+    */
+  def grad: Tensor[D | Undefined] = Tensor(native.grad())
 
-  def is_contiguous: Boolean = native.is_contiguous()
+  def isContiguous: Boolean = native.is_contiguous()
 
-  def is_cuda: Boolean = native.is_cuda()
+  def isCuda: Boolean = native.is_cuda()
 
-  def is_quantized: Boolean = native.is_quantized()
+  def isQuantized: Boolean = native.is_quantized()
 
   def isnan: Tensor[Bool] = Tensor(native.isnan())
 
@@ -243,9 +275,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   /** Returns the maximum value of all elements in the ``input`` tensor. */
   def max(): Tensor[Int64] = Tensor(native.max())
 
-  /** Returns a namedtuple ``(values, indices)`` where ``values`` is the maximum value of each row
-    * of the `input` tensor in the given dimension `dim`. And ``indices`` is the index location of
-    * each maximum value found (argmax).
+  /** Returns a tuple ``(values, indices)`` where ``values`` is the maximum value of each row of the
+    * `input` tensor in the given dimension `dim`. And ``indices`` is the index location of each
+    * maximum value found (argmax).
     *
     * If ``keepdim`` is ``true``, the output tensors are of the same size as ``input`` except in the
     * dimension ``dim`` where they are of size 1. Otherwise, ``dim`` is squeezed (see
@@ -283,6 +315,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def shape: Seq[Long] = size
 
+  def square = Tensor(native.square())
+
   def squeeze: Tensor[D] = Tensor(native.squeeze())
 
   def size: Seq[Long] = ArraySeq.unsafeWrapArray(native.sizes.vec.get)
@@ -312,7 +346,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
           new pytorch.TensorIndex(
             new pytorch.Slice(toOptional(start), toOptional(end), toOptional(step))
           )
-        case s: Seq[T] @unchecked => new pytorch.TensorIndex(Tensor[T](s*).native)
+        case s: Seq[T] @unchecked => new pytorch.TensorIndex(Tensor[T](s).native)
         // TODO remaining index types, see https://pytorch.org/cppdocs/notes/tensor_indexing.html
     val ref = new pytorch.TensorIndexArrayRef(new pytorch.TensorIndexVector(nativeIndices.toArray*))
     Tensor(native.index(ref))
@@ -458,11 +492,11 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
           val extraLine = if (!flattened && tensor.dim >= 3) "\n" else ""
           innerSummary.mkString("[", (if (!flattened) ",\n" else ", ") + extraLine + padding, "]")
 
-    if (includeInfo)
+    if dtype == undefined then "undefined tensor"
+    else if includeInfo then
       s"dtype=${dtype.toString}, shape=${size.mkString("[", ", ", "]")}, device=${device.device} " +
         (if (!flattened) "\n" else ": ") + summarize(this, maxEntries)
-    else
-      summarize(this, maxEntries)
+    else summarize(this, maxEntries)
 
   def view(shape: Int*): Tensor[D] = Tensor(native.view(shape.map(_.toLong)*))
 
@@ -586,36 +620,46 @@ object Tensor:
   /** Constructs a tensor with no autograd history (also known as a “leaf tensor”) by copying data.
     */
   // TODO support multidimensional arrays as input
+  // TODO support explicit dtype
   def apply[U <: ScalaType: ClassTag](
-      data: Seq[U],
+      data: Seq[U] | U,
       layout: Layout = Strided,
       device: Device = CPU,
       requiresGrad: Boolean = false
   ): Tensor[ScalaToDType[U]] =
-    val (pointer, inputDType) = data.toArray match
-      case bools: Array[Boolean] =>
-        (
-          {
-            val p = new BoolPointer(bools.length)
-            for ((b, i) <- bools.zipWithIndex) p.put(i, b)
-            p
-          },
-          bool
+    data match
+      case data: Seq[?] =>
+        val (pointer, inputDType) = data.toArray match
+          case bools: Array[Boolean] =>
+            (
+              {
+                val p = new BoolPointer(bools.length)
+                for ((b, i) <- bools.zipWithIndex) p.put(i, b)
+                p
+              },
+              bool
+            )
+          case bytes: Array[Byte]     => (new BytePointer(ByteBuffer.wrap(bytes)), int8)
+          case shorts: Array[Short]   => (new ShortPointer(ShortBuffer.wrap(shorts)), int16)
+          case ints: Array[Int]       => (new IntPointer(IntBuffer.wrap(ints)), int32)
+          case longs: Array[Long]     => (new LongPointer(LongBuffer.wrap(longs)), int64)
+          case floats: Array[Float]   => (new FloatPointer(FloatBuffer.wrap(floats)), float32)
+          case doubles: Array[Double] => (new DoublePointer(DoubleBuffer.wrap(doubles)), float64)
+          case _                      => throw new IllegalArgumentException("Unsupported type")
+        Tensor(
+          torchNative
+            .from_blob(
+              pointer,
+              Array(data.length.toLong),
+              NativeConverters.tensorOptions(inputDType, layout, device, requiresGrad)
+            )
         )
-      case bytes: Array[Byte]     => (new BytePointer(ByteBuffer.wrap(bytes)), int8)
-      case shorts: Array[Short]   => (new ShortPointer(ShortBuffer.wrap(shorts)), int16)
-      case ints: Array[Int]       => (new IntPointer(IntBuffer.wrap(ints)), int32)
-      case longs: Array[Long]     => (new LongPointer(LongBuffer.wrap(longs)), int64)
-      case floats: Array[Float]   => (new FloatPointer(FloatBuffer.wrap(floats)), float32)
-      case doubles: Array[Double] => (new DoublePointer(DoubleBuffer.wrap(doubles)), float64)
-      case _                      => throw new IllegalArgumentException("Unsupported type")
-    Tensor(
-      torchNative
-        .from_blob(
-          pointer,
-          Array(data.length.toLong),
-          NativeConverters.tensorOptions(inputDType, layout, device, requiresGrad)
+      case data: U =>
+        val dtype = scalaToDType(data)
+        Tensor(
+          torchNative.scalar_tensor(
+            NativeConverters.toScalar(data),
+            NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
+          )
         )
-    )
-
-  def apply[U <: ScalaType: ClassTag](data: U*): Tensor[ScalaToDType[U]] = apply(data)
+      case _ => throw new IllegalArgumentException("Unsupported type")
