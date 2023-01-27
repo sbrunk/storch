@@ -116,7 +116,7 @@
 </span><span class="comment">// data: Seq[Int] = List(0, 1, 2, 3)
 </span><span class="keyword">val</span><span> </span><span class="identifier">t1</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="type-name">Tensor</span><span>(</span><span class="identifier">data</span><span>)
 </span><span class="comment">// t1: Tensor[Int32] = dtype=int32, shape=[4], device=CPU 
-// [218582453, 32571, 2, 3]
+// [0, 1, 2, 3]
 </span><span class="identifier">t1</span><span>.</span><span class="identifier">equal</span><span>(</span><span class="identifier">torch</span><span>.</span><span class="identifier">arange</span><span>(</span><span class="number-literal">0</span><span>,</span><span class="number-literal">4</span><span>))
 </span><span class="comment">// res1: Boolean = true
 </span><span class="keyword">val</span><span> </span><span class="identifier">t2</span><span> = </span><span class="identifier">t1</span><span>.</span><span class="identifier">to</span><span>(</span><span class="identifier">dtype</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="identifier">float32</span><span>)
