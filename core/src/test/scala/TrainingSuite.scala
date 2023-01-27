@@ -21,7 +21,7 @@ class TraininSuite extends munit.FunSuite {
   test("training") {
 
     val xTrain = torch.arange(end = 10, dtype = float32) // .reshape(10, 1)
-    val yTrain = Tensor(1.0f, 1.3f, 3.1f, 2.0f, 5.0f, 6.3f, 6.6f, 7.4f, 8.0f, 9.0f)
+    val yTrain = Tensor(Seq(1.0f, 1.3f, 3.1f, 2.0f, 5.0f, 6.3f, 6.6f, 7.4f, 8.0f, 9.0f))
     val xTrainNorm = ((xTrain - xTrain.mean) / xTrain.std)
 
     val ds = TensorSeq(xTrainNorm).zip(TensorSeq(yTrain))

@@ -80,7 +80,7 @@ class TensorSuite extends ScalaCheckSuite {
 
   test("toBuffer") {
     val content = Seq(1, 2, 3, 4)
-    val t = Tensor.apply(1, 2, 3, 4)
+    val t = Tensor(content)
     val b = t.toBuffer
     val a = new Array[Int](content.length)
     b.get(a)
@@ -89,5 +89,15 @@ class TensorSuite extends ScalaCheckSuite {
 
   test("+") {
     assertEquals((Tensor(1) + 2).item, 3)
+  }
+
+  test("grad") {
+    val t = torch.ones(Seq(3)) * 2
+    t.requiresGrad = true
+    val sum = t.sum
+    assert(t.grad.dtype == undefined)
+    sum.backward()
+    assert(t.grad.dtype == float32)
+    assert(t.grad.equal(torch.ones(Seq(3))))
   }
 }

@@ -29,6 +29,7 @@ import scala.reflect.Typeable
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch.GenericDict
 import org.bytedeco.pytorch.GenericDictIterator
+import spire.math.Complex
 
 private[torch] object NativeConverters:
 
@@ -48,6 +49,17 @@ private[torch] object NativeConverters:
   def toNative(input: Int | (Int, Int)) = input match
     case (h, w): (Int, Int) => LongPointer(Array(h.toLong, w.toLong)*)
     case x: Int             => LongPointer(Array(x.toLong, x.toLong)*)
+
+  def toScalar(x: ScalaType): pytorch.Scalar = x match
+    case x: Boolean                        => pytorch.Scalar(if true then 1: Byte else 0: Byte)
+    case x: Byte                           => pytorch.Scalar(x)
+    case x: Short                          => pytorch.Scalar(x)
+    case x: Int                            => pytorch.Scalar(x)
+    case x: Long                           => pytorch.Scalar(x)
+    case x: Float                          => pytorch.Scalar(x)
+    case x: Double                         => pytorch.Scalar(x)
+    case x @ Complex(r: Float, i: Float)   => ???
+    case x @ Complex(r: Double, i: Double) => ???
 
   def tensorOptions(
       dtype: DType,
