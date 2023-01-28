@@ -22,10 +22,10 @@ ThisBuild / tlSonatypeUseLegacyHost := false
 ThisBuild / tlSitePublishBranch := Some("main")
 
 val scrImageVersion = "4.0.32"
+val pytorchVersion = "1.13.1"
 ThisBuild / scalaVersion := "3.2.2"
 
-ThisBuild / githubWorkflowJavaVersions += JavaSpec.temurin("11")
-ThisBuild / githubWorkflowPublishTargetBranches := Seq() // disable publishing until publishing infra is ready
+ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 
 val enableGPU = settingKey[Boolean]("enable or disable GPU support")
 
@@ -33,23 +33,48 @@ ThisBuild / enableGPU := false
 
 lazy val commonSettings = Seq(
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
-  javaCppPresetLibs ++= Seq(
-    (if (enableGPU.value) "pytorch-gpu" else "pytorch") -> "1.13.1",
-    /*"mkl" -> "2022.2",*/ "openblas" -> "0.3.21"
-  ),
   javaCppVersion := "1.5.9-SNAPSHOT",
+  javaCppPlatform := Seq(),
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+  // This is a hack to avoid depending on the native libs when publishing
+  // but conveniently have them on the classpath during development.
+  // There's probably a cleaner way to do this.
+) ++ tlReplaceCommandAlias(
+  "tlReleaseLocal",
+  List(
+    "reload",
+    "project /",
+    "set core / javaCppPlatform := Seq()",
+    "set core / javaCppPresetLibs := Seq()",
+    "+publishLocal"
+  ).mkString("; ", "; ", "")
+) ++ tlReplaceCommandAlias(
+  "tlRelease",
+  List(
+    "reload",
+    "project /",
+    "set core / javaCppPlatform := Seq()",
+    "set core / javaCppPresetLibs := Seq()",
+    "+mimaReportBinaryIssues",
+    "+publish",
+    "tlSonatypeBundleReleaseIfRelevant"
+  ).mkString("; ", "; ", "")
 )
 
 lazy val core = project
   .in(file("core"))
   .settings(commonSettings)
   .settings(
-    name := "storch",
+    javaCppPresetLibs ++= Seq(
+      (if (enableGPU.value) "pytorch-gpu" else "pytorch") -> pytorchVersion,
+      "mkl" -> "2022.2",
+      "openblas" -> "0.3.21"
+    ) ++ (if (enableGPU.value) Seq("cuda-redist" -> "11.8-8.6") else Seq()),
+    javaCppPlatform := org.bytedeco.sbt.javacpp.Platform.current,
     fork := true,
     Test / fork := true,
     libraryDependencies ++= Seq(
-      "org.bytedeco" % "pytorch" % "1.13.1-1.5.9-SNAPSHOT",
+      "org.bytedeco" % "pytorch" % s"$pytorchVersion-${javaCppVersion.value}",
       "org.typelevel" %% "spire" % "0.18.0",
       "com.lihaoyi" %% "sourcecode" % "0.3.0",
       "org.scalameta" %% "munit" % "0.7.29" % Test,
@@ -70,6 +95,7 @@ lazy val vision = project
 
 lazy val examples = project
   .in(file("examples"))
+  .enablePlugins(NoPublishPlugin)
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
@@ -95,5 +121,6 @@ lazy val docs = project
   .dependsOn(vision)
 
 lazy val root = project
+  .enablePlugins(NoPublishPlugin)
   .in(file("."))
   .aggregate(core, vision, examples, docs)

@@ -16,7 +16,7 @@ Then, add Storch as a dependency to your project:
 @:choice(sbt)
 ```scala
 libraryDependencies += Seq(
-  "dev.storch" % "storch:@VERSION@"
+  "dev.storch" %% "core" % "@VERSION@",
 )
 ```
 
@@ -24,7 +24,7 @@ libraryDependencies += Seq(
 ```scala
 //> using scala "3"
 //> using repository "sonatype:snapshots"
-//> using lib "dev.storch::storch:@VERSION@"
+//> using lib "dev.storch::core:@VERSION@"
 ```
 
 @:@
@@ -55,7 +55,7 @@ The easiest and most portable way to depend on the native library is via the PyT
 ```scala
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 libraryDependencies += Seq(
-  "dev.storch" % "storch:@VERSION@",
+  "dev.storch" %% "core" % "@VERSION@",
   "org.bytedeco" % "pytorch-platform" % "1.13.1-@JAVACPP_VERSION@"
 )
 fork := true
@@ -64,7 +64,7 @@ fork := true
 @:choice(scala-cli)
 ```scala
 //> using repository "sonatype:snapshots"
-//> using lib "dev.storch::storch:@VERSION@"
+//> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch-platform:1.13.1-@JAVACPP_VERSION@"
 ```
 
@@ -87,9 +87,10 @@ Currently supported are `linux-x86_64`, `macosx-x86_64` and `windows-x86_64`.
 ```scala
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 libraryDependencies += Seq(
-  "dev.storch" % "storch:@VERSION@",
+  "dev.storch" %% "core" % "@VERSION@",
   "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@",
-  "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@" classifier "linux-x86_64"
+  "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@" classifier "linux-x86_64",
+  "org.bytedeco" % "openblas" % "0.3.21-@JAVACPP_VERSION@" classifier "linux-x86_64"
 )
 fork := true
 ```
@@ -97,7 +98,7 @@ fork := true
 @:choice(scala-cli)
 ```scala
 //> using repository "sonatype:snapshots"
-//> using lib "dev.storch::storch:@VERSION@"
+//> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:openblas:0.3.21-@JAVACPP_VERSION@,classifier=linux-x86_64"
 //> using lib "org.bytedeco:pytorch:1.13.1-@JAVACPP_VERSION@,classifier=linux-x86_64"
 ```
@@ -120,9 +121,9 @@ addSbtPlugin("org.bytedeco" % "sbt-javacpp" % "1.17")
 ```scala
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 libraryDependencies += Seq(
-  "dev.storch" % "storch:@VERSION@"
+  "dev.storch" %% "core" % "@VERSION@",
 )
-javaCppPresetLibs ++= Seq("pytorch" -> "1.13.1")
+javaCppPresetLibs ++= Seq("pytorch" -> "1.13.1", "openblas" -> "0.3.21")
 fork := true
 
 ```
@@ -144,7 +145,7 @@ distribution including cuDNN, helping you to avoid having to mess with local CUD
 ```scala
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 libraryDependencies += Seq(
-  "dev.storch" % "storch:@VERSION@",
+  "dev.storch" %% "core" % "@VERSION@",
   "org.bytedeco" % "pytorch-platform-gpu" % "1.13.1-@JAVACPP_VERSION@",
   "org.bytedeco" % "cuda-platform-redist" % "11.8-8.6-@JAVACPP_VERSION@"
 )
@@ -154,7 +155,7 @@ fork := true
 @:choice(scala-cli)
 ```scala
 //> using repository "sonatype:snapshots"
-//> using lib "dev.storch::storch:@VERSION@"
+//> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch-platform-gpu:1.13.1-@JAVACPP_VERSION@"
 //> using lib "org.bytedeco:cuda-platform-redist:11.8-8.6-@JAVACPP_VERSION@"
 ```
@@ -162,13 +163,13 @@ fork := true
 @:@
 
 This approach should work on any platform with CUDA support (Linux and Windows) but it causes even more overhead than
-the CPU variants as CUDA is quite large. So, to save space and bandwidth you might want to use one of the options below
-which work
+the CPU variants as CUDA is quite large. So, to save space and bandwidth you can use classifiers, again at the expense
+of portability.
 
 ### Via classifier
 
 This can be done by providing dependency classifiers specifically for your platform.
-Currently supported are `linux-x86_64-gpu`, `windows-x86_64-gpu`.
+Currently supported are `linux-x86_64-gpu` and `windows-x86_64-gpu`.
 
 @:select(build-tool)
 
@@ -176,9 +177,11 @@ Currently supported are `linux-x86_64-gpu`, `windows-x86_64-gpu`.
 ```scala
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 libraryDependencies += Seq(
-  "dev.storch" % "storch:@VERSION@",
+  "dev.storch" %% "core" % "@VERSION@",
   "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@",
-  "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@" classifier "linux-x86_64-gpu"
+  "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@" classifier "linux-x86_64-gpu",
+  "org.bytedeco" % "openblas" % "0.3.21-@JAVACPP_VERSION@" classifier "linux-x86_64",
+  "org.bytedeco" % "cuda" % "11.8-8.6-@JAVACPP_VERSION@" classifier "linux-x86_64-redist"
 )
 fork := true
 ```
@@ -186,8 +189,10 @@ fork := true
 @:choice(scala-cli)
 ```scala
 //> using repository "sonatype:snapshots"
-//> using lib "dev.storch::storch:@VERSION@"
+//> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch:1.13.1-@JAVACPP_VERSION@,classifier=linux-x86_64-gpu"
+//> using lib "org.bytedeco:openblas:0.3.21-@JAVACPP_VERSION@,classifier=linux-x86_64"
+//> using lib "org.bytedeco:cuda:11.8-8.6-@JAVACPP_VERSION@,classifier=linux-x86_64-redist"
 ```
 
 @:@
@@ -206,9 +211,9 @@ addSbtPlugin("org.bytedeco" % "sbt-javacpp" % "1.17")
 ```scala
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 libraryDependencies += Seq(
-  "dev.storch" % "storch:@VERSION@"
+  "dev.storch" %% "core" % "@VERSION@",
 )
-javaCppPresetLibs ++= Seq("pytorch-gpu" -> "1.13.1")
+javaCppPresetLibs ++= Seq("pytorch-gpu" -> "1.13.1", "openblas" -> "0.3.21", "cuda-redist" -> "11.8-8.6")
 fork := true
 ```
 
