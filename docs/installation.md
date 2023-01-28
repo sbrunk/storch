@@ -1,20 +1,21 @@
 # Installation
 
-As Storch is still in an early stage of development, there are no published artifacts available yet. So for the time
-being, you have to build it from source:
+As Storch is still in an early stage of development, there are no releases available yet.
+We provide snapshots built from `main` though, to make it easier to already try Storch.
 
-```bash
-git clone https://github.com/sbrunk/storch
-cd storch
-sbt publishLocal
-```
+@:callout(info)
 
-Then, add Storch as a dependency to your project:
+Storch requires at least Scala 3.2
+
+@:@
+
+To use the snapshots, add a resolver for the sonatype snapshots repository and then add Storch as a dependency to your project:
 
 @:select(build-tool)
 
 @:choice(sbt)
 ```scala
+resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
 )
@@ -22,7 +23,8 @@ libraryDependencies += Seq(
 
 @:choice(scala-cli)
 ```scala
-//> using scala "3"
+//> using scala "3.2"
+//> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 ```
@@ -53,7 +55,7 @@ The easiest and most portable way to depend on the native library is via the PyT
 
 @:choice(sbt)
 ```scala
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
   "org.bytedeco" % "pytorch-platform" % "1.13.1-@JAVACPP_VERSION@"
@@ -63,6 +65,8 @@ fork := true
 
 @:choice(scala-cli)
 ```scala
+//> using scala "3.2"
+//> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch-platform:1.13.1-@JAVACPP_VERSION@"
@@ -85,7 +89,7 @@ Currently supported are `linux-x86_64`, `macosx-x86_64` and `windows-x86_64`.
 
 @:choice(sbt)
 ```scala
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
   "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@",
@@ -97,6 +101,8 @@ fork := true
 
 @:choice(scala-cli)
 ```scala
+//> using scala "3.2"
+//> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:openblas:0.3.21-@JAVACPP_VERSION@,classifier=linux-x86_64"
@@ -119,7 +125,7 @@ addSbtPlugin("org.bytedeco" % "sbt-javacpp" % "1.17")
 
 `build.sbt`:
 ```scala
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
 )
@@ -143,7 +149,7 @@ distribution including cuDNN, helping you to avoid having to mess with local CUD
 @:choice(sbt)
 
 ```scala
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
   "org.bytedeco" % "pytorch-platform-gpu" % "1.13.1-@JAVACPP_VERSION@",
@@ -154,6 +160,8 @@ fork := true
 
 @:choice(scala-cli)
 ```scala
+//> using scala "3.2"
+//> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch-platform-gpu:1.13.1-@JAVACPP_VERSION@"
@@ -175,7 +183,7 @@ Currently supported are `linux-x86_64-gpu` and `windows-x86_64-gpu`.
 
 @:choice(sbt)
 ```scala
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
   "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@",
@@ -188,6 +196,8 @@ fork := true
 
 @:choice(scala-cli)
 ```scala
+//> using scala "3.2"
+//> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch:1.13.1-@JAVACPP_VERSION@,classifier=linux-x86_64-gpu"
@@ -209,7 +219,7 @@ addSbtPlugin("org.bytedeco" % "sbt-javacpp" % "1.17")
 
 `build.sbt`:
 ```scala
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
 )

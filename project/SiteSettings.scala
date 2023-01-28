@@ -83,7 +83,7 @@ object StorchSitePlugin extends AutoPlugin {
       .site
       .landingPage(
         logo = Some(
-          Image.internal(Root / "img" / "storch.svg", height = Some(Length(400, LengthUnit.px)))
+          Image.internal(Root / "img" / "storch.svg", height = Some(Length(300, LengthUnit.px)))
         ),
         title = Some("Storch"),
         subtitle = Some("GPU Accelerated Deep Learning for Scala 3"),

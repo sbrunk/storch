@@ -35,7 +35,7 @@ lazy val commonSettings = Seq(
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
   javaCppVersion := "1.5.9-SNAPSHOT",
   javaCppPlatform := Seq(),
-  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+  resolvers ++= Resolver.sonatypeOssRepos("snapshots")
   // This is a hack to avoid depending on the native libs when publishing
   // but conveniently have them on the classpath during development.
   // There's probably a cleaner way to do this.
