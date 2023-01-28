@@ -69,7 +69,7 @@ lazy val core = project
       (if (enableGPU.value) "pytorch-gpu" else "pytorch") -> pytorchVersion,
       "mkl" -> "2022.2",
       "openblas" -> "0.3.21"
-    ),
+    ) ++ (if (enableGPU.value) Seq("cuda-redist" -> "11.8-8.6") else Seq()),
     javaCppPlatform := org.bytedeco.sbt.javacpp.Platform.current,
     fork := true,
     Test / fork := true,
