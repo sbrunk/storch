@@ -35,9 +35,9 @@ class TensorSuite extends ScalaCheckSuite {
 
   test("arange") {
     val t0 = arange(0, 10)
-    t0.toSeq == Seq.range(0, 10)
+    assertEquals(t0.toSeq, Seq.range(0, 10))
     val t1 = arange(0, 10, 2)
-    t1.toSeq == Seq.range(0, 10, 2)
+    assertEquals(t1.toSeq, Seq.range(0, 10, 2))
   }
 
   test("tensor properties") {
@@ -95,9 +95,19 @@ class TensorSuite extends ScalaCheckSuite {
     val t = torch.ones(Seq(3)) * 2
     t.requiresGrad = true
     val sum = t.sum
-    assert(t.grad.dtype == undefined)
+    assertEquals(t.grad.dtype, undefined)
     sum.backward()
-    assert(t.grad.dtype == float32)
+    assertEquals(t.grad.dtype, float32)
     assert(t.grad.equal(torch.ones(Seq(3))))
+  }
+
+  test("indexing") {
+    val tensor = torch.arange(0, 16).reshape(4, 4)
+    // first row
+    assertEquals(tensor(0), Tensor(Seq(0, 1, 2, 3)))
+    // first column
+    assertEquals(tensor(torch.Slice(), 0), Tensor(Seq(0, 4, 8, 12)))
+    // last column
+    assertEquals(tensor(---, -1), Tensor(Seq(3, 7, 11, 15)))
   }
 }

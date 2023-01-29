@@ -62,6 +62,7 @@ import org.bytedeco.pytorch.IntArrayRef
 import org.bytedeco.pytorch.LongArrayRef
 import org.bytedeco.pytorch.FloatArrayRef
 import org.bytedeco.pytorch.DoubleArrayRef
+import org.bytedeco.pytorch.EllipsisIndexType
 
 case class TensorTuple[D <: DType](
     values: Tensor[D],
@@ -122,7 +123,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def apply[T <: Boolean | Long: ClassTag](
       indices: (Slice | Int | Long | Tensor[Bool] | Tensor[UInt8] | Tensor[Int64] | Seq[T] |
-        None.type)*
+        None.type | Ellipsis)*
   ): Tensor[D] = index(indices*)
 
   /** Computes the absolute value of each element. */
@@ -330,8 +331,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def index[T <: Boolean | Long: ClassTag](
       indices: (Slice | Int | Long | Tensor[Bool] | Tensor[UInt8] | Tensor[Int64] | Seq[T] |
-        None.type)*
+        None.type | Ellipsis)*
   ): Tensor[D] =
+    // see https://pytorch.org/cppdocs/notes/tensor_indexing.html
     val nativeIndices: Seq[pytorch.TensorIndex] =
       for (i <- indices) yield i match
         case None =>
@@ -347,7 +349,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
             new pytorch.Slice(toOptional(start), toOptional(end), toOptional(step))
           )
         case s: Seq[T] @unchecked => new pytorch.TensorIndex(Tensor[T](s).native)
-        // TODO remaining index types, see https://pytorch.org/cppdocs/notes/tensor_indexing.html
+        case e: Ellipsis          => new pytorch.TensorIndex(new EllipsisIndexType)
+        // TODO index with single boolean. Needs investigation why it is not mapped.
     val ref = new pytorch.TensorIndexArrayRef(new pytorch.TensorIndexVector(nativeIndices.toArray*))
     Tensor(native.index(ref))
 
