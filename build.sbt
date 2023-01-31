@@ -21,6 +21,8 @@ ThisBuild / tlSonatypeUseLegacyHost := false
 // publish website from this branch
 ThisBuild / tlSitePublishBranch := Some("main")
 
+ThisBuild / apiURL := Some(new URL("https://storch.dev/api/"))
+
 val scrImageVersion = "4.0.32"
 val pytorchVersion = "1.13.1"
 ThisBuild / scalaVersion := "3.2.2"
