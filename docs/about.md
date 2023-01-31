@@ -22,7 +22,7 @@ t1.equal(torch.arange(0,4))
 val t2 = t1.to(dtype=torch.float32)
 val t3 = t1 + t2
 
-val shape = Seq(2l,3l)
+val shape = Seq(2,3)
 val randTensor = torch.rand(shape)
 val zerosTensor = torch.zeros(shape, dtype=torch.int64)
 

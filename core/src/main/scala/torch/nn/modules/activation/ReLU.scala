@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package torch.nn.modules.activation
+package torch
+package nn
+package modules
+package activation
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{ReLUImpl, ReLUOptions}
@@ -25,7 +28,7 @@ import torch.{DType, Tensor}
   *
   * $\text{ReLU}(x) = (x)^+ = \max(0, x)$
   */
-final class ReLU(inplace: Boolean = false) extends Module:
+final class ReLU[D <: DType: Default](inplace: Boolean = false) extends TensorModule[D]:
   private val options = new ReLUOptions()
   options.inplace().put(inplace)
 
@@ -34,7 +37,8 @@ final class ReLU(inplace: Boolean = false) extends Module:
   override def registerWithParent[M <: pytorch.Module](parent: M)(using
       name: sourcecode.Name
   ): Unit =
-    // println(s"registering ${name.value}: $this with $parent")
     parent.register_module(name.value, nativeModule)
 
-  def apply[D <: DType](t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+
+  override def toString = getClass().getSimpleName()

@@ -42,7 +42,7 @@ class TensorSuite extends ScalaCheckSuite {
 
   test("tensor properties") {
     val t = ones(Seq(2, 3), dtype = float32)
-    assertEquals(t.size, Seq[Long](2, 3))
+    assertEquals(t.size, Seq[Int](2, 3))
     assertEquals(t.device, Device(DeviceType.CPU, -1: Byte))
     assertEquals(t.numel, 2L * 3)
   }
@@ -66,14 +66,14 @@ class TensorSuite extends ScalaCheckSuite {
       val t = ones(size, dtype)
       assertEquals(t.dtype, dtype)
       assertEquals(t.size, size)
-      assertEquals(t.numel, size.product)
+      assertEquals(t.numel, size.product.toLong)
       assertEquals(t.toSeq.length, size.product.toInt)
     }
   }
 
   test("ones") {
     val t = ones[Float32](Seq(2, 3))
-    assertEquals(t.size, Seq[Long](2, 3))
+    assertEquals(t.size, Seq(2, 3))
     assertEquals(t.numel, 2L * 3)
     assertEquals(t.toSeq, Seq.fill[Float](2 * 3)(1f))
   }

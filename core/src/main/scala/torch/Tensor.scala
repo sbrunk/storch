@@ -74,13 +74,15 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def ==(other: ScalaType): Tensor[Bool] = eq(other)
 
-  @targetName("add")
-  def +[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
+  def add[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
     native.add(toScalar(s))
   )
 
-  @targetName("add")
-  def +[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.add(t.native))
+  def +[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = add(s)
+
+  def add[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.add(t.native))
+
+  def +[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = add(t)
 
   // TODO add typelevel casting rules. I.e. An integral output tensor cannot accept a floating point tensor.
   // https://github.com/pytorch/pytorch/blob/041edeeecb75f3c110605d7311fa46abe1c62ea9/c10/core/ScalarType.h
@@ -89,36 +91,62 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     native.add_(t.native)
     this
 
-  def -[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
+  def +=[S <: ScalaType](s: S): this.type =
+    native.add_(toScalar(s))
+    this
+
+  def sub[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
     native.sub(toScalar(s))
   )
 
-  def -[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.sub(t.native))
+  def -[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = sub(s)
+
+  def sub[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.sub(t.native))
+
+  def -[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = sub(t)
 
   def -=[D2 <: DType](t: Tensor[D2]): this.type =
     native.sub_(t.native)
     this
 
-  @targetName("mul")
-  def *[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
+  def -=[S <: ScalaType](s: S): this.type =
+    native.sub_(toScalar(s))
+    this
+
+  def mul[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
     native.mul(toScalar(s))
   )
 
-  @targetName("mul")
-  def *[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.mul(t.native))
+  def *[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = mul(s)
+
+  def mul[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.mul(t.native))
+
+  def *[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = mul(t)
 
   def *=[D2 <: DType](t: Tensor[D2]): this.type =
     native.mul_(t.native)
     this
 
-  def /[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
+  def *=[S <: ScalaType](s: S): this.type =
+    native.mul_(toScalar(s))
+    this
+
+  def div[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
     native.div(toScalar(s))
   )
 
-  def /[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.div(t.native))
+  def /[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = div(s)
+
+  def div[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.div(t.native))
+
+  def /[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = div(t)
 
   def /=[D2 <: DType](t: Tensor[D2]): this.type =
     native.div_(t.native)
+    this
+
+  def /=[S <: ScalaType](s: S): this.type =
+    native.div_(toScalar(s))
     this
 
   def apply[T <: Boolean | Long: ClassTag](
@@ -159,6 +187,29 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     native.argmax(NativeConverters.toOptional(dim), keepdim)
   )
 
+  /** Computes the gradient of current tensor w.r.t. graph leaves.
+    *
+    * The graph is differentiated using the chain rule. If the tensor is non-scalar (i.e. its data
+    * has more than one element) and requires gradient, the function additionally requires
+    * specifying `gradient`. It should be a tensor of matching type and location, that contains the
+    * gradient of the differentiated function w.r.t. `self`.
+    *
+    * This function accumulates gradients in the leaves - you might need to zero `.grad` attributes
+    * or set them to `None` before calling it. See `Default gradient layouts<default-grad-layouts>`
+    * for details on the memory layout of accumulated gradients.
+    *
+    * Note
+    *
+    * If you run any forward ops, create `gradient`, and/or call `backward` in a user-specified CUDA
+    * stream context, see `Stream semantics of backward passes<bwd-cuda-stream-semantics>`.
+    *
+    * Note
+    *
+    * When `inputs` are provided and a given input is not a leaf, the current implementation will
+    * call its grad_fn (though it is not strictly needed to get this gradients). It is an
+    * implementation detail on which the user should not rely. See
+    * <https://github.com/pytorch/pytorch/pull/60521#issuecomment-867061780> for more details.
+    */
   def backward(): Unit = native.backward()
 
   /** Returns a new Tensor, detached from the current graph.
@@ -273,6 +324,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def matmul[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] =
     Tensor[Promoted[D, D2]](native.matmul(u.native))
 
+  def `@`[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] = matmul(u)
+
   /** Returns the maximum value of all elements in the ``input`` tensor. */
   def max(): Tensor[Int64] = Tensor(native.max())
 
@@ -303,29 +356,45 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def minimum[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] =
     Tensor[Promoted[D, D2]](native.minimum(other.native))
 
+  /** Accessing this property is equivalent to calling adjoint(). */
+  def mH: Tensor[D] = Tensor(native.mH())
+
+  /** Returns a view of this tensor with the last two dimensions transposed.
+    *
+    * `x.mT` is equivalent to `x.transpose(-2, -1)`.
+    */
+  def mT: Tensor[D] = Tensor(native.mT())
+
   /** Returns the total number of elements in the input tensor. */
   def numel: Long = native.numel()
 
-  def permute(dims: Long*): Tensor[D] = Tensor(native.permute(dims*))
+  def permute(dims: Int*): Tensor[D] = Tensor(native.permute(dims.map(_.toLong)*))
 
   def pow(exponent: Double): Tensor[D] = Tensor(native.pow(Scalar.apply(exponent)))
 
   def prod[D <: DType](dtype: D = this.dtype) = Tensor(native.prod())
 
-  def reshape(shape: Long*): Tensor[D] = Tensor(native.reshape(shape*))
+  def reshape(shape: Int*): Tensor[D] = Tensor(native.reshape(shape.map(_.toLong)*))
 
-  def shape: Seq[Long] = size
+  def shape: Seq[Int] = size
 
   def square = Tensor(native.square())
 
   def squeeze: Tensor[D] = Tensor(native.squeeze())
 
-  def size: Seq[Long] = ArraySeq.unsafeWrapArray(native.sizes.vec.get)
+  def size: Seq[Int] = ArraySeq.unsafeWrapArray(native.sizes.vec.get.map(_.toInt))
 
   def std: Tensor[D] = Tensor[D](native.std())
 
   /** Returns the sum of all elements of this tensor. */
   def sum: Tensor[Sum[D]] = Tensor(native.sum())
+
+  /** Expects `input` to be \<= 2-D tensor and transposes dimensions 0 and 1.
+    *
+    * 0-D and 1-D tensors are returned as is. When input is a 2-D tensor this is equivalent to
+    * `transpose(input, 0, 1)`.
+    */
+  def t: Tensor[D] = Tensor(native.t())
 
   def zero(): Unit = native.zero_()
 
@@ -648,7 +717,7 @@ object Tensor:
           case longs: Array[Long]     => (new LongPointer(LongBuffer.wrap(longs)), int64)
           case floats: Array[Float]   => (new FloatPointer(FloatBuffer.wrap(floats)), float32)
           case doubles: Array[Double] => (new DoublePointer(DoubleBuffer.wrap(doubles)), float64)
-          case _                      => throw new IllegalArgumentException("Unsupported type")
+          case _ => throw new IllegalArgumentException(s"Unsupported sequence type")
         Tensor(
           torchNative
             .from_blob(

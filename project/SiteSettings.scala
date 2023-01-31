@@ -19,6 +19,7 @@ import laika.helium.config.HeliumIcon
 import laika.helium.config.IconLink
 import laika.helium.config.ImageLink
 import laika.rewrite.nav.{ChoiceConfig, Selections, SelectionConfig}
+import laika.rewrite.link.{ApiLinks, LinkConfig}
 
 import laika.sbt.LaikaPlugin
 import laika.theme.ThemeProvider
@@ -33,7 +34,15 @@ object StorchSitePlugin extends AutoPlugin {
       "PyTorch" -> new URL("https://pytorch.org/"),
       "JavaCPP" -> new URL("https://github.com/bytedeco/javacpp")
     ),
-    laikaConfig := LaikaConfig.defaults
+    laikaConfig := LaikaConfig.defaults.withRawContent
+      .withConfigValue(
+        LinkConfig(apiLinks =
+          Seq(
+            // ApiLinks(baseUri = "http://localhost:4242/api/")
+            ApiLinks(baseUri = "https://storch.dev/api/")
+          )
+        )
+      )
       .withConfigValue(
         Selections(
           SelectionConfig(
