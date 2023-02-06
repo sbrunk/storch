@@ -28,7 +28,7 @@ object Generators:
     deviceType <- genDeviceType // Arbitrary(genDeviceType).arbitrary
     i <- if deviceType == DeviceType.CPU then genCpuIndex else genIndex
   yield Device(deviceType, i)
-  val genDimSize = Gen.choose(0L, 30L)
+  val genDimSize = Gen.choose(0, 30)
   val genTensorSize = Gen.choose(0, 5).flatMap(listSize => Gen.listOfN(listSize, genDimSize))
   given Arbitrary[Device] = Arbitrary(genDevice)
 

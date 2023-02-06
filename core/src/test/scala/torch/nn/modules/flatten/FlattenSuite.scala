@@ -17,23 +17,18 @@
 package torch
 package nn
 package modules
-package linear
+package flatten
 
-import org.bytedeco.pytorch
-import org.bytedeco.pytorch.IdentityImpl
-import torch.nn.modules.Module
-import torch.{DType, Tensor}
-
-/** A placeholder identity operator that is argument-insensitive.
-  *
-  * @group nn_linear
-  */
-final class Identity(args: Any*) extends Module:
-  override val nativeModule: IdentityImpl = IdentityImpl()
-
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
-
-  def apply[D <: DType](t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+class FlattenSuite extends munit.FunSuite {
+  test("Flatten") {
+    val input = torch.randn(Seq(32, 1, 5, 5))
+    val m1 = nn.Flatten()
+    val o1 = m1(input)
+    assertEquals(o1.shape, Seq(32, 25))
+    assert(input.reshape(32, 25).equal(o1))
+    val m2 = nn.Flatten(0, 2)
+    val o2 = m2(input)
+    assertEquals(o2.shape, Seq(160, 5))
+    assert(input.reshape(160, 5).equal(o2))
+  }
+}

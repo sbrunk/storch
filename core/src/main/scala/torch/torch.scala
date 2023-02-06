@@ -78,15 +78,18 @@ import scala.util.Using
   * @return
   */
 def zeros[D <: DType](
-    size: Seq[Long],
+    size: Seq[Int] | Int,
     dtype: D = float32,
     layout: Layout = Strided,
     device: Device = CPU,
     requiresGrad: Boolean = false
 ): Tensor[D] =
+  val nativeSize = size match
+    case s: Seq[Int] => s.map(_.toLong).toArray
+    case s: Int      => Array(s.toLong)
   Tensor(
     torchNative.torch_zeros(
-      size.toArray,
+      nativeSize.toArray.map(_.toLong),
       NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
     )
   )
@@ -99,22 +102,7 @@ def zerosLike[D <: DType, D2 <: DType | Derive](
     requiresGrad: Boolean = false,
     memoryFormat: MemoryFormat = MemoryFormat.Preserve
 ): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
-  val derivedDType = dtype match
-    case _: Derive => input.dtype
-    case d: DType  => d
-  val derivedLayout = layout match
-    case _: Derive => input.layout
-    case l: Layout => l
-  val derivedDevice = device match
-    case _: Derive => input.device
-    case d: Device => d
-  Tensor(
-    torchNative.torch_zeros_like(
-      input.native,
-      NativeConverters.tensorOptions(derivedDType, derivedLayout, derivedDevice, requiresGrad),
-      new MemoryFormatOptional(memoryFormat.toNative)
-    )
-  )
+  xLike(input, dtype, layout, device, requiresGrad, memoryFormat, torchNative.torch_zeros_like)
 
 /** Returns a tensor filled with the scalar value `1`, with the shape defined by the variable
   * argument `size`.
@@ -124,15 +112,18 @@ def zerosLike[D <: DType, D2 <: DType | Derive](
   * @return
   */
 def ones[D <: DType](
-    size: Seq[Long],
+    size: Seq[Int] | Int,
     dtype: D = float32,
     layout: Layout = Strided,
     device: Device = CPU,
     requiresGrad: Boolean = false
 ): Tensor[D] =
+  val nativeSize = size match
+    case s: Seq[Int] => s.map(_.toLong).toArray
+    case s: Int      => Array(s.toLong)
   Tensor(
     torchNative.torch_ones(
-      size.map(_.toLong).toArray,
+      nativeSize,
       NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
     )
   )
@@ -145,22 +136,7 @@ def onesLike[D <: DType, D2 <: DType | Derive](
     requiresGrad: Boolean = false,
     memoryFormat: MemoryFormat = MemoryFormat.Preserve
 ): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
-  val derivedDType = dtype match
-    case _: Derive => input.dtype
-    case d: DType  => d
-  val derivedLayout = layout match
-    case _: Derive => input.layout
-    case l: Layout => l
-  val derivedDevice = device match
-    case _: Derive => input.device
-    case d: Device => d
-  Tensor(
-    torchNative.torch_ones_like(
-      input.native,
-      NativeConverters.tensorOptions(derivedDType, derivedLayout, derivedDevice, requiresGrad),
-      new MemoryFormatOptional(memoryFormat.toNative)
-    )
-  )
+  xLike(input, dtype, layout, device, requiresGrad, memoryFormat, torchNative.torch_ones_like)
 
 // format: off
 /** Returns a 1-D tensor of size $`\left\lceil \frac{\text{end} - \text{start}}{\text{step}} \right\rceil`$ with values
@@ -201,6 +177,7 @@ def arange[D <: DType | Derive, Start <: ScalaType, End <: ScalaType, Step <: Sc
       NativeConverters.tensorOptions(derivedDType, layout, device, requiresGrad)
     )
   )
+
 def linspace[D <: DType](
     start: Double,
     end: Double,
@@ -237,8 +214,25 @@ def logspace[D <: DType](
     NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
   )
 )
+
+/** Returns a 2-D tensor with ones on the diagonal and zeros elsewhere.
+  *
+  * @param n
+  *   the number of rows
+  * @param m
+  *   the number of columns with default being `n`
+  * @param dtype
+  *   the desired data type of the returned tensor.
+  * @param layout
+  *   the desired layout of the returned tensor.
+  * @param device
+  *   the desired device of the returned tensor.
+  * @param requiresGrad
+  *   If autograd should record operations on the returned tensor.
+  */
 def eye[D <: DType](
-    n: Long,
+    n: Int,
+    m: Option[Int] = None,
     dtype: D = float32,
     layout: Layout = Strided,
     device: Device = CPU,
@@ -250,7 +244,7 @@ def eye[D <: DType](
 
 /** Returns a tensor filled with uninitialized data. */
 def empty[D <: DType](
-    size: Seq[Long],
+    size: Seq[Int],
     dtype: D = float32,
     layout: Layout = Strided,
     device: Device = CPU,
@@ -260,7 +254,7 @@ def empty[D <: DType](
 ): Tensor[D] =
   Tensor(
     torchNative.torch_empty(
-      size.toArray,
+      size.toArray.map(_.toLong),
       NativeConverters
         .tensorOptions(dtype, layout, device, requiresGrad)
         .pinned_memory(BoolOptional(pinMemory)),
@@ -281,22 +275,8 @@ def emptyLike[D <: DType, D2 <: DType | Derive](
     requiresGrad: Boolean = false,
     memoryFormat: MemoryFormat = MemoryFormat.Preserve
 ): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
-  val derivedDType = dtype match
-    case _: Derive => input.dtype
-    case d: DType  => d
-  val derivedLayout = layout match
-    case _: Derive => input.layout
-    case l: Layout => l
-  val derivedDevice = device match
-    case _: Derive => input.device
-    case d: Device => d
-  Tensor(
-    torchNative.torch_empty_like(
-      input.native,
-      NativeConverters.tensorOptions(derivedDType, derivedLayout, derivedDevice, requiresGrad),
-      new MemoryFormatOptional(memoryFormat.toNative)
-    )
-  )
+  xLike(input, dtype, layout, device, requiresGrad, memoryFormat, torchNative.torch_empty_like)
+
 // // TODO emptyStrided
 
 /** Creates a tensor of size `size` filled with `fillValue`. The tensor's dtype is inferred from
@@ -323,7 +303,7 @@ def emptyLike[D <: DType, D2 <: DType | Derive](
   *   the newly created tensor.
   */
 def full[D <: DType | Derive, U <: ScalaType](
-    size: Seq[Long],
+    size: Seq[Int],
     fillValue: U,
     dtype: D = derive,
     layout: Layout = Strided,
@@ -335,7 +315,7 @@ def full[D <: DType | Derive, U <: ScalaType](
     case t: DType  => t
   Tensor(
     torchNative.torch_full(
-      size.toArray,
+      size.toArray.map(_.toLong),
       toScalar(fillValue),
       NativeConverters.tensorOptions(derivedDType, layout, device, requiresGrad)
     )
@@ -388,7 +368,7 @@ def pickle_save(tensors: SeqMap[String, Tensor[DType]]) =
   *   the dtype of the created tensor.
   */
 def rand[D <: FloatNN | ComplexNN](
-    size: Seq[Long],
+    size: Seq[Int],
     dtype: D = float32,
     layout: Layout = Strided,
     device: Device = CPU,
@@ -396,13 +376,42 @@ def rand[D <: FloatNN | ComplexNN](
 ): Tensor[D] =
   Tensor(
     torchNative.torch_rand(
-      size.toArray,
+      size.toArray.map(_.toLong),
       NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
     )
   )
 
+/** Returns a tensor with the same size as `input` that is filled with random numbers from a uniform
+  * distribution on the interval $[0, 1)$.
+  *
+  * `torch.randLike(input)` is equivalent to `torch.rand(input.size(), dtype=input.dtype,
+  * layout=input.layout, device=input.device)`.
+  *
+  * @param input
+  *   the size of `input` will determine size of the output tensor.
+  * @param dtype
+  *   the desired data type of returned Tensor. If `derive`, defaults to the dtype of input.
+  * @param layout
+  *   the desired layout of returned tensor. If `derive`, defaults to the layout of input.
+  * @param device
+  *   the desired device of returned tensor. If `derive` , defaults to the device of input.
+  * @param requiresGrad
+  *   If autograd should record operations on the returned tensor.
+  * @param memoryFormat
+  *   the desired memory format of returned Tensor.
+  */
+def randLike[D <: DType, D2 <: DType | Derive](
+    input: Tensor[D],
+    dtype: D2 = derive,
+    layout: Layout | Derive = derive,
+    device: Device | Derive = derive,
+    requiresGrad: Boolean = false,
+    memoryFormat: MemoryFormat = MemoryFormat.Preserve
+): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
+  xLike(input, dtype, layout, device, requiresGrad, memoryFormat, torchNative.torch_rand_like)
+
 def randn[D <: FloatNN](
-    size: Seq[Long],
+    size: Seq[Int],
     dtype: D = float32,
     layout: Layout = Strided,
     device: Device = CPU,
@@ -410,7 +419,7 @@ def randn[D <: FloatNN](
 ): Tensor[D] =
   Tensor(
     torchNative.torch_rand(
-      size.toArray,
+      size.toArray.map(_.toLong),
       NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
     )
   )
@@ -434,6 +443,36 @@ def randperm[D <: DType](
     )
   )
 
+private def xLike[D <: DType, D2 <: DType | Derive](
+    input: Tensor[D],
+    dtype: D2,
+    layout: Layout | Derive,
+    device: Device | Derive,
+    requiresGrad: Boolean,
+    memoryFormat: MemoryFormat,
+    nativeFn: (
+        pytorch.Tensor,
+        pytorch.TensorOptions,
+        pytorch.MemoryFormatOptional
+    ) => pytorch.Tensor
+): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
+  val derivedDType = dtype match
+    case _: Derive => input.dtype
+    case d: DType  => d
+  val derivedLayout = layout match
+    case _: Derive => input.layout
+    case l: Layout => l
+  val derivedDevice = device match
+    case _: Derive => input.device
+    case d: Device => d
+  Tensor(
+    nativeFn(
+      input.native,
+      NativeConverters.tensorOptions(derivedDType, derivedLayout, derivedDevice, requiresGrad),
+      new MemoryFormatOptional(memoryFormat.toNative)
+    )
+  )
+
 // End Creation Ops
 
 // Indexing, Slicing, Joining, Mutating Ops
@@ -451,6 +490,9 @@ def stack[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor
 )
 
 // End Indexing, Slicing, Joining, Mutating Ops
+
+def matmul[D1 <: DType, D2 <: DType](t1: Tensor[D1], t2: Tensor[D2]): Tensor[Promoted[D1, D2]] =
+  t1.matmul(t2)
 
 def manualSeed(seed: Long) = torchNative.manual_seed(seed)
 

@@ -16,6 +16,7 @@
 
 package torch.nn.modules.activation
 
+import org.bytedeco.pytorch
 import org.bytedeco.pytorch.SoftmaxImpl
 import torch.nn.modules.Module
 import torch.{DType, Tensor}
@@ -29,4 +30,10 @@ import torch.{DType, Tensor}
   */
 final class Softmax(dim: Int) extends Module:
   override val nativeModule: SoftmaxImpl = SoftmaxImpl(dim)
+
+  override def registerWithParent[M <: pytorch.Module](parent: M)(using
+      name: sourcecode.Name
+  ): Unit =
+    parent.register_module(name.value, nativeModule)
+
   def apply[D <: DType](t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))

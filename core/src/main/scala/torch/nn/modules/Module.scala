@@ -128,11 +128,11 @@ abstract class Module {
     doSummarize(0)
 }
 
-/** Default tensor type for floating point module parameters.
+/** Default tensor type for module parameters.
   *
   * Defaults to float32 but can be overriden by providing a given
   */
-trait Default[+D <: FloatNN | ComplexNN]:
+trait Default[+D <: DType]:
   def dtype: D
 object Default:
   given f32: Default[Float32] = new Default[Float32] { def dtype = float32 }
@@ -146,5 +146,6 @@ trait HasParams[ParamType <: FloatNN | ComplexNN: Default] extends Module:
 trait HasWeight[ParamType <: FloatNN | ComplexNN]:
   def weight: Tensor[ParamType]
 
+/** Transforms a single tensor into another one of the same type. */
 trait TensorModule[D <: DType] extends Module with (Tensor[D] => Tensor[D]):
   override def toString(): String = "TensorModule"
