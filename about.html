@@ -25,6 +25,26 @@
     
     
     <script> /* for avoiding page load transitions */ </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+    <!-- The loading of KaTeX is deferred to speed up page rendering -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js" integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+    <!-- To automatically render math in text elements, include the auto-render extension: -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false},
+            ],
+            // • rendering keys, e.g.:
+            throwOnError : false
+          });
+      });
+    </script>
   </head>
 
   <body>
@@ -70,6 +90,10 @@
         <li class="level1 active"><a href="#">About</a></li>
         <li class="level1"><a href="installation.html">Installation</a></li>
         <li class="level1"><a href="modules.html">Modules</a></li>
+        <li class="level1 nav-header">tutorial</li>
+        <li class="level2"><a href="tutorial/tensors.html">Tensors</a></li>
+        <li class="level2"><a href="tutorial/buildmodel.html">Build the Neural Network</a></li>
+        <li class="level2"><a href="tutorial/autograd.html">Automatic Differentiation</a></li>
       </ul>
 
       <ul class="nav-list">
@@ -126,8 +150,8 @@
 </span><span class="comment">// t3: Tensor[Float32] = dtype=float32, shape=[4], device=CPU 
 // [0.0000, 2.0000, 4.0000, 6.0000]
 </span><span>
-</span><span class="keyword">val</span><span> </span><span class="identifier">shape</span><span> = </span><span class="type-name">Seq</span><span>(</span><span class="number-literal">2l</span><span>,</span><span class="number-literal">3l</span><span>)
-</span><span class="comment">// shape: Seq[Long] = List(2L, 3L)
+</span><span class="keyword">val</span><span> </span><span class="identifier">shape</span><span> = </span><span class="type-name">Seq</span><span>(</span><span class="number-literal">2</span><span>,</span><span class="number-literal">3</span><span>)
+</span><span class="comment">// shape: Seq[Int] = List(2, 3)
 </span><span class="keyword">val</span><span> </span><span class="identifier">randTensor</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="identifier">shape</span><span>)
 </span><span class="comment">// randTensor: Tensor[Float32] = dtype=float32, shape=[2, 3], device=CPU 
 // [[0.4963, 0.7682, 0.0885],

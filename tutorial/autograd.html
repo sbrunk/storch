@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 0.18.1 + Helium Theme" />
+    <title>Automatic Differentiation</title>
+    
+      <meta name="author" content="Sören Brunk"/>
+    
+    
+      <meta name="description" content="docs"/>
+    
+    
+    
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+    
+    <link rel="stylesheet" type="text/css" href="../helium/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/laika-helium.css" />
+    <link rel="stylesheet" type="text/css" href="../site/styles.css" />
+    <script src="../helium/laika-helium.js"></script>
+    
+    
+    <script> /* for avoiding page load transitions */ </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+    <!-- The loading of KaTeX is deferred to speed up page rendering -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js" integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+    <!-- To automatically render math in text elements, include the auto-render extension: -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false},
+            ],
+            // • rendering keys, e.g.:
+            throwOnError : false
+          });
+      });
+    </script>
+  </head>
+
+  <body>
+
+    <header id="top-bar">
+
+      <div class="row">
+        <a id="nav-icon">
+          <i class="icofont-laika" title="Navigation">&#xefa2;</i>
+        </a>
+        
+      </div>
+
+      <a class="icon-link" href="../index.html"><i class="icofont-laika" title="Home">&#xef47;</i></a>
+
+      <span class="row links"><a class="icon-link svg-link" href="../api/index.html"><span title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
+  </g>
+</svg></span></a><a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
+  </g>
+</svg></span></a></span>
+
+    </header>
+
+    <nav id="sidebar">
+
+      <div class="row">
+        <a class="icon-link svg-link" href="../api/index.html"><span title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
+  </g>
+</svg></span></a><a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
+  </g>
+</svg></span></a>
+      </div>
+
+      <ul class="nav-list">
+        <li class="level1"><a href="../about.html">About</a></li>
+        <li class="level1"><a href="../installation.html">Installation</a></li>
+        <li class="level1"><a href="../modules.html">Modules</a></li>
+        <li class="level1 nav-header">tutorial</li>
+        <li class="level2"><a href="tensors.html">Tensors</a></li>
+        <li class="level2"><a href="buildmodel.html">Build the Neural Network</a></li>
+        <li class="level2 active"><a href="#">Automatic Differentiation</a></li>
+      </ul>
+
+      <ul class="nav-list">
+        <li class="level1 nav-header">Related Projects</li>
+        
+          <li class="level2"><a href="https://pytorch.org/">PyTorch</a></li>
+        
+          <li class="level2"><a href="https://github.com/bytedeco/javacpp">JavaCPP</a></li>
+        
+      </ul>
+
+    </nav>
+
+    <div id="container">
+
+      <nav id="page-nav">
+        <p class="header"><a href="#">Automatic Differentiation</a></p>
+
+        <ul class="nav-list">
+          <li class="level1"><a href="#tensors-functions-and-computational-graph">Tensors, Functions and Computational graph</a></li>
+          <li class="level1"><a href="#computing-gradients">Computing Gradients</a></li>
+          <li class="level1"><a href="#disabling-gradient-tracking">Disabling Gradient Tracking</a></li>
+          <li class="level1"><a href="#more-on-computational-graphs">More on Computational Graphs</a></li>
+          <li class="level1"><a href="#optional-reading-tensor-gradients-and-jacobian-products">Optional Reading: Tensor Gradients and Jacobian Products</a></li>
+          <li class="level2"><a href="#further-reading">Further Reading</a></li>
+        </ul>
+
+        <p class="footer"></p>
+      </nav>
+
+      <main class="content">
+
+        <p>Learn the Basics] ||
+        Quickstart ||
+        <a href="tensors.html">Tensors</a> ||
+        Datasets &amp; DataLoaders ||
+        Transforms ||
+        <a href="buildmodel.html">Build Model</a> ||
+        <strong>Autograd</strong> ||
+        Optimization ||
+        Save &amp; Load Model</p>
+        <h1 id="automatic-differentiation-with-torch-autograd" class="title">Automatic Differentiation with torch.autograd</h1>
+        <p>When training neural networks, the most frequently used algorithm is
+        <strong>back propagation</strong>. In this algorithm, parameters (model weights) are
+        adjusted according to the <strong>gradient</strong> of the loss function with respect
+        to the given parameter.</p>
+        <p>To compute those gradients, PyTorch has a built-in differentiation engine
+        called <code>torch.autograd</code>. It supports automatic computation of gradient for any
+        computational graph.</p>
+        <p>Consider the simplest one-layer neural network, with input <code>x</code>,
+        parameters <code>w</code> and <code>b</code>, and some loss function. It can be defined in
+        Storch in the following manner:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">x</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">ones</span><span>(</span><span class="number-literal">5</span><span>)  </span><span class="comment">// input tensor
+</span><span class="keyword">val</span><span> </span><span class="identifier">y</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">zeros</span><span>(</span><span class="number-literal">3</span><span>) </span><span class="comment">// expected output
+</span><span class="keyword">val</span><span> </span><span class="identifier">w</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">randn</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">5</span><span>, </span><span class="number-literal">3</span><span>), </span><span class="identifier">requiresGrad</span><span>=</span><span class="boolean-literal">true</span><span>)
+</span><span class="keyword">val</span><span> </span><span class="identifier">b</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">randn</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">3</span><span>), </span><span class="identifier">requiresGrad</span><span>=</span><span class="boolean-literal">true</span><span>)
+</span><span class="keyword">val</span><span> </span><span class="identifier">z</span><span> = (</span><span class="identifier">x</span><span> </span><span class="identifier">matmul</span><span> </span><span class="identifier">w</span><span>) + </span><span class="identifier">b</span><span>
+</span><span class="keyword">val</span><span> </span><span class="identifier">loss</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">nn</span><span>.</span><span class="identifier">functional</span><span>.</span><span class="identifier">binaryCrossEntropyWithLogits</span><span>(</span><span class="identifier">z</span><span>, </span><span class="identifier">y</span><span>)</span></code></pre>
+        
+        <h2 id="tensors-functions-and-computational-graph" class="section">Tensors, Functions and Computational graph<a class="anchor-link right" href="#tensors-functions-and-computational-graph"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>This code defines the following <strong>computational graph</strong>:</p>
+        <img style="background-color: white; padding: 1em; width: 100%" src="img/comp-graph.png" alt="Example computation graph"/>
+        <p>In this network, <code>w</code> and <code>b</code> are <strong>parameters</strong>, which we need to
+        optimize. Thus, we need to be able to compute the gradients of loss
+        function with respect to those variables. In order to do that, we set
+        the <code>requiresGrad</code> property of those tensors.</p>
+        <div class="callout info">
+          <i class="icofont-laika">&#xef4e;</i>
+          <p>You can set the value of <code>requiresGrad</code> when creating a tensor, or later
+          by using <code>x.requiresGrad_(true)</code> method.</p>
+        </div>
+        <p>A function that we apply to tensors to construct computational graph is
+        in fact an object of class <code>Function</code>. This object knows how to
+        compute the function in the <em>forward</em> direction, and also how to compute
+        its derivative during the <em>backward propagation</em> step. A reference to
+        the backward propagation function is stored in <code>gradFn</code> property of a
+        tensor. You can find more information of <code>Function</code> <a href="https://pytorch.org/docs/stable/autograd.html#function">in the
+        documentation</a>.</p>
+        <div class="callout warning">
+          <i class="icofont-laika">&#xf026;</i>
+          <p><code>gradFn</code> is not yet available in Storch.</p>
+        </div>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;Gradient function for z = </span><span class="substitution">${z.gradFn}</span><span class="string-literal">&quot;</span><span>)
+</span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;Gradient function for loss = </span><span class="substitution">${loss.gradFn}</span><span class="string-literal">&quot;</span><span>)</span></code></pre>
+        
+        <h2 id="computing-gradients" class="section">Computing Gradients<a class="anchor-link right" href="#computing-gradients"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>To optimize weights of parameters in the neural network, we need to
+        compute the derivatives of our loss function with respect to parameters,
+        namely, we need $\frac{\partial loss}{\partial w}$ and
+        $\frac{\partial loss}{\partial b}$ under some fixed values of
+        <code>x</code> and <code>y</code>. To compute those derivatives, we call
+        <code>loss.backward()</code>, and then retrieve the values from <code>w.grad</code> and
+        <code>b.grad</code>:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">loss</span><span>.</span><span class="identifier">backward</span><span>()
+</span><span class="identifier">println</span><span>(</span><span class="identifier">w</span><span>.</span><span class="identifier">grad</span><span>)
+</span><span class="comment">// dtype=float32, shape=[5, 3], device=CPU 
+// [[0.3027, 0.3201, 0.3118],
+//  [0.3027, 0.3201, 0.3118],
+//  [0.3027, 0.3201, 0.3118],
+//  [0.3027, 0.3201, 0.3118],
+//  [0.3027, 0.3201, 0.3118]]
+</span><span class="identifier">println</span><span>(</span><span class="identifier">b</span><span>.</span><span class="identifier">grad</span><span>)
+</span><span class="comment">// dtype=float32, shape=[3], device=CPU 
+// [0.3027, 0.3201, 0.3118]</span></code></pre>
+        <div class="callout info">
+          <i class="icofont-laika">&#xef4e;</i>
+          <ul>
+            <li>We can only obtain the <code>grad</code> properties for the leaf
+            nodes of the computational graph, which have <code>requiresGrad</code> property
+            set to <code>true</code>. For all other nodes in our graph, gradients will not be
+            available.</li>
+            <li>We can only perform gradient calculations using
+            <code>backward</code> once on a given graph, for performance reasons. If we need
+            to do several <code>backward</code> calls on the same graph, we need to pass
+            <code>retainGraph=true</code> to the <code>backward</code> call.</li>
+          </ul>
+        </div>
+        
+        <h2 id="disabling-gradient-tracking" class="section">Disabling Gradient Tracking<a class="anchor-link right" href="#disabling-gradient-tracking"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>By default, all tensors with <code>requiresGrad=true</code> are tracking their
+        computational history and support gradient computation. However, there
+        are some cases when we do not need to do that, for example, when we have
+        trained the model and just want to apply it to some input data, i.e. we
+        only want to do <em>forward</em> computations through the network. We can stop
+        tracking computations by surrounding our computation code with
+        <code>torch.noGrad</code> block:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">var</span><span> </span><span class="identifier">z</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">matmul</span><span>(</span><span class="identifier">x</span><span>, </span><span class="identifier">w</span><span>) + </span><span class="identifier">b</span><span>
+</span><span class="comment">// z: Tensor[Float32] = dtype=float32, shape=[3], device=CPU 
+// [2.2915, 3.1875, 2.6738]
+</span><span class="identifier">println</span><span>(</span><span class="identifier">z</span><span>.</span><span class="identifier">requiresGrad</span><span>)
+</span><span class="comment">// true
+</span><span class="identifier">torch</span><span>.</span><span class="identifier">noGrad</span><span> {
+  </span><span class="identifier">z</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">matmul</span><span>(</span><span class="identifier">x</span><span>, </span><span class="identifier">w</span><span>) + </span><span class="identifier">b</span><span>
+}
+</span><span class="identifier">println</span><span>(</span><span class="identifier">z</span><span>.</span><span class="identifier">requiresGrad</span><span>)
+</span><span class="comment">// false</span></code></pre>
+        <p>Another way to achieve the same result is to use the <code>detach()</code> method
+        on the tensor:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">z</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">matmul</span><span>(</span><span class="identifier">x</span><span>, </span><span class="identifier">w</span><span>)+</span><span class="identifier">b</span><span>
+</span><span class="comment">// z: Tensor[Float32] = dtype=float32, shape=[3], device=CPU 
+// [2.2915, 3.1875, 2.6738]
+</span><span class="keyword">val</span><span> </span><span class="identifier">zDet</span><span> = </span><span class="identifier">z</span><span>.</span><span class="identifier">detach</span><span>()
+</span><span class="comment">// zDet: Tensor[Float32] = dtype=float32, shape=[3], device=CPU 
+// [2.2915, 3.1875, 2.6738]
+</span><span class="identifier">println</span><span>(</span><span class="identifier">zDet</span><span>.</span><span class="identifier">requiresGrad</span><span>)
+</span><span class="comment">// false</span></code></pre>
+        <p>There are reasons you might want to disable gradient tracking:</p>
+        <ul>
+          <li>To mark some parameters in your neural network as <strong>frozen parameters</strong>. This is
+          a very common scenario for
+          <a href="https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html">finetuning a pretrained network</a></li>
+        </ul>
+        <ul>
+          <li>To <strong>speed up computations</strong> when you are only doing forward pass, because computations on tensors that do
+          not track gradients would be more efficient.</li>
+        </ul>
+        
+        <h2 id="more-on-computational-graphs" class="section">More on Computational Graphs<a class="anchor-link right" href="#more-on-computational-graphs"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>Conceptually, autograd keeps a record of data (tensors) and all executed
+        operations (along with the resulting new tensors) in a directed acyclic
+        graph (DAG) consisting of
+        <a href="https://pytorch.org/docs/stable/autograd.html#torch.autograd.Function">Function</a>_
+        objects. In this DAG, leaves are the input tensors, roots are the output
+        tensors. By tracing this graph from roots to leaves, you can
+        automatically compute the gradients using the chain rule.</p>
+        <p>In a forward pass, autograd does two things simultaneously:</p>
+        <ul>
+          <li>run the requested operation to compute a resulting tensor</li>
+          <li>maintain the operation’s <em>gradient function</em> in the DAG.</li>
+        </ul>
+        <p>The backward pass kicks off when <code>.backward()</code> is called on the DAG
+        root. <code>autograd</code> then:</p>
+        <ul>
+          <li>computes the gradients from each <code>.gradFn</code>,</li>
+          <li>accumulates them in the respective tensor’s <code>.grad</code> attribute</li>
+          <li>using the chain rule, propagates all the way to the leaf tensors.</li>
+        </ul>
+        <div class="callout info">
+          <i class="icofont-laika">&#xef4e;</i>
+          <p><strong>DAGs are dynamic in PyTorch</strong>
+            An important thing to note is that the graph is recreated from scratch; after each
+            <code>.backward()</code> call, autograd starts populating a new graph. This is
+            exactly what allows you to use control flow statements in your model;
+            you can change the shape, size and operations at every iteration if
+            needed.</p>
+        </div>
+        
+        <h2 id="optional-reading-tensor-gradients-and-jacobian-products" class="section">Optional Reading: Tensor Gradients and Jacobian Products<a class="anchor-link right" href="#optional-reading-tensor-gradients-and-jacobian-products"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>In many cases, we have a scalar loss function, and we need to compute
+        the gradient with respect to some parameters. However, there are cases
+        when the output function is an arbitrary tensor. In this case, PyTorch
+        allows you to compute so-called <strong>Jacobian product</strong>, and not the actual
+        gradient.</p>
+        <p>For a vector function $\vec{y}=f(\vec{x})$, where
+        $\vec{x}=\langle x_1,\dots,x_n\rangle$ and
+        $\vec{y}=\langle y_1,\dots,y_m\rangle$, a gradient of
+        $\vec{y}$ with respect to $\vec{x}$ is given by <strong>Jacobian matrix</strong>:</p>
+        <div>
+        $$\begin{align}J=\left(\begin{array}{ccc}
+              \frac{\partial y_{1}}{\partial x_{1}} &amp; \cdots &amp; \frac{\partial y_{1}}{\partial x_{n}}\\
+              \vdots &amp; \ddots &amp; \vdots\\
+              \frac{\partial y_{m}}{\partial x_{1}} &amp; \cdots &amp; \frac{\partial y_{m}}{\partial x_{n}}
+              \end{array}\right)\end{align}$$
+        </div>
+        <p>Instead of computing the Jacobian matrix itself, PyTorch allows you to
+        compute the <strong>Jacobian Product</strong> $v^T\cdot J$ for a given input vector
+        $v=(v_1 \dots v_m)$. This is achieved by calling <code>backward</code> with
+        $v$ as an argument. The size of $v$ should be the same as
+        the size of the original tensor, with respect to which we want to
+        compute the product:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">inp</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">eye</span><span>(</span><span class="number-literal">4</span><span>, </span><span class="type-name">Some</span><span>(</span><span class="number-literal">5</span><span>), </span><span class="identifier">requiresGrad</span><span>=</span><span class="boolean-literal">true</span><span>)
+</span><span class="keyword">val</span><span> </span><span class="identifier">out</span><span> = (</span><span class="identifier">inp</span><span>+</span><span class="number-literal">1</span><span>).</span><span class="identifier">pow</span><span>(</span><span class="number-literal">2</span><span>).</span><span class="identifier">t</span><span>()
+</span><span class="identifier">out</span><span>.</span><span class="identifier">backward</span><span>(</span><span class="identifier">torch</span><span>.</span><span class="identifier">onesLike</span><span>(</span><span class="identifier">out</span><span>), </span><span class="identifier">retainGraph</span><span>=</span><span class="boolean-literal">true</span><span>)
+</span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;First call</span><span class="escape-sequence">\n</span><span class="substitution">${inp.grad}</span><span class="string-literal">&quot;</span><span>)
+</span><span class="identifier">out</span><span>.</span><span class="identifier">backward</span><span>(</span><span class="identifier">torch</span><span>.</span><span class="identifier">onesLike</span><span>(</span><span class="identifier">out</span><span>), </span><span class="identifier">retainGraph</span><span>=</span><span class="boolean-literal">true</span><span>)
+</span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;</span><span class="escape-sequence">\n</span><span class="string-literal">Second call</span><span class="escape-sequence">\n</span><span class="substitution">${inp.grad}</span><span class="string-literal">&quot;</span><span>)
+</span><span class="identifier">inp</span><span>.</span><span class="identifier">grad</span><span>.</span><span class="identifier">zero_</span><span>()
+</span><span class="identifier">out</span><span>.</span><span class="identifier">backward</span><span>(</span><span class="identifier">torch</span><span>.</span><span class="identifier">onesLike</span><span>(</span><span class="identifier">out</span><span>), </span><span class="identifier">retainGraph</span><span>=</span><span class="boolean-literal">true</span><span>)
+</span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;</span><span class="escape-sequence">\n</span><span class="string-literal">Call after zeroing gradients</span><span class="escape-sequence">\n</span><span class="substitution">${inp.grad}</span><span class="string-literal">&quot;</span><span>)</span></code></pre>
+        <p>Notice that when we call <code>backward</code> for the second time with the same
+        argument, the value of the gradient is different. This happens because
+        when doing <code>backward</code> propagation, PyTorch <strong>accumulates the
+        gradients</strong>, i.e. the value of computed gradients is added to the
+        <code>grad</code> property of all leaf nodes of computational graph. If you want
+        to compute the proper gradients, you need to zero out the <code>grad</code>
+        property before. In real-life training an <em>optimizer</em> helps us to do
+        this.</p>
+        <div class="callout info">
+          <i class="icofont-laika">&#xef4e;</i>
+          <p>Previously we were calling <code>backward()</code> function without
+          parameters. This is essentially equivalent to calling
+          <code>backward(torch.tensor(1.0))</code>, which is a useful way to compute the
+          gradients in case of a scalar-valued function, such as loss during
+          neural network training.</p>
+        </div>
+        <hr>
+        
+        <h3 id="further-reading" class="section">Further Reading<a class="anchor-link right" href="#further-reading"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <ul>
+          <li><a href="https://pytorch.org/docs/stable/notes/autograd.html">Autograd Mechanics</a></li>
+        </ul>
+
+      </main>
+
+    </div>
+
+  </body>
+</html>
