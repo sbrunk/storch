@@ -30,6 +30,7 @@ import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch.GenericDict
 import org.bytedeco.pytorch.GenericDictIterator
 import spire.math.Complex
+import spire.math.UByte
 
 private[torch] object NativeConverters:
 
@@ -52,6 +53,7 @@ private[torch] object NativeConverters:
 
   def toScalar(x: ScalaType): pytorch.Scalar = x match
     case x: Boolean                        => pytorch.Scalar(if true then 1: Byte else 0: Byte)
+    case x: UByte                          => Tensor(x.toInt).to(dtype = uint8).native.item()
     case x: Byte                           => pytorch.Scalar(x)
     case x: Short                          => pytorch.Scalar(x)
     case x: Int                            => pytorch.Scalar(x)

@@ -32,7 +32,6 @@ import org.bytedeco.pytorch.global.torch as torchNative
 import Tensor.*
 import org.bytedeco.pytorch.global.torch.ScalarType
 import org.bytedeco.pytorch.NoGradGuard
-import ScalarUtils.toScalar
 
 import java.nio.{
   Buffer,
@@ -48,7 +47,7 @@ import scala.collection.immutable.ArraySeq
 import scala.reflect.ClassTag
 import scala.annotation.{targetName, unused}
 import org.bytedeco.pytorch.global.torch.DeviceType
-import internal.NativeConverters.toOptional
+import internal.NativeConverters.{toOptional, toScalar}
 import spire.math.{Complex, UByte}
 
 import scala.reflect.Typeable
@@ -301,8 +300,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def item: DTypeToScala[D] =
     import ScalarType.*
     val out = native.dtype().toScalarType().intern() match
-      case Byte                   => native.item_byte()
-      case Char                   => UByte(native.item_byte())
+      case Byte                   => UByte(native.item_int())
+      case Char                   => native.item_byte()
       case Short                  => native.item_short()
       case Int                    => native.item_int()
       case Long                   => native.item_long()
@@ -515,13 +514,13 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
     import ScalarType.*
     val out = tensor.native.dtype().toScalarType.intern() match
-      case Byte         => writeRawArray[Byte]((a, b) => b.get(a))
+      case Byte         => to(dtype = int32).toArray.map(UByte.apply)
+      case Char         => writeRawArray[Byte]((a, b) => b.get(a))
       case Short        => writeRawArray[Short]((a, b) => b.get(a))
       case Int          => writeRawArray[Int]((a, b) => b.get(a))
       case Long         => writeRawArray[Long]((a, b) => b.get(a))
       case Float        => writeRawArray[Float]((a, b) => b.get(a))
       case Double       => writeRawArray[Double]((a, b) => b.get(a))
-      case Char         => to(dtype = int16).toArray
       case Half         => to(dtype = float32).toArray
       case ComplexHalf  => to(dtype = complex64).toArray
       case ComplexFloat => writeArray[Complex[Float], FloatBuffer](b => Complex(b.get(), b.get()))
@@ -611,14 +610,14 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   )
 }
 
-sealed class Int8Tensor(native: pytorch.Tensor) extends Tensor[Int8](native) { /* 0, Byte */
+sealed class UInt8Tensor(native: pytorch.Tensor) extends Tensor[UInt8](native) { /* 0, Byte */
   require(native.scalar_type().intern() == ScalarType.Byte)
-  override def dtype: Int8 = int8
+  override def dtype: UInt8 = uint8
 }
 
-sealed class UInt8Tensor(native: pytorch.Tensor) extends Tensor[UInt8](native) { /* 1, Char */
+sealed class Int8Tensor(native: pytorch.Tensor) extends Tensor[Int8](native) { /* 1, Char */
   requireNativeType(ScalarType.Char)
-  override def dtype: UInt8 = uint8
+  override def dtype: Int8 = int8
 }
 sealed class Int16Tensor(native: pytorch.Tensor) extends Tensor[Int16](native) { /* 2, Short */
   requireNativeType(ScalarType.Short)
@@ -693,13 +692,13 @@ sealed class NumOptionsTensor(native: pytorch.Tensor) extends Tensor[NumOptions]
   override def dtype: NumOptions = numoptions
 }
 
-type IntTensor = Int8Tensor | UInt8Tensor | Int16Tensor | Int32Tensor | Int64Tensor
+type IntTensor = UInt8Tensor | Int8Tensor | Int16Tensor | Int32Tensor | Int64Tensor
 type ComplexTensor = Complex32Tensor | Complex64Tensor | Complex128Tensor
 
 object Tensor:
   def apply[D <: DType](native: pytorch.Tensor): Tensor[D] = (native.scalar_type().intern() match
-    case ScalarType.Byte          => new Int8Tensor(native)
-    case ScalarType.Char          => new UInt8Tensor(native)
+    case ScalarType.Byte          => new UInt8Tensor(native)
+    case ScalarType.Char          => new Int8Tensor(native)
     case ScalarType.Short         => new Int16Tensor(native)
     case ScalarType.Int           => new Int32Tensor(native)
     case ScalarType.Long          => new Int64Tensor(native)
