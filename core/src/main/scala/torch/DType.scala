@@ -215,12 +215,12 @@ type IntNN = Int8 | UInt8 | Int16 | Int32 | Int64
 
 type ComplexNN = Complex32 | Complex64 | Complex128
 
-type ScalaType = Boolean | Byte | Short | Int | Long | Float | Double | Complex[Float] |
+type ScalaType = Boolean | Byte | UByte | Short | Int | Long | Float | Double | Complex[Float] |
   Complex[Double]
 
 type DTypeToScala[T <: DType] <: ScalaType = T match
   case Int8       => Byte
-  case UInt8      => Short
+  case UInt8      => UByte
   case Int16      => Short
   case Int32      => Int
   case Int64      => Long

@@ -17,12 +17,14 @@
 package torchvision.transforms
 
 import torch.*
+import com.sksamuel.scrimage.ImmutableImage
+import scala.collection.immutable.ArraySeq
 
-object functional:
+object functional {
 
-  def isTensorATorchImage(x: Tensor[?]): Boolean = x.dim >= 2
+  private def isTensorATorchImage(x: Tensor[?]): Boolean = x.dim >= 2
 
-  def assertImageTensor(img: Tensor[?]): Unit =
+  private def assertImageTensor(img: Tensor[?]): Unit =
     if !isTensorATorchImage(img) then
       throw new IllegalArgumentException("Tensor is not a torch image.")
 
@@ -44,3 +46,30 @@ object functional:
     if _std.dim == 1 then _mean = _mean.view(-1, 1, 1)
     if _std.dim == 1 then _std = _std.view(-1, 1, 1)
     (tensor - _mean) / _std
+
+  /** Convert an [[ImmutableImage]] (H x W x C) to a [[Tensor[Float32]] of shape (C x H x W) in the
+    * range `[0.0, 1.0]`.
+    */
+  def toTensor(pic: ImmutableImage) =
+    val bytes = pic.rgb.flatten
+    // transpose NxHxWxC to NxCxHxW because pytorch expects channels first
+    Tensor(ArraySeq.unsafeWrapArray(bytes)).permute(2, 0, 1).to(dtype = float32) / 255
+
+  def toImmutableImage[D <: FloatNN](pic: Tensor[D]): ImmutableImage =
+    var _pic = pic
+    if !Seq(2, 3).contains(pic.dim) then
+      throw new IllegalArgumentException(
+        s"pic should be 2/3 dimensional. Got ${pic.dim} dimensions."
+      )
+    else if pic.dim == 2 then
+      // if 2D image, add channel dimension (CHW)
+      _pic = pic.unsqueeze(0)
+    // check number of channels
+    if pic.shape(-3) > 4 then
+      throw new IllegalArgumentException(
+        s"pic should not have > 4 channels. Got ${pic.shape(-3)} channels."
+      )
+    val intImage = (_pic.permute(1, 2, 0) * 255).to(dtype = int8)
+    val bytes = intImage.toArray
+    ImmutableImage.loader().fromBytes(bytes)
+}

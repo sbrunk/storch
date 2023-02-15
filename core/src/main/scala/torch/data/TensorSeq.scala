@@ -17,8 +17,6 @@
 package torch
 package data
 
-import scala.util.Random
-
 /** Wraps a tensor as a Seq.
   *
   * Each sample will be retrieved by indexing tensors along the first dimension.

@@ -70,7 +70,11 @@ case class TensorTuple[D <: DType](
 )
 
 /** A [[torch.Tensor]] is a multi-dimensional matrix containing elements of a single data type. */
-sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pytorch.Tensor):
+sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pytorch.Tensor) {
+  require(
+    native.numel <= Int.MaxValue,
+    s"Storch only supports tensors with up to ${Int.MaxValue} elements"
+  )
 
   def ==(other: ScalaType): Tensor[Bool] = eq(other)
 
@@ -173,9 +177,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     * semantics of this method.
     *
     * Example:
-    * ```scala sc:nocompile
+    * ```scala sc
     * val a = torch.rand(Seq(1, 3))
-    * println(a.argmax())
+    * a.argmax()
     * // tensor dtype=float32, shape=[1] 2
     * ```
     *
@@ -252,8 +256,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def dim: Int = native.dim().toInt
 
-  def dtype: D // = DType.fromScalarType(native.dtype().toScalarType)
-  // def dtype: T = deriveDType[T]
+  def dtype: D
 
   /** Computes element-wise equality */
   def eq(other: ScalaType): Tensor[Bool] = Tensor(native.eq(toScalar(other)))
@@ -395,6 +398,31 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     * `transpose(input, 0, 1)`.
     */
   def t: Tensor[D] = Tensor(native.t())
+
+  /** Returns a new tensor with a dimension of size one inserted at the specified position.
+    *
+    * The returned tensor shares the same underlying data with this tensor.
+    *
+    * A `dim` value within the range `[-input.dim() - 1, input.dim() + 1)` can be used. Negative
+    * `dim` will correspond to [[unsqueeze]] applied at `dim` = `dim + input.dim() + 1`.
+    *
+    * Example:
+    *
+    * ```scala sc
+    * val x = torch.Tensor(Seq(1, 2, 3, 4))
+    * x.unsqueeze(0)
+    * // [[1, 2, 3, 4]]
+    * x.unsqueeze(1)
+    * // [[1],
+    * //  [2],
+    * //  [3],
+    * //  [4]]
+    * ```
+    *
+    * @param dim
+    *   the index at which to insert the singleton dimension
+    */
+  def unsqueeze(dim: Int): Tensor[D] = Tensor(native.unsqueeze(dim))
 
   def zero(): Unit = native.zero_()
 
@@ -540,7 +568,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
     def summarize(tensor: Tensor[D], maxEntries: Int): String =
       tensor.dim match
-        case 0 => format(tensor.toSeq.head) // ScalarUtils.scalarToString(tensor.native.item)
+        case 0 => format(tensor.toSeq.head)
         case 1 =>
           val slice =
             if tensor.numel <= math.max(maxEntries, 6) then tensor.toSeq.map(format)
@@ -572,13 +600,16 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def view(shape: Int*): Tensor[D] = Tensor(native.view(shape.map(_.toLong)*))
 
-  override def toString: String =
-    summarize() // s"dtype=${dtype.toString}, shape=${size.mkString("[", ", ", "]")}, device=${device.device} " //summarize()
+  def info: String =
+    s"tensor dtype=${dtype.toString}, shape=${size.mkString("[", ", ", "]")}, device=${device.device}"
 
-  def requireNativeType(expected: ScalarType) = require(
+  override def toString: String = summarize()
+
+  private[torch] def requireNativeType(expected: ScalarType) = require(
     native.scalar_type().intern() == expected,
     s"Expected native tensor type $expected, got ${native.scalar_type().intern()}"
   )
+}
 
 sealed class Int8Tensor(native: pytorch.Tensor) extends Tensor[Int8](native) { /* 0, Byte */
   require(native.scalar_type().intern() == ScalarType.Byte)
