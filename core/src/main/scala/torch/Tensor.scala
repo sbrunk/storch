@@ -134,21 +134,23 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     native.mul_(toScalar(s))
     this
 
-  def div[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
+  def div[S <: ScalaType](s: S): Tensor[Div[D, ScalaToDType[S]]] = Tensor(
     native.div(toScalar(s))
   )
 
-  def /[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = div(s)
+  def /[S <: ScalaType](s: S): Tensor[Div[D, ScalaToDType[S]]] = div(s)
 
-  def div[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.div(t.native))
+    /** Divides each element of this tensor by the corresponding element of `other`. **/
+  def div[D2 <: DType](other: Tensor[D2]): Tensor[Div[D, D2]] = Tensor(native.div(t.native))
 
-  def /[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = div(t)
+  /** Divides each element of this tensor by the corresponding element of `other`. **/
+  def /[D2 <: DType](t: Tensor[D2]): Tensor[Div[D, D2]] = div(t)
 
-  def /=[D2 <: DType](t: Tensor[D2]): this.type =
+  def /=[D2 <: DType](t: Tensor[D2])(using D <:< FloatNN): this.type =
     native.div_(t.native)
     this
 
-  def /=[S <: ScalaType](s: S): this.type =
+  def /=[S <: ScalaType](s: S)(using D <:< FloatNN): this.type =
     native.div_(toScalar(s))
     this
 

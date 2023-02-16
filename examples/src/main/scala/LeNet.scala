@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
+//> using scala "3.2"
+//> using repository "sonatype-s01:snapshots"
+//> using repository "sonatype:snapshots"
+//> using repository "ivy2local"
+//> using lib "dev.storch::vision:0.0-7c9a7fe-20230217T211653Z-SNAPSHOT"
+//> using lib "org.bytedeco:pytorch-platform:1.13.1-1.5.9-SNAPSHOT"
+
+
 import torch.{DType, Float32, Tensor, nn}
 import torch.*
 import torch.nn.functional as F
-import torch.optim.SGD
+import torch.optim.Adam
 import org.bytedeco.pytorch.OutputArchive
 import torch.nn.modules.Default
 import torchvision.datasets.MNIST
 import scala.util.Random
 
+// define model architecture
 class LeNet[D <: BFloat16 | Float32: Default] extends nn.Module {
   val conv1 = register(nn.Conv2d(1, 6, 5))
   val pool = register(nn.MaxPool2d((2, 2)))
@@ -47,16 +56,16 @@ object LeNetApp extends App {
   // prepare data
   val path = "./data"
   val mnistTrain = MNIST(path, train = true)
-  val mnistTest = MNIST("./data", train = false)
+  val mnistEval = MNIST("./data", train = false)
   val r = Random(seed = 0)
   def dataLoader: Iterator[(Tensor[Float32], Tensor[Int64])] =
-    r.shuffle(mnistTrain).grouped(64).map { batch =>
+    r.shuffle(mnistTrain).grouped(32).map { batch =>
       val (features, targets) = batch.unzip
       (torch.stack(features), torch.stack(targets))
     }
 
   val lossFn = torch.nn.loss.CrossEntropyLoss()
-  val optimizer = SGD(model.parameters, lr = 0.01)
+  val optimizer = Adam(model.parameters, lr = 0.001)
 
   // run training
   for (epoch <- 1 to 5) do
@@ -67,9 +76,12 @@ object LeNetApp extends App {
       val loss = lossFn(prediction, target)
       loss.backward()
       optimizer.step()
-      if batchIndex % 100 == 0 then
-        println("Epoch: " + epoch + " | Batch: " + f"$batchIndex%4d" + " | Loss: " + loss.item)
-        // TODO eval
+      if batchIndex % 200 == 0 then
+        // run evaluation
+        val predictions = model(mnistEval.features)
+        val evalLoss = lossFn(predictions, mnistEval.targets)
+        val accuracy = (predictions.argmax(dim = 1).eq(mnistEval.targets).sum / mnistEval.length).item
+        println(f"Epoch: $epoch | Batch: $batchIndex%4d | Training loss: ${loss.item}%.4f | Eval loss: ${evalLoss.item}%.4f | Eval accuracy: $accuracy%.4f")
     val archive = new OutputArchive
     model.save(archive)
     archive.save_to("net.pt")
