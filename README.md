@@ -1,5 +1,7 @@
 # Storch - GPU Accelerated Deep Learning for Scala 3
 
+[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/dev.storch/core_3?server=https%3A%2F%2Fs01.oss.sonatype.org)](https://s01.oss.sonatype.org/#nexus-search;gav~dev.storch~~~~)
+
 Storch is a Scala library for fast tensor computations and deep learning, based on PyTorch.
 
 Like PyTorch, Storch provides
