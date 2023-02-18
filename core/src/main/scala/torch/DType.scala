@@ -366,10 +366,12 @@ type Promoted[T <: DType, U <: DType] <: DType = (T, U) match
   case (T, Complex128)                           => T
   case _                                         => DType
 
+/** Promoted type for tensor division */
 type Div[T <: DType, U <: DType] <: DType = (T, U) match
   case (Bool | IntNN, Bool | IntNN) => Float32
-  case _ => Promoted[T, U]
+  case _                            => Promoted[T, U]
 
+/** Promoted type for elementwise tensor sum */
 type Sum[D <: DType] <: DType = D match
   case Bool | IntNN => Int64
   case D            => D

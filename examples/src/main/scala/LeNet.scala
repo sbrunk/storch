@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-//> using scala "3.2"
-//> using repository "sonatype-s01:snapshots"
-//> using repository "sonatype:snapshots"
-//> using repository "ivy2local"
-//> using lib "dev.storch::vision:0.0-7c9a7fe-20230217T211653Z-SNAPSHOT"
-//> using lib "org.bytedeco:pytorch-platform:1.13.1-1.5.9-SNAPSHOT"
-
-
-import torch.{DType, Float32, Tensor, nn}
 import torch.*
 import torch.nn.functional as F
 import torch.optim.Adam
@@ -30,6 +21,7 @@ import org.bytedeco.pytorch.OutputArchive
 import torch.nn.modules.Default
 import torchvision.datasets.MNIST
 import scala.util.Random
+import java.nio.file.Paths
 
 // define model architecture
 class LeNet[D <: BFloat16 | Float32: Default] extends nn.Module {
@@ -54,9 +46,9 @@ object LeNetApp extends App {
   val model = LeNet()
 
   // prepare data
-  val path = "./data"
-  val mnistTrain = MNIST(path, train = true)
-  val mnistEval = MNIST("./data", train = false)
+  val dataPath = Paths.get("data")
+  val mnistTrain = MNIST(dataPath, train = true, download = true)
+  val mnistEval = MNIST(dataPath, train = false)
   val r = Random(seed = 0)
   def dataLoader: Iterator[(Tensor[Float32], Tensor[Int64])] =
     r.shuffle(mnistTrain).grouped(32).map { batch =>
@@ -80,8 +72,11 @@ object LeNetApp extends App {
         // run evaluation
         val predictions = model(mnistEval.features)
         val evalLoss = lossFn(predictions, mnistEval.targets)
-        val accuracy = (predictions.argmax(dim = 1).eq(mnistEval.targets).sum / mnistEval.length).item
-        println(f"Epoch: $epoch | Batch: $batchIndex%4d | Training loss: ${loss.item}%.4f | Eval loss: ${evalLoss.item}%.4f | Eval accuracy: $accuracy%.4f")
+        val accuracy =
+          (predictions.argmax(dim = 1).eq(mnistEval.targets).sum / mnistEval.length).item
+        println(
+          f"Epoch: $epoch | Batch: $batchIndex%4d | Training loss: ${loss.item}%.4f | Eval loss: ${evalLoss.item}%.4f | Eval accuracy: $accuracy%.4f"
+        )
     val archive = new OutputArchive
     model.save(archive)
     archive.save_to("net.pt")

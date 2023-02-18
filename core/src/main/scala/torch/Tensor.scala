@@ -140,10 +140,10 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def /[S <: ScalaType](s: S): Tensor[Div[D, ScalaToDType[S]]] = div(s)
 
-    /** Divides each element of this tensor by the corresponding element of `other`. **/
+  /** Divides each element of this tensor by the corresponding element of `other`. * */
   def div[D2 <: DType](other: Tensor[D2]): Tensor[Div[D, D2]] = Tensor(native.div(t.native))
 
-  /** Divides each element of this tensor by the corresponding element of `other`. **/
+  /** Divides each element of this tensor by the corresponding element of `other`. * */
   def /[D2 <: DType](t: Tensor[D2]): Tensor[Div[D, D2]] = div(t)
 
   def /=[D2 <: DType](t: Tensor[D2])(using D <:< FloatNN): this.type =
