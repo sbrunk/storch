@@ -98,8 +98,8 @@ import scala.compiletime.{erasedValue, summonFrom}
 // format: on
 sealed abstract class DType private[torch] ():
   private[torch] def toScalarType: ScalarType = this match
-    case _: Int8       => ScalarType.Byte
-    case _: UInt8      => ScalarType.Char
+    case _: UInt8      => ScalarType.Byte
+    case _: Int8       => ScalarType.Char
     case _: Int16      => ScalarType.Short
     case _: Int32      => ScalarType.Int
     case _: Int64      => ScalarType.Long
@@ -121,8 +121,8 @@ sealed abstract class DType private[torch] ():
 
 object DType:
   private[torch] def fromScalarType(t: ScalarType): DType = t.intern() match
-    case ScalarType.Byte          => int8
-    case ScalarType.Char          => uint8
+    case ScalarType.Byte          => uint8
+    case ScalarType.Char          => int8
     case ScalarType.Short         => int16
     case ScalarType.Int           => int32
     case ScalarType.Long          => int64
@@ -141,8 +141,8 @@ object DType:
     case ScalarType.Half          => float16
     case ScalarType.Undefined     => undefined
     case ScalarType.NumOptions    => numoptions
-  case object int8 extends Int8 /* 0, */
-  case object uint8 extends UInt8 /* 1, */
+  case object uint8 extends UInt8 /* 0, */
+  case object int8 extends Int8 /* 1, */
   case object int16 extends Int16 /* 2, */
   case object int32 extends Int32 /* 3, */
   case object int64 extends Int64 /* 4, */
@@ -162,8 +162,8 @@ object DType:
   case object undefined extends Undefined /* 17 */
   case object numoptions extends NumOptions /* 18 */
 
-sealed abstract class Int8 extends DType /* 0, Byte */
-sealed abstract class UInt8 extends DType /* 1, Char */
+sealed abstract class UInt8 extends DType /* 0, Byte */
+sealed abstract class Int8 extends DType /* 1, Char */
 sealed abstract class Int16 extends DType /* 2, Short */
 sealed abstract class Int32 extends DType /* 3, Int */
 sealed abstract class Int64 extends DType /* 4, Long */
@@ -183,8 +183,8 @@ sealed abstract class Float16 extends DType /* 17, Half */
 sealed abstract class Undefined extends DType /* 18 */
 sealed abstract class NumOptions extends DType /* 18 */
 
-val int8: Int8 = DType.int8
 val uint8: UInt8 = DType.uint8
+val int8: Int8 = DType.int8
 val int16: Int16 = DType.int16
 val int32: Int32 = DType.int32
 val int64: Int64 = DType.int64
@@ -215,12 +215,12 @@ type IntNN = Int8 | UInt8 | Int16 | Int32 | Int64
 
 type ComplexNN = Complex32 | Complex64 | Complex128
 
-type ScalaType = Boolean | Byte | Short | Int | Long | Float | Double | Complex[Float] |
+type ScalaType = Boolean | Byte | UByte | Short | Int | Long | Float | Double | Complex[Float] |
   Complex[Double]
 
 type DTypeToScala[T <: DType] <: ScalaType = T match
+  case UInt8      => UByte
   case Int8       => Byte
-  case UInt8      => Short
   case Int16      => Short
   case Int32      => Int
   case Int64      => Long
@@ -235,6 +235,7 @@ type DTypeToScala[T <: DType] <: ScalaType = T match
   // TODO remaining types
 
 type ScalaToDType[S <: ScalaType] <: DType = S match
+  case UByte           => UInt8
   case Byte            => Int8
   case Short           => Int16
   case Int             => Int32
@@ -246,6 +247,7 @@ type ScalaToDType[S <: ScalaType] <: DType = S match
   case Complex[Double] => Complex128
 
 def scalaToDType[S <: ScalaType](s: S): DType = s match
+  case _: UByte                      => uint8
   case _: Byte                       => int8
   case _: Short                      => int16
   case _: Int                        => int32
@@ -257,8 +259,8 @@ def scalaToDType[S <: ScalaType](s: S): DType = s match
   case Complex(_: Float, _: Float)   => complex64
 
 type TensorType[T] <: DType = T match
-  case Int8       => Int8
   case UInt8      => UInt8
+  case Int8       => Int8
   case Int16      => Int16
   case Int32      => Int32
   case Int64      => Int64
@@ -339,10 +341,10 @@ type Promoted[T <: DType, U <: DType] <: DType = (T, U) match
   case (Bool, U)                                 => U
   case (T, Bool)                                 => T
   case (Int8, UInt8) | (UInt8, Int8)             => Int16
-  case (Int8, U)                                 => U
-  case (T, Int8)                                 => T
   case (UInt8, U)                                => U
   case (T, UInt8)                                => T
+  case (Int8, U)                                 => U
+  case (T, Int8)                                 => T
   case (Int16, U)                                => U
   case (T, Int16)                                => T
   case (Int32, U)                                => U
@@ -352,19 +354,24 @@ type Promoted[T <: DType, U <: DType] <: DType = (T, U) match
   case (Float16, BFloat16) | (BFloat16, Float16) => Float32
   case (Float16, U)                              => U
   case (T, Float16)                              => T
-  // case (Float32, Float32)                                                  => Float32
-  case (Float32, U)    => U
-  case (T, Float32)    => T
-  case (Float64, U)    => U
-  case (T, Float64)    => T
-  case (Complex32, U)  => U
-  case (T, Complex32)  => T
-  case (Complex64, U)  => U
-  case (T, Complex64)  => T
-  case (Complex128, U) => U
-  case (T, Complex128) => T
-  case _               => DType
+  case (Float32, U)                              => U
+  case (T, Float32)                              => T
+  case (Float64, U)                              => U
+  case (T, Float64)                              => T
+  case (Complex32, U)                            => U
+  case (T, Complex32)                            => T
+  case (Complex64, U)                            => U
+  case (T, Complex64)                            => T
+  case (Complex128, U)                           => U
+  case (T, Complex128)                           => T
+  case _                                         => DType
 
+/** Promoted type for tensor division */
+type Div[T <: DType, U <: DType] <: DType = (T, U) match
+  case (Bool | IntNN, Bool | IntNN) => Float32
+  case _                            => Promoted[T, U]
+
+/** Promoted type for elementwise tensor sum */
 type Sum[D <: DType] <: DType = D match
   case Bool | IntNN => Int64
   case D            => D
@@ -381,8 +388,8 @@ private[torch] type TypedBuffer[T <: ScalaType] <: Buffer = T match
 
 transparent inline def deriveDType[T <: DType]: DType =
   inline erasedValue[T] match
-    case _: Int8       => int8
     case _: UInt8      => uint8
+    case _: Int8       => int8
     case _: Int16      => int16
     case _: Int32      => int32
     case _: Int64      => int64

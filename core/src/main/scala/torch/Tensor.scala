@@ -32,7 +32,6 @@ import org.bytedeco.pytorch.global.torch as torchNative
 import Tensor.*
 import org.bytedeco.pytorch.global.torch.ScalarType
 import org.bytedeco.pytorch.NoGradGuard
-import ScalarUtils.toScalar
 
 import java.nio.{
   Buffer,
@@ -48,7 +47,7 @@ import scala.collection.immutable.ArraySeq
 import scala.reflect.ClassTag
 import scala.annotation.{targetName, unused}
 import org.bytedeco.pytorch.global.torch.DeviceType
-import internal.NativeConverters.toOptional
+import internal.NativeConverters.{toOptional, toScalar}
 import spire.math.{Complex, UByte}
 
 import scala.reflect.Typeable
@@ -70,7 +69,11 @@ case class TensorTuple[D <: DType](
 )
 
 /** A [[torch.Tensor]] is a multi-dimensional matrix containing elements of a single data type. */
-sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pytorch.Tensor):
+sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pytorch.Tensor) {
+  require(
+    native.numel <= Int.MaxValue,
+    s"Storch only supports tensors with up to ${Int.MaxValue} elements"
+  )
 
   def ==(other: ScalaType): Tensor[Bool] = eq(other)
 
@@ -131,21 +134,23 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     native.mul_(toScalar(s))
     this
 
-  def div[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
+  def div[S <: ScalaType](s: S): Tensor[Div[D, ScalaToDType[S]]] = Tensor(
     native.div(toScalar(s))
   )
 
-  def /[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = div(s)
+  def /[S <: ScalaType](s: S): Tensor[Div[D, ScalaToDType[S]]] = div(s)
 
-  def div[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.div(t.native))
+  /** Divides each element of this tensor by the corresponding element of `other`. * */
+  def div[D2 <: DType](other: Tensor[D2]): Tensor[Div[D, D2]] = Tensor(native.div(t.native))
 
-  def /[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = div(t)
+  /** Divides each element of this tensor by the corresponding element of `other`. * */
+  def /[D2 <: DType](t: Tensor[D2]): Tensor[Div[D, D2]] = div(t)
 
-  def /=[D2 <: DType](t: Tensor[D2]): this.type =
+  def /=[D2 <: DType](t: Tensor[D2])(using D <:< FloatNN): this.type =
     native.div_(t.native)
     this
 
-  def /=[S <: ScalaType](s: S): this.type =
+  def /=[S <: ScalaType](s: S)(using D <:< FloatNN): this.type =
     native.div_(toScalar(s))
     this
 
@@ -173,9 +178,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     * semantics of this method.
     *
     * Example:
-    * ```scala sc:nocompile
+    * ```scala sc
     * val a = torch.rand(Seq(1, 3))
-    * println(a.argmax())
+    * a.argmax()
     * // tensor dtype=float32, shape=[1] 2
     * ```
     *
@@ -252,8 +257,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def dim: Int = native.dim().toInt
 
-  def dtype: D // = DType.fromScalarType(native.dtype().toScalarType)
-  // def dtype: T = deriveDType[T]
+  def dtype: D
 
   /** Computes element-wise equality */
   def eq(other: ScalaType): Tensor[Bool] = Tensor(native.eq(toScalar(other)))
@@ -298,8 +302,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def item: DTypeToScala[D] =
     import ScalarType.*
     val out = native.dtype().toScalarType().intern() match
-      case Byte                   => native.item_byte()
-      case Char                   => UByte(native.item_byte())
+      case Byte                   => UByte(native.item_int())
+      case Char                   => native.item_byte()
       case Short                  => native.item_short()
       case Int                    => native.item_int()
       case Long                   => native.item_long()
@@ -396,6 +400,31 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     */
   def t: Tensor[D] = Tensor(native.t())
 
+  /** Returns a new tensor with a dimension of size one inserted at the specified position.
+    *
+    * The returned tensor shares the same underlying data with this tensor.
+    *
+    * A `dim` value within the range `[-input.dim() - 1, input.dim() + 1)` can be used. Negative
+    * `dim` will correspond to [[unsqueeze]] applied at `dim` = `dim + input.dim() + 1`.
+    *
+    * Example:
+    *
+    * ```scala sc
+    * val x = torch.Tensor(Seq(1, 2, 3, 4))
+    * x.unsqueeze(0)
+    * // [[1, 2, 3, 4]]
+    * x.unsqueeze(1)
+    * // [[1],
+    * //  [2],
+    * //  [3],
+    * //  [4]]
+    * ```
+    *
+    * @param dim
+    *   the index at which to insert the singleton dimension
+    */
+  def unsqueeze(dim: Int): Tensor[D] = Tensor(native.unsqueeze(dim))
+
   def zero(): Unit = native.zero_()
 
   def index[T <: Boolean | Long: ClassTag](
@@ -487,13 +516,13 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
     import ScalarType.*
     val out = tensor.native.dtype().toScalarType.intern() match
-      case Byte         => writeRawArray[Byte]((a, b) => b.get(a))
+      case Byte         => to(dtype = int32).toArray.map(UByte.apply)
+      case Char         => writeRawArray[Byte]((a, b) => b.get(a))
       case Short        => writeRawArray[Short]((a, b) => b.get(a))
       case Int          => writeRawArray[Int]((a, b) => b.get(a))
       case Long         => writeRawArray[Long]((a, b) => b.get(a))
       case Float        => writeRawArray[Float]((a, b) => b.get(a))
       case Double       => writeRawArray[Double]((a, b) => b.get(a))
-      case Char         => to(dtype = int16).toArray
       case Half         => to(dtype = float32).toArray
       case ComplexHalf  => to(dtype = complex64).toArray
       case ComplexFloat => writeArray[Complex[Float], FloatBuffer](b => Complex(b.get(), b.get()))
@@ -540,7 +569,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
     def summarize(tensor: Tensor[D], maxEntries: Int): String =
       tensor.dim match
-        case 0 => format(tensor.toSeq.head) // ScalarUtils.scalarToString(tensor.native.item)
+        case 0 => format(tensor.toSeq.head)
         case 1 =>
           val slice =
             if tensor.numel <= math.max(maxEntries, 6) then tensor.toSeq.map(format)
@@ -572,22 +601,25 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def view(shape: Int*): Tensor[D] = Tensor(native.view(shape.map(_.toLong)*))
 
-  override def toString: String =
-    summarize() // s"dtype=${dtype.toString}, shape=${size.mkString("[", ", ", "]")}, device=${device.device} " //summarize()
+  def info: String =
+    s"tensor dtype=${dtype.toString}, shape=${size.mkString("[", ", ", "]")}, device=${device.device}"
 
-  def requireNativeType(expected: ScalarType) = require(
+  override def toString: String = summarize()
+
+  private[torch] def requireNativeType(expected: ScalarType) = require(
     native.scalar_type().intern() == expected,
     s"Expected native tensor type $expected, got ${native.scalar_type().intern()}"
   )
-
-sealed class Int8Tensor(native: pytorch.Tensor) extends Tensor[Int8](native) { /* 0, Byte */
-  require(native.scalar_type().intern() == ScalarType.Byte)
-  override def dtype: Int8 = int8
 }
 
-sealed class UInt8Tensor(native: pytorch.Tensor) extends Tensor[UInt8](native) { /* 1, Char */
-  requireNativeType(ScalarType.Char)
+sealed class UInt8Tensor(native: pytorch.Tensor) extends Tensor[UInt8](native) { /* 0, Byte */
+  require(native.scalar_type().intern() == ScalarType.Byte)
   override def dtype: UInt8 = uint8
+}
+
+sealed class Int8Tensor(native: pytorch.Tensor) extends Tensor[Int8](native) { /* 1, Char */
+  requireNativeType(ScalarType.Char)
+  override def dtype: Int8 = int8
 }
 sealed class Int16Tensor(native: pytorch.Tensor) extends Tensor[Int16](native) { /* 2, Short */
   requireNativeType(ScalarType.Short)
@@ -662,13 +694,13 @@ sealed class NumOptionsTensor(native: pytorch.Tensor) extends Tensor[NumOptions]
   override def dtype: NumOptions = numoptions
 }
 
-type IntTensor = Int8Tensor | UInt8Tensor | Int16Tensor | Int32Tensor | Int64Tensor
+type IntTensor = UInt8Tensor | Int8Tensor | Int16Tensor | Int32Tensor | Int64Tensor
 type ComplexTensor = Complex32Tensor | Complex64Tensor | Complex128Tensor
 
 object Tensor:
   def apply[D <: DType](native: pytorch.Tensor): Tensor[D] = (native.scalar_type().intern() match
-    case ScalarType.Byte          => new Int8Tensor(native)
-    case ScalarType.Char          => new UInt8Tensor(native)
+    case ScalarType.Byte          => new UInt8Tensor(native)
+    case ScalarType.Char          => new Int8Tensor(native)
     case ScalarType.Short         => new Int16Tensor(native)
     case ScalarType.Int           => new Int32Tensor(native)
     case ScalarType.Long          => new Int64Tensor(native)

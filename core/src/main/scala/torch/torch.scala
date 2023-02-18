@@ -46,7 +46,6 @@ import java.nio.{
 }
 import scala.annotation.{targetName, varargs}
 import scala.reflect.ClassTag
-import ScalarUtils.toScalar
 import internal.NativeConverters.*
 import Layout.Strided
 import Device.CPU
