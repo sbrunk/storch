@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+//> using scala "3.2"
+//> using repository "sonatype-s01:snapshots"
+//> using repository "sonatype:snapshots"
+//> using lib "dev.storch::vision:0.0-2b6ed09-SNAPSHOT"
+//> using lib "org.bytedeco:pytorch-platform:1.13.1-1.5.9-SNAPSHOT"
+
 import torch.*
 import torch.nn.functional as F
 import torch.optim.Adam

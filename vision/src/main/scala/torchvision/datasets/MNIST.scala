@@ -71,7 +71,7 @@ class MNIST(root: Path, train: Boolean = true, download: Boolean = false)
     for (filename, md5) <- resources do
       val finalPath = root.resolve(filename.stripSuffix(".gz"))
       if !Files.exists(finalPath) then
-        downloadAndExtractArchive(new URL(s"${mirrors.head}/$filename"), finalPath)
+        downloadAndExtractArchive(new URL(s"${mirrors.head}$filename"), finalPath)
 
   override def toString(): String = ds.toString()
 }
