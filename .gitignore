@@ -7,3 +7,5 @@ target/
 .metals
 metals.sbt
 *.worksheet.sc
+/data/
+.scala-build/

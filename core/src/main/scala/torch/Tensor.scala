@@ -595,8 +595,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
     if dtype == undefined then "undefined tensor"
     else if includeInfo then
-      s"dtype=${dtype.toString}, shape=${size.mkString("[", ", ", "]")}, device=${device.device} " +
-        (if (!flattened) "\n" else ": ") + summarize(this, maxEntries)
+      info + " " + (if !flattened then "\n" else ": ") + summarize(this, maxEntries)
     else summarize(this, maxEntries)
 
   def view(shape: Int*): Tensor[D] = Tensor(native.view(shape.map(_.toLong)*))
