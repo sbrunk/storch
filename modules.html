@@ -152,7 +152,7 @@
         <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">model</span><span> = </span><span class="type-name">LeNet</span><span>()
 </span><span class="comment">// model: LeNet[Float32] = LeNet
 </span><span class="keyword">val</span><span> </span><span class="identifier">input</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">1</span><span>, </span><span class="number-literal">1</span><span>, </span><span class="number-literal">28</span><span>, </span><span class="number-literal">28</span><span>))
-</span><span class="comment">// input: Tensor[Float32] = dtype=float32, shape=[1, 1, 28, 28], device=CPU 
+</span><span class="comment">// input: Tensor[Float32] = tensor dtype=float32, shape=[1, 1, 28, 28], device=CPU 
 // [[[[0.0239, 0.1741, 0.5066, ..., 0.9512, 0.8070, 0.3739],
 //    [0.5625, 0.4165, 0.1153, ..., 0.3510, 0.0086, 0.2082],
 //    [0.8317, 0.0963, 0.1241, ..., 0.4985, 0.4273, 0.7526],
@@ -161,7 +161,7 @@
 //    [0.9404, 0.1533, 0.4236, ..., 0.5938, 0.1366, 0.9904],
 //    [0.7634, 0.4054, 0.2530, ..., 0.6332, 0.9523, 0.4602]]]]
 </span><span class="identifier">model</span><span>(</span><span class="identifier">input</span><span>)
-</span><span class="comment">// res1: Tensor[Float32] = dtype=float32, shape=[1, 10], device=CPU 
+</span><span class="comment">// res1: Tensor[Float32] = tensor dtype=float32, shape=[1, 10], device=CPU 
 // [[0.0094, 0.0280, 0.0906, ..., 0.1166, -0.0993, 0.0102]]</span></code></pre>
 
       </main>

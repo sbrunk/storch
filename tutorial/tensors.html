@@ -152,7 +152,7 @@
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">data</span><span> = </span><span class="type-name">Seq</span><span>(</span><span class="number-literal">1</span><span>, </span><span class="number-literal">2</span><span>, </span><span class="number-literal">3</span><span>, </span><span class="number-literal">4</span><span>)
 </span><span class="comment">// data: Seq[Int] = List(1, 2, 3, 4)
 </span><span class="keyword">val</span><span> </span><span class="identifier">xData</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="type-name">Tensor</span><span>(</span><span class="identifier">data</span><span>).</span><span class="identifier">reshape</span><span>(</span><span class="number-literal">2</span><span>,</span><span class="number-literal">2</span><span>)
-</span><span class="comment">// xData: Tensor[Int32] = dtype=int32, shape=[2, 2], device=CPU 
+</span><span class="comment">// xData: Tensor[Int32] = tensor dtype=int32, shape=[2, 2], device=CPU 
 // [[1, 2],
 //  [3, 4]]</span></code></pre>
         <p><strong>From another tensor:</strong></p>
@@ -160,12 +160,12 @@
         tensor, unless explicitly overridden.</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">// Ones Tensor:
 </span><span class="keyword">val</span><span> </span><span class="identifier">xOnes</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">onesLike</span><span>(</span><span class="identifier">xData</span><span>) </span><span class="comment">// retains the properties of xData
-// xOnes: Tensor[Int32] = dtype=int32, shape=[2, 2], device=CPU 
+// xOnes: Tensor[Int32] = tensor dtype=int32, shape=[2, 2], device=CPU 
 // [[1, 1],
 //  [1, 1]]</span></code></pre>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">// Random Tensor:
 </span><span class="keyword">val</span><span> </span><span class="identifier">xRand</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">randLike</span><span>(</span><span class="identifier">xData</span><span>, </span><span class="identifier">dtype</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="identifier">float32</span><span>) </span><span class="comment">// overrides the datatype of xData
-// xRand: Tensor[Float32] = dtype=float32, shape=[2, 2], device=CPU 
+// xRand: Tensor[Float32] = tensor dtype=float32, shape=[2, 2], device=CPU 
 // [[0.4963, 0.7682],
 //  [0.0885, 0.1320]]</span></code></pre>
         <p><strong>With random or constant values:</strong></p>
@@ -176,19 +176,19 @@
 </span><span>
 </span><span class="comment">// Random Tensor:
 </span><span class="keyword">val</span><span> </span><span class="identifier">randTensor</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="identifier">shape</span><span>)
-</span><span class="comment">// randTensor: Tensor[Float32] = dtype=float32, shape=[2, 3], device=CPU 
+</span><span class="comment">// randTensor: Tensor[Float32] = tensor dtype=float32, shape=[2, 3], device=CPU 
 // [[0.3074, 0.6341, 0.4901],
 //  [0.8964, 0.4556, 0.6323]]
 </span><span>
 </span><span class="comment">// Ones Tensor: 
 </span><span class="keyword">val</span><span> </span><span class="identifier">onesTensor</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">ones</span><span>(</span><span class="identifier">shape</span><span>)
-</span><span class="comment">// onesTensor: Tensor[Float32] = dtype=float32, shape=[2, 3], device=CPU 
+</span><span class="comment">// onesTensor: Tensor[Float32] = tensor dtype=float32, shape=[2, 3], device=CPU 
 // [[1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000]]
 </span><span>
 </span><span class="comment">// Zeros Tensor:
 </span><span class="keyword">val</span><span> </span><span class="identifier">zerosTensor</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">zeros</span><span>(</span><span class="identifier">shape</span><span>)
-</span><span class="comment">// zerosTensor: Tensor[Float32] = dtype=float32, shape=[2, 3], device=CPU 
+</span><span class="comment">// zerosTensor: Tensor[Float32] = tensor dtype=float32, shape=[2, 3], device=CPU 
 // [[0.0000, 0.0000, 0.0000],
 //  [0.0000, 0.0000, 0.0000]]</span></code></pre>
         
@@ -196,7 +196,7 @@
         <p>Tensor attributes describe their shape, datatype, and the device on
         which they are stored.</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">var</span><span> </span><span class="identifier">tensor</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">3</span><span>,</span><span class="number-literal">4</span><span>))
-</span><span class="comment">// tensor: Tensor[Float32] = dtype=float32, shape=[3, 4], device=CPU 
+</span><span class="comment">// tensor: Tensor[Float32] = tensor dtype=float32, shape=[3, 4], device=CPU 
 // [[0.3489, 0.4017, 0.0223, 0.1689],
 //  [0.2939, 0.5185, 0.6977, 0.8000],
 //  [0.1610, 0.2823, 0.6816, 0.9152]]
@@ -230,17 +230,17 @@
         <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.{---, </span><span class="type-name">Slice</span><span>}
 </span><span class="identifier">tensor</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">ones</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">4</span><span>, </span><span class="number-literal">4</span><span>))
 </span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;First row: </span><span class="substitution">${tensor(0)}</span><span class="string-literal">&quot;</span><span>)
-</span><span class="comment">// First row: dtype=float32, shape=[4], device=CPU 
+</span><span class="comment">// First row: tensor dtype=float32, shape=[4], device=CPU 
 // [1.0000, 1.0000, 1.0000, 1.0000]
 </span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;First column: </span><span class="substitution">${tensor(Slice(), 0)}</span><span class="string-literal">&quot;</span><span>)
-</span><span class="comment">// First column: dtype=float32, shape=[4], device=CPU 
+</span><span class="comment">// First column: tensor dtype=float32, shape=[4], device=CPU 
 // [1.0000, 1.0000, 1.0000, 1.0000]
 </span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;Last column: </span><span class="substitution">${tensor(---, -1)}</span><span class="string-literal">&quot;</span><span>)
-</span><span class="comment">// Last column: dtype=float32, shape=[4], device=CPU 
+</span><span class="comment">// Last column: tensor dtype=float32, shape=[4], device=CPU 
 // [1.0000, 1.0000, 1.0000, 1.0000]
 //tensor(---,1) = 0 TODO update op
 </span><span class="identifier">println</span><span>(</span><span class="identifier">tensor</span><span>)
-</span><span class="comment">// dtype=float32, shape=[4, 4], device=CPU 
+</span><span class="comment">// tensor dtype=float32, shape=[4, 4], device=CPU 
 // [[1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000],
@@ -250,13 +250,13 @@
         <a href="https://pytorch.org/docs/stable/generated/torch.stack.html">torch.stack</a>,
         another tensor joining op that is subtly different from <code>torch.cat</code>.</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">t1</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">cat</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="identifier">tensor</span><span>, </span><span class="identifier">tensor</span><span>, </span><span class="identifier">tensor</span><span>), </span><span class="identifier">dim</span><span>=</span><span class="number-literal">1</span><span>)
-</span><span class="comment">// t1: Tensor[Float32] = dtype=float32, shape=[4, 12], device=CPU 
+</span><span class="comment">// t1: Tensor[Float32] = tensor dtype=float32, shape=[4, 12], device=CPU 
 // [[1.0000, 1.0000, 1.0000, ..., 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, ..., 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, ..., 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, ..., 1.0000, 1.0000, 1.0000]]
 </span><span class="identifier">println</span><span>(</span><span class="identifier">t1</span><span>)
-</span><span class="comment">// dtype=float32, shape=[4, 12], device=CPU 
+</span><span class="comment">// tensor dtype=float32, shape=[4, 12], device=CPU 
 // [[1.0000, 1.0000, 1.0000, ..., 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, ..., 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, ..., 1.0000, 1.0000, 1.0000],
@@ -266,13 +266,13 @@
 // have the same value
 // `tensor.mT` returns the transpose of a tensor
 </span><span class="keyword">val</span><span> </span><span class="identifier">y1</span><span> = </span><span class="identifier">tensor</span><span> </span><span class="identifier">`@`</span><span> </span><span class="identifier">tensor</span><span>.</span><span class="identifier">mT</span><span>
-</span><span class="comment">// y1: Tensor[Float32] = dtype=float32, shape=[4, 4], device=CPU 
+</span><span class="comment">// y1: Tensor[Float32] = tensor dtype=float32, shape=[4, 4], device=CPU 
 // [[4.0000, 4.0000, 4.0000, 4.0000],
 //  [4.0000, 4.0000, 4.0000, 4.0000],
 //  [4.0000, 4.0000, 4.0000, 4.0000],
 //  [4.0000, 4.0000, 4.0000, 4.0000]]
 </span><span class="keyword">val</span><span> </span><span class="identifier">y2</span><span> = </span><span class="identifier">tensor</span><span>.</span><span class="identifier">matmul</span><span>(</span><span class="identifier">tensor</span><span>.</span><span class="identifier">mT</span><span>)
-</span><span class="comment">// y2: Tensor[Float32] = dtype=float32, shape=[4, 4], device=CPU 
+</span><span class="comment">// y2: Tensor[Float32] = tensor dtype=float32, shape=[4, 4], device=CPU 
 // [[4.0000, 4.0000, 4.0000, 4.0000],
 //  [4.0000, 4.0000, 4.0000, 4.0000],
 //  [4.0000, 4.0000, 4.0000, 4.0000],
@@ -284,13 +284,13 @@
 </span><span class="comment">// This computes the element-wise product. z1, z2, z3 will have the same value
 </span><span>
 </span><span class="keyword">val</span><span> </span><span class="identifier">z1</span><span> = </span><span class="identifier">tensor</span><span> * </span><span class="identifier">tensor</span><span>
-</span><span class="comment">// z1: Tensor[Float32] = dtype=float32, shape=[4, 4], device=CPU 
+</span><span class="comment">// z1: Tensor[Float32] = tensor dtype=float32, shape=[4, 4], device=CPU 
 // [[1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000]]
 </span><span class="keyword">val</span><span> </span><span class="identifier">z2</span><span> = </span><span class="identifier">tensor</span><span>.</span><span class="identifier">mul</span><span>(</span><span class="identifier">tensor</span><span>)
-</span><span class="comment">// z2: Tensor[Float32] = dtype=float32, shape=[4, 4], device=CPU 
+</span><span class="comment">// z2: Tensor[Float32] = tensor dtype=float32, shape=[4, 4], device=CPU 
 // [[1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000],
@@ -299,7 +299,7 @@
         by aggregating all values of a tensor into one value, you can convert it
         to a Scala numerical value using <code>item()</code>:</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">agg</span><span> = </span><span class="identifier">tensor</span><span>.</span><span class="identifier">sum</span><span>
-</span><span class="comment">// agg: Tensor[Float32] = dtype=float32, shape=[], device=CPU 
+</span><span class="comment">// agg: Tensor[Float32] = tensor dtype=float32, shape=[], device=CPU 
 // 16.0000
 </span><span class="keyword">val</span><span> </span><span class="identifier">aggItem</span><span> = </span><span class="identifier">agg</span><span>.</span><span class="identifier">item</span><span>
 </span><span class="comment">// aggItem: Float = 16.0F
@@ -311,19 +311,19 @@
         operand are called in-place. They are denoted by a <code>_</code> suffix. For
         example: <code>x.copy_(y)</code>, <code>x.t_()</code>, will change <code>x</code>.</p>
         <pre><code class="nohighlight"><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;</span><span class="substitution">$tensor</span><span class="string-literal">&quot;</span><span>)
-</span><span class="comment">// dtype=float32, shape=[4, 4], device=CPU 
+</span><span class="comment">// tensor dtype=float32, shape=[4, 4], device=CPU 
 // [[1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000],
 //  [1.0000, 1.0000, 1.0000, 1.0000]]
 </span><span class="identifier">tensor</span><span> -= </span><span class="number-literal">5</span><span>
-</span><span class="comment">// res14: Tensor[Float32] = dtype=float32, shape=[4, 4], device=CPU 
+</span><span class="comment">// res14: Tensor[Float32] = tensor dtype=float32, shape=[4, 4], device=CPU 
 // [[-4.0000, -4.0000, -4.0000, -4.0000],
 //  [-4.0000, -4.0000, -4.0000, -4.0000],
 //  [-4.0000, -4.0000, -4.0000, -4.0000],
 //  [-4.0000, -4.0000, -4.0000, -4.0000]]
 </span><span class="identifier">println</span><span>(</span><span class="identifier">tensor</span><span>)
-</span><span class="comment">// dtype=float32, shape=[4, 4], device=CPU 
+</span><span class="comment">// tensor dtype=float32, shape=[4, 4], device=CPU 
 // [[-4.0000, -4.0000, -4.0000, -4.0000],
 //  [-4.0000, -4.0000, -4.0000, -4.0000],
 //  [-4.0000, -4.0000, -4.0000, -4.0000],
