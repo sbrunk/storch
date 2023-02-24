@@ -90,7 +90,8 @@ lazy val vision = project
   .settings(
     libraryDependencies ++= Seq(
       "com.sksamuel.scrimage" % "scrimage-core" % scrImageVersion,
-      "com.sksamuel.scrimage" % "scrimage-webp" % scrImageVersion
+      "com.sksamuel.scrimage" % "scrimage-webp" % scrImageVersion,
+      "org.scalameta" %% "munit" % "0.7.29" % Test
     )
   )
   .dependsOn(core)

@@ -24,31 +24,41 @@ import scala.util.Using
 import java.net.URL
 import java.nio.file.Files
 import java.util.zip.GZIPInputStream
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
 
-/** The [MNIST](http://yann.lecun.com/exdb/mnist/) dataset.
-  *
-  * @param root
-  *   Root directory of dataset where `train-images-idx3-ubyte` `t10k-images-idx3-ubyte` exist.
-  * @param train
-  *   If true, creates dataset from `train-images-idx3-ubyte`, otherwise from
-  *   `t10k-images-idx3-ubyte`.
-  */
-class MNIST(root: Path, train: Boolean = true, download: Boolean = false)
-    extends TensorDataset[Float32, Int64] {
+trait MNISTBase(
+    val mirrors: Seq[String],
+    val resources: Seq[(String, String)],
+    val classes: Seq[String],
+    val root: Path,
+    val train: Boolean,
+    val download: Boolean
+) extends TensorDataset[Float32, Int64] {
 
-  val mirrors = List(
-    "http://yann.lecun.com/exdb/mnist/",
-    "https://ossci-datasets.s3.amazonaws.com/mnist/"
-  )
+  private def downloadAndExtractArchive(url: URL, target: Path): Unit =
+    println(s"downloading from $url")
+    Using.resource(url.openStream()) { inputStream =>
+      Files.copy(GZIPInputStream(inputStream), target)
+    }
 
-  val resources = List(
-    ("train-images-idx3-ubyte.gz", "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
-    ("train-labels-idx1-ubyte.gz", "d53e105ee54ea40749a09fcbcd1e9432"),
-    ("t10k-images-idx3-ubyte.gz", "9fb629c4189551a2d022fa330f9573f3"),
-    ("t10k-labels-idx1-ubyte.gz", "ec29112dd5afa0611ce80d1b7f02629c")
-  )
-
-  if download then doDownload()
+  if download then {
+    Files.createDirectories(root)
+    for (filename, md5) <- resources do
+      val finalPath = root.resolve(filename.stripSuffix(".gz"))
+      if !Files.exists(finalPath) then
+        println(s"$finalPath not found")
+        mirrors.iterator
+          .map { mirror =>
+            Try(downloadAndExtractArchive(URL(s"$mirror$filename"), finalPath))
+          }
+          .tapEach {
+            case Failure(exception) => println(exception)
+            case Success(_)         =>
+          }
+          .collectFirst { case Success(_) => }
+  }
 
   private val mode =
     if train then pytorch.MNIST.Mode.kTrain.intern().value
@@ -60,18 +70,78 @@ class MNIST(root: Path, train: Boolean = true, download: Boolean = false)
     TensorDataset(Tensor[Float32](native.images().clone()), Tensor[Int64](native.targets().clone()))
   export ds.{apply, length, features, targets}
 
-  private def downloadAndExtractArchive(url: URL, target: Path): Unit =
-    println(s"$target not found, downloading from $url")
-    Using.resource(url.openStream()) { inputStream =>
-      Files.copy(GZIPInputStream(inputStream), target)
-    }
-
-  private def doDownload(): Unit =
-    Files.createDirectories(root)
-    for (filename, md5) <- resources do
-      val finalPath = root.resolve(filename.stripSuffix(".gz"))
-      if !Files.exists(finalPath) then
-        downloadAndExtractArchive(new URL(s"${mirrors.head}$filename"), finalPath)
-
   override def toString(): String = ds.toString()
 }
+
+/** The [MNIST](http://yann.lecun.com/exdb/mnist/) dataset.
+  *
+  * @param root
+  *   Root directory of dataset where `train-images-idx3-ubyte` `t10k-images-idx3-ubyte` exist.
+  * @param train
+  *   If true, creates dataset from `train-images-idx3-ubyte`, otherwise from
+  *   `t10k-images-idx3-ubyte`.
+  */
+class MNIST(root: Path, train: Boolean = true, download: Boolean = false)
+    extends MNISTBase(
+      mirrors = List(
+        "http://yann.lecun.com/exdb/mnist/",
+        "https://ossci-datasets.s3.amazonaws.com/mnist/"
+      ),
+      resources = List(
+        ("train-images-idx3-ubyte.gz", "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
+        ("train-labels-idx1-ubyte.gz", "d53e105ee54ea40749a09fcbcd1e9432"),
+        ("t10k-images-idx3-ubyte.gz", "9fb629c4189551a2d022fa330f9573f3"),
+        ("t10k-labels-idx1-ubyte.gz", "ec29112dd5afa0611ce80d1b7f02629c")
+      ),
+      classes = Seq(
+        "0 - zero",
+        "1 - one",
+        "2 - two",
+        "3 - three",
+        "4 - four",
+        "5 - five",
+        "6 - six",
+        "7 - seven",
+        "8 - eight",
+        "9 - nine"
+      ),
+      root,
+      train,
+      download
+    )
+
+/** The [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) Dataset.
+  *
+  * @param root
+  *   Root directory of dataset where `train-images-idx3-ubyte` `t10k-images-idx3-ubyte` exist.
+  * @param train
+  *   If true, creates dataset from `train-images-idx3-ubyte`, otherwise from
+  *   `t10k-images-idx3-ubyte`.
+  */
+class FashionMNIST(root: Path, train: Boolean = true, download: Boolean = false)
+    extends MNISTBase(
+      mirrors = List(
+        "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/"
+      ),
+      resources = List(
+        ("train-images-idx3-ubyte.gz", "8d4fb7e6c68d591d4c3dfef9ec88bf0d"),
+        ("train-labels-idx1-ubyte.gz", "25c81989df183df01b3e8a0aad5dffbe"),
+        ("t10k-images-idx3-ubyte.gz", "bef4ecab320f06d8554ea6380940ec79"),
+        ("t10k-labels-idx1-ubyte.gz", "bb300cfdad3c16e7a12a480ee83cd310")
+      ),
+      classes = Seq(
+        "T-shirt/top",
+        "Trouser",
+        "Pullover",
+        "Dress",
+        "Coat",
+        "Sandal",
+        "Shirt",
+        "Sneaker",
+        "Bag",
+        "Ankle boot"
+      ),
+      root,
+      train,
+      download
+    )
