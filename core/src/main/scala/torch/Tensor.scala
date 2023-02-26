@@ -83,7 +83,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def +[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = add(s)
 
-  def add[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.add(other.native))
+  def add[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(
+    native.add(other.native)
+  )
 
   def +[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = add(other)
 
@@ -104,7 +106,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def -[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = sub(s)
 
-  def sub[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.sub(other.native))
+  def sub[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(
+    native.sub(other.native)
+  )
 
   def -[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = sub(other)
 
@@ -122,7 +126,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def *[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = mul(s)
 
-  def mul[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.mul(other.native))
+  def mul[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(
+    native.mul(other.native)
+  )
 
   def *[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = mul(other)
 
@@ -271,7 +277,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   override def equals(that: Any): Boolean =
     that match
       case other: Tensor[?] if dtype == other.dtype => native.equal(other.native)
-      case _                                => false
+      case _                                        => false
 
   /** True if `other` has the same size and elements as this tensor, false otherwise. */
   def equal(other: Tensor[D]): Boolean = native.equal(other.native)
