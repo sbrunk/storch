@@ -83,15 +83,15 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def +[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = add(s)
 
-  def add[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.add(t.native))
+  def add[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.add(other.native))
 
-  def +[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = add(t)
+  def +[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = add(other)
 
   // TODO add typelevel casting rules. I.e. An integral output tensor cannot accept a floating point tensor.
   // https://github.com/pytorch/pytorch/blob/041edeeecb75f3c110605d7311fa46abe1c62ea9/c10/core/ScalarType.h
   // https://pytorch.org/docs/stable/tensor_attributes.html#torch-dtype
-  def +=[D2 <: DType](t: Tensor[D2]): this.type =
-    native.add_(t.native)
+  def +=[D2 <: DType](other: Tensor[D2]): this.type =
+    native.add_(other.native)
     this
 
   def +=[S <: ScalaType](s: S): this.type =
@@ -104,12 +104,12 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def -[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = sub(s)
 
-  def sub[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.sub(t.native))
+  def sub[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.sub(other.native))
 
-  def -[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = sub(t)
+  def -[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = sub(other)
 
-  def -=[D2 <: DType](t: Tensor[D2]): this.type =
-    native.sub_(t.native)
+  def -=[D2 <: DType](other: Tensor[D2]): this.type =
+    native.sub_(other.native)
     this
 
   def -=[S <: ScalaType](s: S): this.type =
@@ -122,12 +122,12 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def *[S <: ScalaType](s: S): Tensor[Promoted[D, ScalaToDType[S]]] = mul(s)
 
-  def mul[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.mul(t.native))
+  def mul[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = Tensor(native.mul(other.native))
 
-  def *[D2 <: DType](t: Tensor[D2]): Tensor[Promoted[D, D2]] = mul(t)
+  def *[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] = mul(other)
 
-  def *=[D2 <: DType](t: Tensor[D2]): this.type =
-    native.mul_(t.native)
+  def *=[D2 <: DType](other: Tensor[D2]): this.type =
+    native.mul_(other.native)
     this
 
   def *=[S <: ScalaType](s: S): this.type =
@@ -141,13 +141,13 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def /[S <: ScalaType](s: S): Tensor[Div[D, ScalaToDType[S]]] = div(s)
 
   /** Divides each element of this tensor by the corresponding element of `other`. * */
-  def div[D2 <: DType](other: Tensor[D2]): Tensor[Div[D, D2]] = Tensor(native.div(t.native))
+  def div[D2 <: DType](other: Tensor[D2]): Tensor[Div[D, D2]] = Tensor(native.div(other.native))
 
   /** Divides each element of this tensor by the corresponding element of `other`. * */
-  def /[D2 <: DType](t: Tensor[D2]): Tensor[Div[D, D2]] = div(t)
+  def /[D2 <: DType](other: Tensor[D2]): Tensor[Div[D, D2]] = div(other)
 
-  def /=[D2 <: DType](t: Tensor[D2])(using D <:< FloatNN): this.type =
-    native.div_(t.native)
+  def /=[D2 <: DType](other: Tensor[D2])(using D <:< FloatNN): this.type =
+    native.div_(other.native)
     this
 
   def /=[S <: ScalaType](s: S)(using D <:< FloatNN): this.type =
@@ -270,7 +270,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   override def equals(that: Any): Boolean =
     that match
-      case t: Tensor[?] if dtype == t.dtype => native.equal(t.native)
+      case other: Tensor[?] if dtype == other.dtype => native.equal(other.native)
       case _                                => false
 
   /** True if `other` has the same size and elements as this tensor, false otherwise. */
@@ -436,8 +436,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
       for (i <- indices) yield i match
         case None =>
           new pytorch.TensorIndex()
-        case t: Tensor[?] =>
-          new pytorch.TensorIndex(t.native)
+        case i: Tensor[?] =>
+          new pytorch.TensorIndex(i.native)
         case singleton: Int =>
           new pytorch.TensorIndex(singleton)
         case singleton: Long =>
