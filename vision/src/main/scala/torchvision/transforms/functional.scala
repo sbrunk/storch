@@ -20,7 +20,7 @@ import torch.*
 import com.sksamuel.scrimage.ImmutableImage
 import scala.collection.immutable.ArraySeq
 
-object functional {
+object functional:
 
   private def isTensorATorchImage(x: Tensor[?]): Boolean = x.dim >= 2
 
@@ -43,17 +43,20 @@ object functional {
       throw new IllegalArgumentException(
         f"std evaluated to zero after conversion to {dtype}, leading to division by zero."
       )
-    if _std.dim == 1 then _mean = _mean.view(-1, 1, 1)
+    if _mean.dim == 1 then _mean = _mean.view(-1, 1, 1)
     if _std.dim == 1 then _std = _std.view(-1, 1, 1)
     (tensor - _mean) / _std
 
   /** Convert an [[ImmutableImage]] (H x W x C) to a [[Tensor[Float32]] of shape (C x H x W) in the
     * range `[0.0, 1.0]`.
     */
-  def toTensor(pic: ImmutableImage) =
+  def toTensor(pic: ImmutableImage): Tensor[Float32] =
     val bytes = pic.rgb.flatten
     // transpose NxHxWxC to NxCxHxW because pytorch expects channels first
-    Tensor(ArraySeq.unsafeWrapArray(bytes)).permute(2, 0, 1).to(dtype = float32) / 255
+    Tensor(ArraySeq.unsafeWrapArray(bytes))
+      .reshape(pic.height, pic.width, 3)
+      .permute(2, 0, 1)
+      .to(dtype = float32) / 255
 
   def toImmutableImage[D <: FloatNN](pic: Tensor[D]): ImmutableImage =
     var _pic = pic
@@ -72,4 +75,3 @@ object functional {
     val intImage = (_pic.permute(1, 2, 0) * 255).to(dtype = int8)
     val bytes = intImage.toArray
     ImmutableImage.loader().fromBytes(bytes)
-}
