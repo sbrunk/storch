@@ -50,10 +50,10 @@ object functional {
   /** Convert an [[ImmutableImage]] (H x W x C) to a [[Tensor[Float32]] of shape (C x H x W) in the
     * range `[0.0, 1.0]`.
     */
-  def toTensor(pic: ImmutableImage) =
+  def toTensor(pic: ImmutableImage): Tensor[Float32] =
     val bytes = pic.rgb.flatten
     // transpose NxHxWxC to NxCxHxW because pytorch expects channels first
-    Tensor(ArraySeq.unsafeWrapArray(bytes)).permute(2, 0, 1).to(dtype = float32) / 255
+    Tensor(ArraySeq.unsafeWrapArray(bytes)).reshape(pic.height, pic.width, 3).permute(2, 0, 1).to(dtype = float32) / 255
 
   def toImmutableImage[D <: FloatNN](pic: Tensor[D]): ImmutableImage =
     var _pic = pic

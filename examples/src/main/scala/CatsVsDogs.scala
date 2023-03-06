@@ -65,9 +65,6 @@ object CatsVsDogs {
     (if shuffle then random.shuffle(dataset) else dataset)
       .grouped(batchSize)
       .map { batch =>
-        batch.map { (path, labels) =>
-          transform(ImmutableImage.loader().fromPath(path.toNIO)).to(device)
-        }
         val (inputs, labels) = batch.unzip
         val transformedInputs =
           inputs.map(path => transform(ImmutableImage.loader().fromPath(path.toNIO)))
@@ -108,38 +105,6 @@ object CatsVsDogs {
   val evalBatchSize = 64
   def testDL = dataloader(testData, shuffle = false, batchSize = evalBatchSize)
   val evalSteps = (testData.size / evalBatchSize.toFloat).ceil.toInt
-
-  def transform(image: ImmutableImage) =
-    val scaledImage =
-      if image.height < image.width then
-        image.scaleTo(
-          (232 * (image.width / image.height.toDouble)).toInt,
-          232,
-          ScaleMethod.Bilinear
-        )
-      else
-        image.scaleTo(
-          232,
-          (232 * (image.height / image.width.toDouble)).toInt,
-          ScaleMethod.Bilinear
-        )
-    val croppedImage = scaledImage.resizeTo(224, 224)
-    val bytes = croppedImage.rgb.flatten
-    // TODO figure out why there seem to be threading issues sometimes with in the normalize function
-    this.synchronized {
-      // transpose NxHxWxC to NxCxHxW because pytorch expects channels first
-      var x =
-        Tensor(ArraySeq.unsafeWrapArray(bytes))
-          .reshape(224, 224, 3)
-          .permute(2, 0, 1)
-          .to(dtype = float32)
-      x = x / 255
-      torchvision.transforms.functional.normalize(
-        x,
-        mean = Seq(0.485f, 0.456f, 0.406f),
-        std = Seq(0.229f, 0.224f, 0.225f)
-      )
-    }
 
   def train(): Unit =
     val weights = torch.pickleLoad(Paths.get("notebooks/resnet18.pt"))

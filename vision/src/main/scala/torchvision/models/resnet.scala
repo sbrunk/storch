@@ -31,8 +31,11 @@ import torch.nn.modules.activation.ReLU
 import torch.nn.modules.conv.Conv2d
 import torch.nn.modules.pooling.{AdaptiveAvgPool2d, MaxPool2d}
 import torch.nn.modules.{Default, HasWeight, Module, TensorModule}
+import torchvision.transforms.Presets
 
 import scala.util.Using
+import com.sksamuel.scrimage.ImmutableImage
+import torch.Int32
 
 object resnet:
   /** 3x3 convolution with padding */
@@ -300,6 +303,28 @@ object resnet:
     def apply(x: Tensor[D]): Tensor[D] =
       forwardImpl(x)
   }
+
+  case class Weights(
+      url: String,
+      transforms: ImmutableImage => Tensor[Float32],
+      batchTransforms: Tensor[Int32] => Tensor[Float32],
+  )
+
+  object ResNet18Weights:
+    val IMAGENET1K_V1 = Weights(
+      url = "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+      transforms = Presets.ImageClassification(cropSize=224).transform,
+      batchTransforms = Presets.ImageClassification(cropSize=224).batchTransform,
+    )
+    val DEFAULT = IMAGENET1K_V1
+
+  object ResNet34Weights:
+    val IMAGENET1K_V1 = Weights(
+      url = "https://download.pytorch.org/models/resnet34-b627a593.pth",
+      transforms = Presets.ImageClassification(cropSize=224).transform,
+      batchTransforms = Presets.ImageClassification(cropSize=224).batchTransform,
+    )
+    val DEFAULT = IMAGENET1K_V1
 
   /** ResNet-18 from [Deep Residual Learning for Image
     * Recognition](https://arxiv.org/pdf/1512.03385.pdf).
