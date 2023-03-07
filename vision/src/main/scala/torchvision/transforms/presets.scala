@@ -8,15 +8,16 @@ import torch.Tensor
 import torch.Float32
 import torchvision.transforms.functional.toTensor
 
-private[torchvision] object Presets:
+object Presets:
+
   class ImageClassification(
-    cropSize: Int,
-    resizeSize: Int = 256,
-    mean: Seq[Float] = Seq(0.485f, 0.456f, 0.406f),
-    std: Seq[Float] = Seq(0.229f, 0.224f, 0.225f),
-    interpolation: ScaleMethod = ScaleMethod.Bilinear
+      cropSize: Int,
+      resizeSize: Int = 256,
+      mean: Seq[Float] = Seq(0.485f, 0.456f, 0.406f),
+      std: Seq[Float] = Seq(0.229f, 0.224f, 0.225f),
+      interpolation: ScaleMethod = ScaleMethod.Bilinear
   ):
-    def transform(image: ImmutableImage): Tensor[Float32] =
+    def transforms(image: ImmutableImage): Tensor[Float32] =
       val scaledImage =
         if image.height < image.width then
           image.scaleTo(
@@ -33,11 +34,10 @@ private[torchvision] object Presets:
       val croppedImage = scaledImage.resizeTo(cropSize, cropSize)
       toTensor(croppedImage)
 
-    def batchTransform(input: Tensor[Int32]): Tensor[Float32] = 
+    def batchTransforms(input: Tensor[Float32]): Tensor[Float32] =
       var x = input / 255
       torchvision.transforms.functional.normalize(
         x,
         mean = Seq(0.485f, 0.456f, 0.406f),
         std = Seq(0.229f, 0.224f, 0.225f)
       )
-      

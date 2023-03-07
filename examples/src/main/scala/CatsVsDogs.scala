@@ -43,6 +43,7 @@ import scala.util.Random
 import scala.util.Using
 
 import concurrent.ExecutionContext.Implicits.global
+import torchvision.models.resnet.ResNet18Weights
 
 object CatsVsDogs {
 
@@ -52,6 +53,7 @@ object CatsVsDogs {
 
   val device = if torch.cuda.isAvailable then CUDA else CPU
 
+  val weights = ResNet18Weights.IMAGENET1K_V1
   val model = resnet18(numClasses = 2)
   val lossFn = torch.nn.loss.CrossEntropyLoss()
 
@@ -67,11 +69,15 @@ object CatsVsDogs {
       .map { batch =>
         val (inputs, labels) = batch.unzip
         val transformedInputs =
-          inputs.map(path => transform(ImmutableImage.loader().fromPath(path.toNIO)))
+          inputs
+            .map(path => ImmutableImage.loader().fromPath(path.toNIO))
+            .map(weights.transforms.transforms)
         assert(transformedInputs.forall(t => !t.isnan.any.item))
-        assert(transformedInputs.forall(t => t.all.isNonzero))
+        // assert(transformedInputs.forall(t => t.all.isNonzero))
         (
-          torch.stack(transformedInputs).to(device),
+          weights.transforms.batchTransforms(
+            torch.stack(transformedInputs).to(device)
+          ),
           torch
             .stack(labels.map(label => Tensor(classIndices(label)).to(dtype = int64)))
             .to(device)
@@ -97,7 +103,7 @@ object CatsVsDogs {
 
   println(s"Found ${pathsWithLabel.size} examples")
 
-  val sample = random.shuffle(pathsWithLabel).take(1000)
+  val sample = random.shuffle(pathsWithLabel).take(10000)
   val (trainData, testData) = sample.splitAt((sample.size * 0.9).toInt)
   println(s"Train size: ${trainData.size}")
   println(s"Eval size:  ${testData.size}")
