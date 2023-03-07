@@ -35,9 +35,8 @@ object Presets:
       toTensor(croppedImage)
 
     def batchTransforms(input: Tensor[Float32]): Tensor[Float32] =
-      var x = input / 255
       torchvision.transforms.functional.normalize(
-        x,
+        input,
         mean = Seq(0.485f, 0.456f, 0.406f),
         std = Seq(0.229f, 0.224f, 0.225f)
       )

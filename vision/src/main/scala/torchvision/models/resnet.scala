@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// derived from https://github.com/pytorch/vision/blob/v0.14.1/torchvision/models/resnet.py
-// does not support downloading of pre-trained weights yet
 package torchvision
 package models
 
@@ -37,6 +35,11 @@ import scala.util.Using
 import com.sksamuel.scrimage.ImmutableImage
 import torch.Int32
 
+/** ResNet architecture implementations
+  *
+  * derived from https://github.com/pytorch/vision/blob/v0.14.1/torchvision/models/resnet.py does
+  * not support downloading of pre-trained weights yet
+  */
 object resnet:
   /** 3x3 convolution with padding */
   def conv3x3[D <: BFloat16 | Float32 | Float64: Default](

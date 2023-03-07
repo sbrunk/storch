@@ -22,32 +22,23 @@
 //> using lib "com.lihaoyi::os-lib:0.9.0"
 //> using lib "me.tongfei:progressbar:0.9.5"
 
-import com.sksamuel.scrimage.ImmutableImage
-import com.sksamuel.scrimage.ScaleMethod
-import me.tongfei.progressbar.ProgressBar
-import me.tongfei.progressbar.ProgressBarBuilder
+import com.sksamuel.scrimage.{ImmutableImage, ScaleMethod}
+import me.tongfei.progressbar.{ProgressBar, ProgressBarBuilder}
 import org.bytedeco.javacpp.PointerScope
 import org.bytedeco.pytorch.OutputArchive
 import os.Path
-import torch.Device.CPU
-import torch.Device.CUDA
-import torch.*
+import torch.Device.{CPU, CUDA}
+import torch.{Float32, Int32, int64, Int64, Tensor}
 import torch.optim.Adam
-import torchvision.models.resnet.resnet18
+import torchvision.models.resnet.{ResNet18Weights, resnet18}
 
 import java.nio.file.Paths
-import scala.collection.immutable.ArraySeq
-import scala.concurrent.Future
-import scala.concurrent.duration.Duration
-import scala.util.Random
-import scala.util.Using
+import scala.util.{Random, Using}
+import scala.util.Try
+import org.bytedeco.pytorch.InputArchive
 
-import concurrent.ExecutionContext.Implicits.global
-import torchvision.models.resnet.ResNet18Weights
+object CatsVsDogs:
 
-object CatsVsDogs {
-
-  System.setProperty("org.bytedeco.openblas.load", "mkl") // try to use MKL when available
   torch.manualSeed(0)
   val random = new Random(seed = 0)
 
@@ -69,11 +60,11 @@ object CatsVsDogs {
       .map { batch =>
         val (inputs, labels) = batch.unzip
         val transformedInputs =
+          val loader = ImmutableImage.loader()
           inputs
-            .map(path => ImmutableImage.loader().fromPath(path.toNIO))
+            .map(path => loader.fromPath(path.toNIO))
             .map(weights.transforms.transforms)
         assert(transformedInputs.forall(t => !t.isnan.any.item))
-        // assert(transformedInputs.forall(t => t.all.isNonzero))
         (
           weights.transforms.batchTransforms(
             torch.stack(transformedInputs).to(device)
@@ -85,12 +76,7 @@ object CatsVsDogs {
       }
 
   val datasetDir = os.pwd / "data" / "PetImages"
-  // os.walk(datasetDir).filter(_.ext == "jpg").foreach { path =>
-  //   Try(imageLoader.fromPath(path.toNIO)).recover{_ =>
-  //     println(s"Cleaning up broken image $path")
-  //     os.remove(path)
-  //   }
-  // }
+
   val classes = os.list(datasetDir).filter(os.isDir).map(_.last).sorted
   val classIndices = classes.zipWithIndex.toMap
   println(s"Found ${classIndices.size} classes: ${classIndices.mkString("[", ", ", "]")}")
@@ -103,12 +89,12 @@ object CatsVsDogs {
 
   println(s"Found ${pathsWithLabel.size} examples")
 
-  val sample = random.shuffle(pathsWithLabel).take(10000)
+  val sample = random.shuffle(pathsWithLabel).take(1000)
   val (trainData, testData) = sample.splitAt((sample.size * 0.9).toInt)
   println(s"Train size: ${trainData.size}")
   println(s"Eval size:  ${testData.size}")
 
-  val evalBatchSize = 64
+  val evalBatchSize = 16
   def testDL = dataloader(testData, shuffle = false, batchSize = evalBatchSize)
   val evalSteps = (testData.size / evalBatchSize.toFloat).ceil.toInt
 
@@ -120,21 +106,22 @@ object CatsVsDogs {
     model.to(device)
     val optimizer = Adam(model.parameters, lr = 1e-5)
     val numEpochs = 1
-    val batchSize = 64
+    val batchSize = 16
     val trainSteps = (trainData.size / batchSize.toFloat).ceil.toInt
 
     def trainDL = dataloader(trainData, shuffle = true, batchSize)
 
-    for epoch <- 1 to numEpochs do {
+    for epoch <- 1 to numEpochs do
       var trainPB = ProgressBarBuilder()
         .setTaskName(s"Training epoch $epoch/$numEpochs")
         .setInitialMax(trainSteps)
         .build()
       var runningLoss = 0.0
       var step = 0
-      var evalMetrics: Metrics = null
+      var evalMetrics: Metrics = Metrics(Float.NaN, accuracy = 0)
       for (input, label) <- trainDL do {
         optimizer.zeroGrad()
+        // PointerScope makes sure that all intermediate tensors are deallocated in time
         Using.resource(new PointerScope()) { p =>
           val pred = model(input.to(device))
           val loss = lossFn(pred, label.to(device))
@@ -163,10 +150,9 @@ object CatsVsDogs {
       println(
         s"Epoch $epoch/$numEpochs, Training loss: ${(runningLoss / step).format}, Evaluation loss: ${evalMetrics.loss.format}, Accuracy: ${evalMetrics.accuracy.format}"
       )
-      val oa = new OutputArchive()
+      val oa = OutputArchive()
       model.save(oa)
       oa.save_to(s"checkpoint-$epoch.pt")
-    }
 
   case class Metrics(loss: Float, accuracy: Float)
 
@@ -189,8 +175,8 @@ object CatsVsDogs {
       .toSeq
       .unzip
     val metrics = Metrics(
-      torch.Tensor(loss).mean.item,
-      torch.Tensor(correct).sum.item / testData.size.toFloat
+      Tensor(loss).mean.item,
+      Tensor(correct).sum.item / testData.size.toFloat
     )
     evalPB.setExtraMessage(
       s"    Loss: ${metrics.loss.format}, Accuracy: ${metrics.accuracy.format}"
@@ -199,7 +185,25 @@ object CatsVsDogs {
     if isTraining then model.train()
     metrics
 
-  def main(args: Array[String]): Unit =
-    train()
+  def cleanup(): Unit =
+    os.walk(datasetDir).filter(_.ext == "jpg").foreach { path =>
+      Try(ImmutableImage.loader().fromPath(path.toNIO)).recover { _ =>
+        println(s"Cleaning up broken image $path")
+        os.move(path, path / os.up / (path.last + ".bak"))
+      }
+    }
 
-}
+  def predict(imagePath: String) =
+    val ia = InputArchive()
+    ia.load_from("checkpoint-2.pt")
+    model.load(ia)
+    model.eval()
+    val image = ImmutableImage.loader().fromPath(Paths.get(imagePath))
+    val transformedImage =
+      weights.transforms.batchTransforms(weights.transforms.transforms(image)).unsqueeze(dim = 0)
+    val prediction = model(transformedImage)
+    val correct = prediction.argmax(dim = 1).item
+
+  def main(args: Array[String]): Unit =
+    // train()
+    predict(args(0))
