@@ -101,9 +101,11 @@ lazy val examples = project
   .enablePlugins(NoPublishPlugin)
   .settings(commonSettings)
   .settings(
+    fork := true,
     libraryDependencies ++= Seq(
       "com.lihaoyi" %% "os-lib" % "0.9.0",
-      "me.tongfei" % "progressbar" % "0.9.5"
+      "me.tongfei" % "progressbar" % "0.9.5",
+      "com.github.alexarchambault" %% "case-app" % "2.1.0-M24"
     )
   )
   .dependsOn(vision)

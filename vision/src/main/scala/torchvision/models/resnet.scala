@@ -37,8 +37,9 @@ import torch.Int32
 
 /** ResNet architecture implementations
   *
-  * derived from https://github.com/pytorch/vision/blob/v0.14.1/torchvision/models/resnet.py does
-  * not support downloading of pre-trained weights yet
+  * Derived from https://github.com/pytorch/vision/blob/v0.14.1/torchvision/models/resnet.py
+  *
+  * Does not support downloading of pre-trained weights yet.
   */
 object resnet:
   /** 3x3 convolution with padding */
@@ -313,7 +314,6 @@ object resnet:
   )
 
   object ResNet18Weights:
-    private val preset = Presets.ImageClassification(cropSize = 224)
     val IMAGENET1K_V1 = Weights(
       url = "https://download.pytorch.org/models/resnet18-f37072fd.pth",
       Presets.ImageClassification(cropSize = 224)
