@@ -760,9 +760,9 @@ object Tensor:
             .from_blob(
               pointer,
               Array(data.length.toLong),
-              NativeConverters.tensorOptions(inputDType, layout, device, requiresGrad)
+              NativeConverters.tensorOptions(inputDType, layout, CPU, requiresGrad)
             )
-        )
+        ).to(device = device)
       case data: U =>
         val dtype = scalaToDType(data)
         Tensor(
