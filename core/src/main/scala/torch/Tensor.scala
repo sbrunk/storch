@@ -282,7 +282,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   /** True if `other` has the same size and elements as this tensor, false otherwise. */
   def equal(other: Tensor[D]): Boolean = native.equal(other.native)
 
-  /** Returns the tensor with element exponentiated. */
+  /** Returns the tensor with elements exponentiated. */
   def exp: Tensor[D] = Tensor(native.exp())
 
   def flatten: Tensor[D] = Tensor(native.flatten())
