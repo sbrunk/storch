@@ -282,6 +282,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   /** True if `other` has the same size and elements as this tensor, false otherwise. */
   def equal(other: Tensor[D]): Boolean = native.equal(other.native)
 
+  /** Returns the tensor with elements exponentiated. */
+  def exp: Tensor[D] = Tensor(native.exp())
+
   def flatten: Tensor[D] = Tensor(native.flatten())
 
   def flatten(startDim: Int = 0, endDim: Int = -1): Tensor[D] = Tensor(
@@ -330,6 +333,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     out.asInstanceOf[DTypeToScala[D]]
 
   def layout: Layout = Layout.fromNative(native.layout())
+
+  /** Returns the tensor with elements logged. */
+  def log: Tensor[D] = Tensor(native.log())
 
   def matmul[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] =
     Tensor[Promoted[D, D2]](native.matmul(u.native))

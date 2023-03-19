@@ -78,6 +78,12 @@ class TensorSuite extends ScalaCheckSuite {
     assertEquals(t.toSeq, Seq.fill[Float](2 * 3)(1f))
   }
 
+  test("exp and log") {
+    val t = Tensor(Seq(1.0, 2.0, 3.0))
+    assertEquals(t.log(0), Tensor(0.0))
+    assertEquals(t.log.exp, t)
+  }
+
   test("toBuffer") {
     val content = Seq(1, 2, 3, 4)
     val t = Tensor(content)
