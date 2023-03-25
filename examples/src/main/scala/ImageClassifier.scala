@@ -26,6 +26,7 @@
 import Commands.*
 import ImageClassifier.{Prediction, predict, train}
 import caseapp.*
+import caseapp.core.argparser.{ArgParser, SimpleArgParser}
 import caseapp.core.app.CommandsEntryPoint
 import com.sksamuel.scrimage.{ImmutableImage, ScaleMethod}
 import me.tongfei.progressbar.{ProgressBar, ProgressBarBuilder}
@@ -35,7 +36,7 @@ import os.Path
 import torch.*
 import torch.Device.{CPU, CUDA}
 import torch.optim.Adam
-import torchvision.models.resnet.{ResNet101Weights, resnet101}
+import torchvision.models.resnet.{ResNet, ResNetVariant}
 
 import java.nio.file.Paths
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -50,8 +51,6 @@ object ImageClassifier extends CommandsEntryPoint:
 
   torch.manualSeed(0)
   val random = new Random(seed = 0)
-
-  val transforms = ResNet101Weights.IMAGENET1K_V1.transforms
 
   extension (number: Double) def format: String = "%1.5f".format(number)
 
@@ -76,9 +75,11 @@ object ImageClassifier extends CommandsEntryPoint:
     println(s"Train size: ${trainData.size}")
     println(s"Eval size:  ${testData.size}")
 
-    val model = resnet101(numClasses = classes.length)
-    for weightsDir <- options.weightsDir do
-      val weights = torch.pickleLoad(Paths.get(weightsDir))
+    val model: ResNet[Float32] = options.baseModel.factory(numClasses = classes.length)
+    val transforms = options.baseModel.factory.DEFAULT.transforms
+
+    if options.pretrained then
+      val weights = torch.hub.loadStateDictFromUrl(options.baseModel.factory.DEFAULT.url)
       model.loadStateDict(
         weights.filterNot((k, v) => Set("fc.weight", "fc.bias").contains(k))
       )
@@ -192,6 +193,7 @@ object ImageClassifier extends CommandsEntryPoint:
       val oa = OutputArchive()
       model.to(CPU).save(oa)
       oa.save_to((checkpointDir / "model.pt").toString)
+      os.write(checkpointDir / "model.txt", options.baseModel.toString())
       os.write(checkpointDir / "classes.txt", classes.mkString("\n"))
 
   def cleanup(datasetDir: String): Unit =
@@ -206,7 +208,10 @@ object ImageClassifier extends CommandsEntryPoint:
 
   def predict(options: PredictOptions): Prediction =
     val classes = os.read.lines(os.Path(options.modelDir, os.pwd) / "classes.txt")
-    val model = resnet101(numClasses = classes.length)
+    val modelVariant =
+      ResNetVariant.valueOf(os.read(os.Path(options.modelDir, os.pwd) / "model.txt"))
+    val model: ResNet[Float32] = modelVariant.factory(numClasses = classes.length)
+    val transforms = modelVariant.factory.DEFAULT.transforms
     val ia = InputArchive()
     ia.load_from((os.Path(options.modelDir, os.pwd) / "model.pt").toString)
     model.load(ia)
@@ -223,14 +228,21 @@ object ImageClassifier extends CommandsEntryPoint:
   override def commands: Seq[Command[?]] = Seq(Train, Predict)
   override def progName: String = "image-classifier"
 
+implicit val customArgParser: ArgParser[ResNetVariant] =
+  SimpleArgParser.string.xmap(_.toString(), ResNetVariant.valueOf)
+
 @HelpMessage("Train an image classification model")
 case class TrainOptions(
     @HelpMessage(
       "Path to images. Images are expected to be stored in one directory per class i.e. cats/cat1.jpg cats/cat2.jpg dogs/dog1.jpg ..."
     )
     datasetDir: String,
-    @HelpMessage("Path to load pre-trained weights from")
-    weightsDir: Option[String] = None,
+    @HelpMessage(
+      s"ResNet variant to use. Possible values are: ${ResNetVariant.values.mkString(", ")}"
+    )
+    baseModel: ResNetVariant,
+    @HelpMessage("Load pre-trained weights for base-model")
+    pretrained: Boolean = true,
     @HelpMessage("Where to save model checkpoints")
     checkpointDir: String = "checkpoints",
     @HelpMessage("The maximum number of images to take for training")
