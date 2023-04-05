@@ -106,7 +106,8 @@ lazy val examples = project
     fork := true,
     libraryDependencies ++= Seq(
       "me.tongfei" % "progressbar" % "0.9.5",
-      "com.github.alexarchambault" %% "case-app" % "2.1.0-M24"
+      "com.github.alexarchambault" %% "case-app" % "2.1.0-M24",
+      "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
     )
   )
   .dependsOn(vision)
