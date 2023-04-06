@@ -39,7 +39,7 @@ import torch.Int32
   *
   * Derived from https://github.com/pytorch/vision/blob/v0.14.1/torchvision/models/resnet.py
   *
-  * Does not support downloading of pre-trained weights yet.
+  * TODO ResNeXt and wide ResNet variants
   */
 object resnet:
   /** 3x3 convolution with padding */
@@ -75,8 +75,7 @@ object resnet:
         groups: Int = 1,
         baseWidth: Int = 64,
         dilation: Int = 1,
-        normLayer: (Int => HasWeight[D] & TensorModule[D]) =
-          (numFeatures => BatchNorm2d(numFeatures))
+        normLayer: (Int => HasWeight[D] & TensorModule[D])
     ): TensorModule[D] = this match
       case BasicBlock =>
         new BasicBlock(inplanes, planes, stride, downsample, groups, baseWidth, dilation, normLayer)
@@ -97,7 +96,7 @@ object resnet:
       groups: Int = 1,
       baseWidth: Int = 64,
       dilation: Int = 1,
-      normLayer: => (Int => TensorModule[D]) = (numFeatures => BatchNorm2d(numFeatures))
+      normLayer: => (Int => TensorModule[D])
   ) extends TensorModule[D] {
     import BasicBlock.expansion
 
@@ -147,7 +146,7 @@ object resnet:
       groups: Int = 1,
       baseWidth: Int = 64,
       dilation: Int = 1,
-      normLayer: (Int => HasWeight[D] & TensorModule[D]) = (numFeatures => BatchNorm2d(numFeatures))
+      normLayer: (Int => HasWeight[D] & TensorModule[D])
   ) extends TensorModule[D]:
     import Bottleneck.expansion
 
@@ -186,7 +185,7 @@ object resnet:
       out
     override def toString(): String = getClass().getSimpleName()
 
-  class ResNet[D <: BFloat16 | Float32 | Float64: Default](
+  class ResNet[D <: BFloat16 | Float32 | Float64](
       block: BlockBuilder,
       layers: Seq[Int],
       numClasses: Int = 1000,
@@ -195,8 +194,10 @@ object resnet:
       widthPerGroup: Int = 64,
       // each element in the tuple indicates if we should replace
       // the 2x2 stride with a dilated convolution instead
-      replaceStrideWithDilation: (Boolean, Boolean, Boolean) = (false, false, false),
-      normLayer: (Int => HasWeight[D] & TensorModule[D]) = (numFeatures => BatchNorm2d(numFeatures))
+      replaceStrideWithDilation: (Boolean, Boolean, Boolean) = (false, false, false)
+  )(using Default[D])(
+      normLayer: (Int => HasWeight[D] & TensorModule[D]) =
+        (numFeatures => BatchNorm2d[D](numFeatures))
   ) extends Module {
     var inplanes = 64
     var dilation = 1
@@ -289,7 +290,7 @@ object resnet:
       Sequential(layers*)
     }
 
-    private def forwardImpl(_x: Tensor[D]): Tensor[D] =
+    private inline def forwardImpl(_x: Tensor[D]): Tensor[D] =
       var x = conv1(_x)
       x = bn1(x)
       x = relu(x)
@@ -304,93 +305,96 @@ object resnet:
       x = x.flatten(1)
       fc(x)
 
-    def apply(x: Tensor[D]): Tensor[D] =
-      forwardImpl(x)
+    def apply(x: Tensor[D]): Tensor[D] = forwardImpl(x)
   }
+
+  private val weightsBaseUrl =
+    "https://github.com/sbrunk/storch/releases/download/pretrained-weights/"
 
   case class Weights(
       url: String,
       transforms: Presets.ImageClassification
   )
 
-  object ResNet18Weights:
-    val IMAGENET1K_V1 = Weights(
-      url = "https://download.pytorch.org/models/resnet18-f37072fd.pth",
-      Presets.ImageClassification(cropSize = 224)
-    )
-    val DEFAULT = IMAGENET1K_V1
-
-  object ResNet34Weights:
-    val IMAGENET1K_V1 = Weights(
-      url = "https://download.pytorch.org/models/resnet34-b627a593.pth",
-      transforms = Presets.ImageClassification(cropSize = 224)
-    )
-    val DEFAULT = IMAGENET1K_V1
-
-  object ResNet50Weights:
-    private val preset = Presets.ImageClassification(cropSize = 224)
-    val IMAGENET1K_V1 = Weights(
-      url = "https://download.pytorch.org/models/resnet50-0676ba61.pth",
-      transforms = Presets.ImageClassification(cropSize = 224)
-    )
-    val IMAGENET1K_V2 = Weights(
-      url = "https://download.pytorch.org/models/resnet50-11ad3fa6.pth",
-      transforms = Presets.ImageClassification(cropSize = 224, resizeSize = 232)
-    )
-    val DEFAULT = IMAGENET1K_V2
-
-  object ResNet101Weights:
-    private val preset = Presets.ImageClassification(cropSize = 224)
-    val IMAGENET1K_V1 = Weights(
-      url = "https://download.pytorch.org/models/resnet101-63fe2227.pth",
-      transforms = Presets.ImageClassification(cropSize = 224)
-    )
-    val IMAGENET1K_V2 = Weights(
-      url = "https://download.pytorch.org/models/resnet101-cd907fc2.pth",
-      transforms = Presets.ImageClassification(cropSize = 224, resizeSize = 232)
-    )
-    val DEFAULT = IMAGENET1K_V2
-
-  object ResNet152Weights:
-    private val preset = Presets.ImageClassification(cropSize = 224)
-    val IMAGENET1K_V1 = Weights(
-      url = "https://download.pytorch.org/models/resnet152-394f9c45.pth",
-      transforms = Presets.ImageClassification(cropSize = 224)
-    )
-    val IMAGENET1K_V2 = Weights(
-      url = "https://download.pytorch.org/models/resnet152-f82ba261.pth",
-      transforms = Presets.ImageClassification(cropSize = 224, resizeSize = 232)
-    )
-    val DEFAULT = IMAGENET1K_V2
+  abstract class ResNetFactory:
+    def apply[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000): ResNet[D]
+    val DEFAULT: Weights
 
   /** ResNet-18 from [Deep Residual Learning for Image
     * Recognition](https://arxiv.org/pdf/1512.03385.pdf).
     */
-  def resnet18[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
-    ResNet(BasicBlock, Seq(2, 2, 2, 2), numClasses)
+  object ResNet18 extends ResNetFactory:
+    def apply[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
+      ResNet[D](BasicBlock, Seq(2, 2, 2, 2), numClasses)()
+    val IMAGENET1K_V1 = Weights(
+      url = weightsBaseUrl + "resnet18-f37072fd.pth",
+      Presets.ImageClassification(cropSize = 224)
+    )
+    val DEFAULT = IMAGENET1K_V1
 
   /** ResNet-34 from [Deep Residual Learning for Image
     * Recognition](https://arxiv.org/pdf/1512.03385.pdf).
     */
-  def resnet34[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
-    ResNet(BasicBlock, Seq(3, 4, 6, 3), numClasses = numClasses)
+  object ResNet34 extends ResNetFactory:
+    def apply[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
+      ResNet[D](BasicBlock, Seq(3, 4, 6, 3), numClasses = numClasses)()
+    val IMAGENET1K_V1 = Weights(
+      url = weightsBaseUrl + "resnet34-b627a593.pth",
+      transforms = Presets.ImageClassification(cropSize = 224)
+    )
+    val DEFAULT = IMAGENET1K_V1
 
   /** ResNet-50 from [Deep Residual Learning for Image
     * Recognition](https://arxiv.org/pdf/1512.03385.pdf)
     */
-  def resnet50[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
-    ResNet(Bottleneck, Seq(3, 4, 6, 3), numClasses = numClasses)
+  object ResNet50 extends ResNetFactory:
+    def apply[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
+      ResNet(Bottleneck, Seq(3, 4, 6, 3), numClasses = numClasses)()
+    val IMAGENET1K_V1 = Weights(
+      url = weightsBaseUrl + "resnet50-0676ba61.pth",
+      transforms = Presets.ImageClassification(cropSize = 224)
+    )
+    val IMAGENET1K_V2 = Weights(
+      url = weightsBaseUrl + "resnet50-11ad3fa6.pth",
+      transforms = Presets.ImageClassification(cropSize = 224, resizeSize = 232)
+    )
+    val DEFAULT = IMAGENET1K_V2
 
   /** ResNet-101 from [Deep Residual Learning for Image
     * Recognition](https://arxiv.org/pdf/1512.03385.pdf)
     */
-  def resnet101[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
-    ResNet(Bottleneck, Seq(3, 4, 23, 3), numClasses = numClasses)
+  object ResNet101 extends ResNetFactory:
+    def apply[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
+      ResNet(Bottleneck, Seq(3, 4, 23, 3), numClasses = numClasses)()
+    val IMAGENET1K_V1 = Weights(
+      url = weightsBaseUrl + "resnet101-63fe2227.pth",
+      transforms = Presets.ImageClassification(cropSize = 224)
+    )
+    val IMAGENET1K_V2 = Weights(
+      url = weightsBaseUrl + "resnet101-cd907fc2.pth",
+      transforms = Presets.ImageClassification(cropSize = 224, resizeSize = 232)
+    )
+    val DEFAULT = IMAGENET1K_V2
 
   /** ResNet-152 from [Deep Residual Learning for Image
     * Recognition](https://arxiv.org/pdf/1512.03385.pdf)
     */
-  def resnet152[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
-    ResNet(Bottleneck, Seq(3, 8, 36, 3), numClasses = numClasses)
+  object ResNet152 extends ResNetFactory:
+    def apply[D <: BFloat16 | Float32 | Float64: Default](numClasses: Int = 1000) =
+      ResNet(Bottleneck, Seq(3, 8, 36, 3), numClasses = numClasses)()
+    val IMAGENET1K_V1 = Weights(
+      url = weightsBaseUrl + "resnet152-394f9c45.pth",
+      transforms = Presets.ImageClassification(cropSize = 224)
+    )
+    val IMAGENET1K_V2 = Weights(
+      url = weightsBaseUrl + "resnet152-f82ba261.pth",
+      transforms = Presets.ImageClassification(cropSize = 224, resizeSize = 232)
+    )
+    val DEFAULT = IMAGENET1K_V2
 
-  // TODO ResNeXt and wide ResNet variants
+  enum ResNetVariant(val factory: ResNetFactory):
+    case ResNet18 extends ResNetVariant(resnet.this.ResNet18)
+    case ResNet34 extends ResNetVariant(resnet.this.ResNet34)
+    case ResNet50 extends ResNetVariant(resnet.this.ResNet50)
+    case ResNet101 extends ResNetVariant(resnet.this.ResNet101)
+    case ResNet152 extends ResNetVariant(resnet.this.ResNet152)

@@ -17,15 +17,17 @@
 //> using scala "3.2"
 //> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
-//> using lib "dev.storch::vision:0.0-baeeb21-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-b34f589-SNAPSHOT"
 //> using lib "com.lihaoyi::os-lib:0.9.0"
 //> using lib "me.tongfei:progressbar:0.9.5"
 //> using lib "com.github.alexarchambault::case-app:2.1.0-M24"
+//> using lib "org.scala-lang.modules::scala-parallel-collections:1.0.4"
 //> using lib "org.bytedeco:pytorch-platform-gpu:1.13.1-1.5.9-SNAPSHOT"
 
 import Commands.*
 import ImageClassifier.{Prediction, predict, train}
 import caseapp.*
+import caseapp.core.argparser.{ArgParser, SimpleArgParser}
 import caseapp.core.app.CommandsEntryPoint
 import com.sksamuel.scrimage.{ImmutableImage, ScaleMethod}
 import me.tongfei.progressbar.{ProgressBar, ProgressBarBuilder}
@@ -35,9 +37,10 @@ import os.Path
 import torch.*
 import torch.Device.{CPU, CUDA}
 import torch.optim.Adam
-import torchvision.models.resnet.{ResNet101Weights, resnet101}
+import torchvision.models.resnet.{ResNet, ResNetVariant}
 
 import java.nio.file.Paths
+import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
@@ -46,12 +49,12 @@ import scala.util.{Random, Try, Using}
 /** Example script for training an image-classification model on your own images */
 object ImageClassifier extends CommandsEntryPoint:
 
+  val fileTypes = Seq("jpg", "png")
+
   case class Metrics(loss: Float, accuracy: Float)
 
   torch.manualSeed(0)
   val random = new Random(seed = 0)
-
-  val transforms = ResNet101Weights.IMAGENET1K_V1.transforms
 
   extension (number: Double) def format: String = "%1.5f".format(number)
 
@@ -60,25 +63,51 @@ object ImageClassifier extends CommandsEntryPoint:
     println(s"Using device: $device")
 
     val datasetDir = os.Path(options.datasetDir, base = os.pwd)
+
+    /** verify that we can read all images of the dataset */
+    if os
+        .walk(datasetDir)
+        .filter(path => fileTypes.contains(path.ext))
+        .par
+        .map { path =>
+          val readTry = Try(ImmutableImage.loader().fromPath(path.toNIO)).map(_ => ())
+          readTry.failed.foreach(e => println(s"Could not read $path"))
+          readTry
+        }
+        .exists(_.isFailure)
+    then
+      println("Could not read all images in the dataset. Stopping.")
+      System.exit(1)
     val classes = os.list(datasetDir).filter(os.isDir).map(_.last).sorted
     val classIndices = classes.zipWithIndex.toMap
     println(s"Found ${classIndices.size} classes: ${classIndices.mkString("[", ", ", "]")}")
-    val pathsWithLabel = classes.flatMap { label =>
-      os
+    val pathsPerLabel = classes.map { label =>
+      label -> os
         .list(datasetDir / label)
-        .filter(_.ext == "jpg")
-        .map(path => path -> label)
-    }
+        .filter(path => fileTypes.contains(path.ext))
+    }.toMap
+    val pathsWithLabel =
+      pathsPerLabel.toSeq.flatMap((label, paths) => paths.map(path => path -> label))
     println(s"Found ${pathsWithLabel.size} examples")
+    println(
+      pathsPerLabel
+        .map((label, paths) => s"Found ${paths.size} examples for class $label")
+        .mkString("\n")
+    )
 
     val sample = random.shuffle(pathsWithLabel).take(options.take.getOrElse(pathsWithLabel.length))
     val (trainData, testData) = sample.splitAt((sample.size * 0.9).toInt)
     println(s"Train size: ${trainData.size}")
     println(s"Eval size:  ${testData.size}")
 
-    val model = resnet101(numClasses = classes.length)
-    for weightsDir <- options.weightsDir do
-      val weights = torch.pickleLoad(Paths.get(weightsDir))
+    val model: ResNet[Float32] = options.baseModel.factory(numClasses = classes.length)
+    println(s"Model architecture: ${options.baseModel}")
+    val transforms = options.baseModel.factory.DEFAULT.transforms
+
+    if options.pretrained then
+      val weights = torch.hub.loadStateDictFromUrl(options.baseModel.factory.DEFAULT.url)
+      // Don't load the classification head weights, as we they are specific to the imagenet classes
+      // and their output size (1000) usually won't match the number of classes of our dataset.
       model.loadStateDict(
         weights.filterNot((k, v) => Set("fc.weight", "fc.bias").contains(k))
       )
@@ -102,13 +131,9 @@ object ImageClassifier extends CommandsEntryPoint:
         .grouped(batchSize)
         .map { batch =>
           val (inputs, labels) = batch.unzip
+          // parallelize loading to improve GPU utilization
           val transformedInputs =
-            Await.result(
-              Future.traverse(inputs)(path => // parallelize loading to improve GPU utilization
-                Future(transforms.transforms(loader.fromPath(path.toNIO)))
-              ),
-              10.seconds
-            )
+            inputs.par.map(path => transforms.transforms(loader.fromPath(path.toNIO))).seq
           assert(transformedInputs.forall(t => !t.isnan.any.item))
           (
             transforms.batchTransforms(torch.stack(transformedInputs)),
@@ -192,23 +217,28 @@ object ImageClassifier extends CommandsEntryPoint:
       val oa = OutputArchive()
       model.to(CPU).save(oa)
       oa.save_to((checkpointDir / "model.pt").toString)
+      os.write(checkpointDir / "model.txt", options.baseModel.toString())
       os.write(checkpointDir / "classes.txt", classes.mkString("\n"))
-
-  def cleanup(datasetDir: String): Unit =
-    os.walk(os.Path(datasetDir, base = os.pwd)).filter(_.ext == "jpg").foreach { path =>
-      Try(ImmutableImage.loader().fromPath(path.toNIO)).recover { _ =>
-        println(s"Cleaning up broken image $path")
-        os.move(path, path / os.up / (path.last + ".bak"))
-      }
-    }
 
   case class Prediction(label: String, confidence: Double)
 
   def predict(options: PredictOptions): Prediction =
-    val classes = os.read.lines(os.Path(options.modelDir, os.pwd) / "classes.txt")
-    val model = resnet101(numClasses = classes.length)
+    val modelDir = options.modelDir match
+      case None =>
+        val checkpoints = os.list(os.pwd / "checkpoints", sort = true)
+        if checkpoints.isEmpty then
+          println("Not checkpoint found. Did you train a model?")
+          System.exit(1)
+        checkpoints.last
+      case Some(value) => os.Path(value, os.pwd)
+    println(s"Trying to load model from $modelDir")
+    val classes = os.read.lines(modelDir / "classes.txt")
+    val modelVariant =
+      ResNetVariant.valueOf(os.read(modelDir / "model.txt"))
+    val model: ResNet[Float32] = modelVariant.factory(numClasses = classes.length)
+    val transforms = modelVariant.factory.DEFAULT.transforms
     val ia = InputArchive()
-    ia.load_from((os.Path(options.modelDir, os.pwd) / "model.pt").toString)
+    ia.load_from((modelDir / "model.pt").toString)
     model.load(ia)
     model.eval()
     val image = ImmutableImage.loader().fromPath(Paths.get(options.imagePath))
@@ -223,14 +253,21 @@ object ImageClassifier extends CommandsEntryPoint:
   override def commands: Seq[Command[?]] = Seq(Train, Predict)
   override def progName: String = "image-classifier"
 
+implicit val customArgParser: ArgParser[ResNetVariant] =
+  SimpleArgParser.string.xmap(_.toString(), ResNetVariant.valueOf)
+
 @HelpMessage("Train an image classification model")
 case class TrainOptions(
     @HelpMessage(
       "Path to images. Images are expected to be stored in one directory per class i.e. cats/cat1.jpg cats/cat2.jpg dogs/dog1.jpg ..."
     )
     datasetDir: String,
-    @HelpMessage("Path to load pre-trained weights from")
-    weightsDir: Option[String] = None,
+    @HelpMessage(
+      s"ResNet variant to use. Possible values are: ${ResNetVariant.values.mkString(", ")}. Defaults to ResNet50."
+    )
+    baseModel: ResNetVariant = ResNetVariant.ResNet50,
+    @HelpMessage("Load pre-trained weights for base-model")
+    pretrained: Boolean = true,
     @HelpMessage("Where to save model checkpoints")
     checkpointDir: String = "checkpoints",
     @HelpMessage("The maximum number of images to take for training")
@@ -244,8 +281,10 @@ case class TrainOptions(
 case class PredictOptions(
     @HelpMessage("Path to an image whose class we want to predict")
     imagePath: String,
-    @HelpMessage("Path to to the serialized model created by running 'train'")
-    modelDir: String
+    @HelpMessage(
+      "Path to to the serialized model created by running 'train'. Tries the latest model in 'checkpoints' if not set."
+    )
+    modelDir: Option[String]
 )
 
 object Commands:

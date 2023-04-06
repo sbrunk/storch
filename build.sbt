@@ -78,7 +78,9 @@ lazy val core = project
     libraryDependencies ++= Seq(
       "org.bytedeco" % "pytorch" % s"$pytorchVersion-${javaCppVersion.value}",
       "org.typelevel" %% "spire" % "0.18.0",
+      "com.lihaoyi" %% "os-lib" % "0.9.0",
       "com.lihaoyi" %% "sourcecode" % "0.3.0",
+      "dev.dirs" % "directories" % "26",
       "org.scalameta" %% "munit" % "0.7.29" % Test,
       "org.scalameta" %% "munit-scalacheck" % "0.7.29" % Test
     )
@@ -103,9 +105,9 @@ lazy val examples = project
   .settings(
     fork := true,
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %% "os-lib" % "0.9.0",
       "me.tongfei" % "progressbar" % "0.9.5",
-      "com.github.alexarchambault" %% "case-app" % "2.1.0-M24"
+      "com.github.alexarchambault" %% "case-app" % "2.1.0-M24",
+      "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
     )
   )
   .dependsOn(vision)
