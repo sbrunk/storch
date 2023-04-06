@@ -90,6 +90,7 @@
         <li class="level1"><a href="../about.html">About</a></li>
         <li class="level1"><a href="../installation.html">Installation</a></li>
         <li class="level1"><a href="../modules.html">Modules</a></li>
+        <li class="level1"><a href="../pre-trained-weights.html">Converting pre-trained weights</a></li>
         <li class="level1 nav-header">tutorial</li>
         <li class="level2 active"><a href="#">Tensors</a></li>
         <li class="level2"><a href="buildmodel.html">Build the Neural Network</a></li>
@@ -153,8 +154,8 @@
 </span><span class="comment">// data: Seq[Int] = List(1, 2, 3, 4)
 </span><span class="keyword">val</span><span> </span><span class="identifier">xData</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="type-name">Tensor</span><span>(</span><span class="identifier">data</span><span>).</span><span class="identifier">reshape</span><span>(</span><span class="number-literal">2</span><span>,</span><span class="number-literal">2</span><span>)
 </span><span class="comment">// xData: Tensor[Int32] = tensor dtype=int32, shape=[2, 2], device=CPU 
-// [[-723575469, 32625],
-//  [0, 0]]</span></code></pre>
+// [[1, 2],
+//  [3, 4]]</span></code></pre>
         <p><strong>From another tensor:</strong></p>
         <p>The new tensor retains the properties (shape, datatype) of the argument
         tensor, unless explicitly overridden.</p>
