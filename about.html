@@ -183,7 +183,12 @@
         <p>Tracking the data type at compile time enables us to catch certain errors earlier. For instance, <code>torch.rand</code> is only implemented for float types and the following will trigger a runtime error in PyTorch:</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>([</span><span class="number-literal">3</span><span>,</span><span class="number-literal">3</span><span>], </span><span class="identifier">dtype</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="identifier">int32</span><span>) </span><span class="comment"># RuntimeError: &quot;check_uniform_bounds&quot; not implemented for &#39;Int&#39;</span></code></pre>
         <p>In Storch, the same code does not compile:</p>
-        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">3</span><span>,</span><span class="number-literal">3</span><span>), </span><span class="identifier">dtype</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="identifier">int32</span><span>) </span><span class="comment">// compile error</span></code></pre>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">3</span><span>,</span><span class="number-literal">3</span><span>), </span><span class="identifier">dtype</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="identifier">int32</span><span>)
+</span><span class="comment">// error:
+// Found:    (torch.int32 : torch.Int32)
+// Required: torch.FloatNN | torch.ComplexNN
+// torch.rand(Seq(3,3), dtype=torch.int32)
+//                            ^^^^^^^^^^^</span></code></pre>
         <p>Storch is powered by <a href="https://pytorch.org/cppdocs/index.html">LibTorch</a>, the C++ library underlying PyTorch and
         <a href="https://github.com/bytedeco/javacpp">JavaCPP</a>, which provides generated Java bindings for LibTorch as well as important utilities to integrate with native code on the JVM.</p>
 
