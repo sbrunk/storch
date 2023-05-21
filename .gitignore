@@ -9,3 +9,8 @@ metals.sbt
 *.worksheet.sc
 /data/
 .scala-build/
+
+# Devenv
+.devenv*
+devenv.local.nix
+

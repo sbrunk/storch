@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Go to the repository root
+cd "${GIT_DIR}/.."
+
+# Run the sbt linting checks
+sbt 'headerCheckAll ; scalafmtCheckAll ; scalafmtSbtCheck'
