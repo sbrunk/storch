@@ -41,8 +41,8 @@ torch.rand([3,3], dtype=torch.int32) # RuntimeError: "check_uniform_bounds" not 
 ```
 
 In Storch, the same code does not compile:
-```scala
-torch.rand(Seq(3,3), dtype=torch.int32) // compile error
+```scala mdoc:fail
+torch.rand(Seq(3,3), dtype=torch.int32)
 ```
 
 Storch is powered by [LibTorch](https://pytorch.org/cppdocs/index.html), the C++ library underlying PyTorch and
