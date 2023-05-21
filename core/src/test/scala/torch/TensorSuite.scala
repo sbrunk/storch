@@ -81,7 +81,7 @@ class TensorSuite extends ScalaCheckSuite {
   test("exp and log") {
     val t = Tensor(Seq(1.0, 2.0, 3.0))
     assertEquals(t.log(0), Tensor(0.0))
-    assertEquals(t.log.exp, t)
+    assert(torch.allclose(t.log.exp, t))
   }
 
   test("toBuffer") {
