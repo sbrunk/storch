@@ -480,6 +480,34 @@ def cat[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
   torchNative.cat(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)), dim.toLong)
 )
 
+// TODO dsplit
+// TODO column_stack
+// TODO dstack
+// TODO gather
+// TODO hsplit
+// TODO hstack
+// TODO index_add
+// TODO index_copy
+// TODO index_reduce
+// TODO index_select
+// TODO masked_select
+// TODO movedim
+// TODO moveaxis
+// TODO narrow
+// TODO narrow_copy
+// TODO nonzero
+// TODO permute
+// TODO reshape
+// TODO select
+// TODO scatter
+// TODO diagonal_scatter
+// TODO select_scatter
+// TODO slice_scatter
+// TODO scatter_add
+// TODO scatter_reduce
+// TODO split
+// TODO squeeze
+
 /** Concatenates a sequence of tensors along a new dimension.
   *
   * All tensors need to be of the same size.
@@ -488,9 +516,148 @@ def stack[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor
   torchNative.stack(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)), dim)
 )
 
+// TODO swapaxes
+// TODO swapdims
+// TODO t
+// TODO take
+// TODO take_along_dim
+// TODO tensor_split
+// TODO tile
+// TODO transpose
+// TODO unbind
+// TODO unsqueeze
+// TODO vsplit
+// TODO vstack
+// TODO where
+
 // End Indexing, Slicing, Joining, Mutating Ops
 
 // Math operations
+
+// Pointwise Ops
+
+/** Computes the absolute value of each element in `input`. */
+def abs[D <: DType](input: Tensor[D]) = Tensor(torchNative.abs(input.native))
+
+/** Computes the inverse cosine of each element in `input`. */
+def acos[D <: DType](input: Tensor[D]) = Tensor(torchNative.acos(input.native))
+
+/** Returns a new tensor with the inverse hyperbolic cosine of the elements of `input` . */
+def acosh[D <: DType](input: Tensor[D]) = Tensor(torchNative.acosh(input.native))
+
+/** Adds `other` to `input`. */
+def add[D <: DType, D2 <: DType](input: Tensor[D], other: Tensor[D2]): Tensor[Promoted[D, D2]] =
+  Tensor(torchNative.add(input.native, other.native))
+
+/** Adds `other` to `input`. */
+def add[D <: DType, S <: ScalaType](
+    input: Tensor[D],
+    other: ScalaType
+): Tensor[Promoted[D, ScalaToDType[S]]] =
+  Tensor(torchNative.add(input.native, toScalar(other)))
+
+// TODO addcdiv
+// TODO addcmul
+// TODO angle
+// TODO asin
+// TODO atan
+// TODO atanh
+// TODO atan2
+// TODO bitwise_not
+// TODO bitwise_and
+// TODO bitwise_or
+// TODO bitwise_xor
+// TODO bitwise_left_shift
+// TODO bitwise_right_shift
+// TODO ceil
+// TODO clamp
+// TODO conj_physical
+// TODO copysign
+// TODO cos
+// TODO cosh
+// TODO deg2rad
+// TODO div
+// TODO exp
+// TODO exp2
+// TODO expm1
+// TODO fake_quantize_per_channel_affine
+// TODO fake_quantize_per_tensor_affine
+// TODO float_power
+// TODO floor
+// TODO floor_divide
+// TODO fmod
+// TODO frac
+// TODO frexp
+// TODO gradient
+// TODO imag
+// TODO ldexp
+// TODO lerp
+// TODO lgamma
+// TODO log
+
+/** Returns a new tensor with the natural logarithm of the elements of input. */
+def log[D <: DType](input: Tensor[D]) = Tensor(torchNative.log(input.native))
+
+// TODO log10
+// TODO log1p
+
+/** Returns a new tensor with the logarithm to the base 2 of the elements of `input`. */
+def log2[D <: DType](input: Tensor[D]) = Tensor(torchNative.log2(input.native))
+
+// TODO logaddexp
+// TODO logaddexp2
+// TODO logical_and
+// TODO locigal_not
+// TODO logical_or
+// TODO logical_xor
+// TODO logit
+// TODO hypot
+// TODO i0
+// TODO igamma
+// TODO igammac
+
+def mul[D <: DType, D2 <: DType](input: Tensor[D], other: Tensor[D2]): Tensor[Promoted[D, D2]] =
+  Tensor(torchNative.mul(input.native, other.native))
+
+// TODO mlvgamma
+// TODO nan_to_num
+// TODO neg
+// TODO nextafter
+// TODO polygamma
+// TODO positive
+// TODO pow
+// TODO quantized_batch_norm
+// TODO quantized_max_pool1d
+// TODO quantized_max_pool2d
+// TODO rad2deg
+// TODO real
+// TODO reciprocal
+// TODO remainder
+// TODO round
+// TODO rsqrt
+// TODO sigmoid
+// TODO sign
+// TODO sgn
+// TODO signbit
+
+def sin[D <: DType](input: Tensor[D]) = Tensor(torchNative.sin(input.native))
+
+// TODO sinc
+// TODO sinh
+// TODO softmax
+
+export torch.nn.functional.softmax
+
+// TODO sqrt
+// TODO square
+// TODO sub
+// TODO tan
+// TODO tanh
+// TODO true_divide
+// TODO trunc
+// TODO xlogy
+
+// End Pointwise Ops
 
 // Comparison Ops
 
