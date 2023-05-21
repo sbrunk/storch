@@ -490,6 +490,23 @@ def stack[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor
 
 // End Indexing, Slicing, Joining, Mutating Ops
 
+// Math operations
+
+// Comparison Ops
+
+def allclose(
+    input: Tensor[?],
+    other: Tensor[?],
+    rtol: Double = 1e-05,
+    atol: Double = 1e-08,
+    equalNan: Boolean = false
+) =
+  torchNative.allclose(input.native, other.native, rtol, atol, equalNan)
+
+// End Comparison Ops
+
+// End Math operations
+
 def matmul[D1 <: DType, D2 <: DType](t1: Tensor[D1], t2: Tensor[D2]): Tensor[Promoted[D1, D2]] =
   t1.matmul(t2)
 

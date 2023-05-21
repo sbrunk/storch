@@ -62,6 +62,8 @@ import org.bytedeco.pytorch.LongArrayRef
 import org.bytedeco.pytorch.FloatArrayRef
 import org.bytedeco.pytorch.DoubleArrayRef
 import org.bytedeco.pytorch.EllipsisIndexType
+import org.bytedeco.pytorch.SymInt
+import org.bytedeco.pytorch.SymIntOptional
 
 case class TensorTuple[D <: DType](
     values: Tensor[D],
@@ -172,6 +174,14 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   /** Tests if all elements of this tensor evaluate to `true`. */
   def all: Tensor[Bool] = Tensor(native.all())
+
+  /** @see [[torch.allclose]] */
+  def allclose(
+      other: Tensor[?],
+      rtol: Double = 1e-05,
+      atol: Double = 1e-08,
+      equalNan: Boolean = false
+  ) = native.allclose(other.native, rtol, atol, equalNan)
 
   def any: Tensor[Bool] = Tensor(native.any())
 
@@ -443,6 +453,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
       indices: (Slice | Int | Long | Tensor[Bool] | Tensor[UInt8] | Tensor[Int64] | Seq[T] |
         None.type | Ellipsis)*
   ): Tensor[D] =
+    def toSymInt(maybeLong: Option[Long]) = maybeLong.map(l => SymIntOptional(SymInt(l))).orNull
     // see https://pytorch.org/cppdocs/notes/tensor_indexing.html
     val nativeIndices: Seq[pytorch.TensorIndex] =
       for (i <- indices) yield i match
@@ -456,7 +467,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
           new pytorch.TensorIndex(singleton)
         case Slice(start, end, step) =>
           new pytorch.TensorIndex(
-            new pytorch.Slice(toOptional(start), toOptional(end), toOptional(step))
+            new pytorch.Slice(toSymInt(start), toSymInt(end), toSymInt(step))
           )
         case s: Seq[T] @unchecked => new pytorch.TensorIndex(Tensor[T](s).native)
         case e: Ellipsis          => new pytorch.TensorIndex(new EllipsisIndexType)
