@@ -25,6 +25,8 @@ ThisBuild / apiURL := Some(new URL("https://storch.dev/api/"))
 
 val scrImageVersion = "4.0.32"
 val pytorchVersion = "2.0.1"
+val openblasVersion = "0.3.23"
+val mklVersion = "2023.1"
 ThisBuild / scalaVersion := "3.2.2"
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
@@ -69,8 +71,8 @@ lazy val core = project
   .settings(
     javaCppPresetLibs ++= Seq(
       (if (enableGPU.value) "pytorch-gpu" else "pytorch") -> pytorchVersion,
-      "mkl" -> "2023.1",
-      "openblas" -> "0.3.23"
+      "mkl" -> mklVersion,
+      "openblas" -> openblasVersion
     ) ++ (if (enableGPU.value) Seq("cuda-redist" -> "11.8-8.6") else Seq()),
     javaCppPlatform := org.bytedeco.sbt.javacpp.Platform.current,
     fork := true,
@@ -118,7 +120,10 @@ lazy val docs = project
   .settings(commonSettings)
   .settings(
     mdocVariables ++= Map(
-      "JAVACPP_VERSION" -> javaCppVersion.value
+      "JAVACPP_VERSION" -> javaCppVersion.value,
+      "PYTORCH_VERSION" -> pytorchVersion,
+      "OPENBLAS_VERSION" -> openblasVersion,
+      "MKL_VERSION" -> mklVersion
     ),
     ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(examples),
     Laika / sourceDirectories ++= Seq(sourceDirectory.value),

@@ -58,7 +58,7 @@ The easiest and most portable way to depend on the native library is via the PyT
 resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
-  "org.bytedeco" % "pytorch-platform" % "1.13.1-@JAVACPP_VERSION@"
+  "org.bytedeco" % "pytorch-platform" % "@PYTORCH_VERSION@-@JAVACPP_VERSION@"
 )
 fork := true
 ```
@@ -69,7 +69,7 @@ fork := true
 //> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
-//> using lib "org.bytedeco:pytorch-platform:1.13.1-@JAVACPP_VERSION@"
+//> using lib "org.bytedeco:pytorch-platform:@PYTORCH_VERSION@-@JAVACPP_VERSION@"
 ```
 
 @:@
@@ -92,9 +92,9 @@ Currently supported are `linux-x86_64`, `macosx-x86_64` and `windows-x86_64`.
 resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
-  "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@",
-  "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@" classifier "linux-x86_64",
-  "org.bytedeco" % "openblas" % "0.3.21-@JAVACPP_VERSION@" classifier "linux-x86_64"
+  "org.bytedeco" % "pytorch" % "@PYTORCH_VERSION@-@JAVACPP_VERSION@",
+  "org.bytedeco" % "pytorch" % "@PYTORCH_VERSION@-@JAVACPP_VERSION@" classifier "linux-x86_64",
+  "org.bytedeco" % "openblas" % "@OPENBLAS_VERSION@-@JAVACPP_VERSION@" classifier "linux-x86_64"
 )
 fork := true
 ```
@@ -105,8 +105,8 @@ fork := true
 //> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
-//> using lib "org.bytedeco:openblas:0.3.21-@JAVACPP_VERSION@,classifier=linux-x86_64"
-//> using lib "org.bytedeco:pytorch:1.13.1-@JAVACPP_VERSION@,classifier=linux-x86_64"
+//> using lib "org.bytedeco:openblas:@OPENBLAS_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64"
+//> using lib "org.bytedeco:pytorch:@PYTORCH_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64"
 ```
 
 @:@
@@ -129,7 +129,7 @@ resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
 )
-javaCppPresetLibs ++= Seq("pytorch" -> "1.13.1", "openblas" -> "0.3.21")
+javaCppPresetLibs ++= Seq("pytorch" -> "@PYTORCH_VERSION@", "openblas" -> "@OPENBLAS_VERSION@")
 fork := true
 
 ```
@@ -152,7 +152,7 @@ distribution including cuDNN, helping you to avoid having to mess with local CUD
 resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
-  "org.bytedeco" % "pytorch-platform-gpu" % "1.13.1-@JAVACPP_VERSION@",
+  "org.bytedeco" % "pytorch-platform-gpu" % "@PYTORCH_VERSION@-@JAVACPP_VERSION@",
   "org.bytedeco" % "cuda-platform-redist" % "11.8-8.6-@JAVACPP_VERSION@"
 )
 fork := true
@@ -164,7 +164,7 @@ fork := true
 //> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
-//> using lib "org.bytedeco:pytorch-platform-gpu:1.13.1-@JAVACPP_VERSION@"
+//> using lib "org.bytedeco:pytorch-platform-gpu:@PYTORCH_VERSION@-@JAVACPP_VERSION@"
 //> using lib "org.bytedeco:cuda-platform-redist:11.8-8.6-@JAVACPP_VERSION@"
 ```
 
@@ -186,9 +186,9 @@ Currently supported are `linux-x86_64-gpu` and `windows-x86_64-gpu`.
 resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
-  "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@",
-  "org.bytedeco" % "pytorch" % "1.13.1-@JAVACPP_VERSION@" classifier "linux-x86_64-gpu",
-  "org.bytedeco" % "openblas" % "0.3.21-@JAVACPP_VERSION@" classifier "linux-x86_64",
+  "org.bytedeco" % "pytorch" % "@PYTORCH_VERSION@-@JAVACPP_VERSION@",
+  "org.bytedeco" % "pytorch" % "@PYTORCH_VERSION@-@JAVACPP_VERSION@" classifier "linux-x86_64-gpu",
+  "org.bytedeco" % "openblas" % "@OPENBLAS_VERSION@-@JAVACPP_VERSION@" classifier "linux-x86_64",
   "org.bytedeco" % "cuda" % "11.8-8.6-@JAVACPP_VERSION@" classifier "linux-x86_64-redist"
 )
 fork := true
@@ -200,8 +200,8 @@ fork := true
 //> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
-//> using lib "org.bytedeco:pytorch:1.13.1-@JAVACPP_VERSION@,classifier=linux-x86_64-gpu"
-//> using lib "org.bytedeco:openblas:0.3.21-@JAVACPP_VERSION@,classifier=linux-x86_64"
+//> using lib "org.bytedeco:pytorch:@PYTORCH_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64-gpu"
+//> using lib "org.bytedeco:openblas:@OPENBLAS_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64"
 //> using lib "org.bytedeco:cuda:11.8-8.6-@JAVACPP_VERSION@,classifier=linux-x86_64-redist"
 ```
 
@@ -223,7 +223,7 @@ resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
 )
-javaCppPresetLibs ++= Seq("pytorch-gpu" -> "1.13.1", "openblas" -> "0.3.21", "cuda-redist" -> "11.8-8.6")
+javaCppPresetLibs ++= Seq("pytorch-gpu" -> "@PYTORCH_VERSION@", "openblas" -> "@OPENBLAS_VERSION@", "cuda-redist" -> "11.8-8.6")
 fork := true
 ```
 

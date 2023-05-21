@@ -17,12 +17,13 @@
 //> using scala "3.2"
 //> using repository "sonatype-s01:snapshots"
 //> using repository "sonatype:snapshots"
-//> using lib "dev.storch::vision:0.0-6201394-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-5d5568f-SNAPSHOT"
 //> using lib "com.lihaoyi::os-lib:0.9.0"
 //> using lib "me.tongfei:progressbar:0.9.5"
 //> using lib "com.github.alexarchambault::case-app:2.1.0-M24"
 //> using lib "org.scala-lang.modules::scala-parallel-collections:1.0.4"
-//> using lib "org.bytedeco:pytorch-platform-gpu:1.13.1-1.5.9-SNAPSHOT"
+// replace with pytorch-platform-gpu if you have a CUDA capable GPU
+//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9-SNAPSHOT"
 
 import Commands.*
 import ImageClassifier.{Prediction, predict, train}
