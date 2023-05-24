@@ -32,7 +32,7 @@ object Generators:
   val genTensorSize = Gen.choose(0, 5).flatMap(listSize => Gen.listOfN(listSize, genDimSize))
   given Arbitrary[Device] = Arbitrary(genDevice)
 
-  val genDType = Gen.oneOf(
+  val allDTypes = List(
     int8,
     uint8,
     int16,
@@ -47,10 +47,17 @@ object Generators:
     // qint8,
     // quint8,
     // qint32,
-    bfloat16,
+    bfloat16
     // quint4x2,
-    float16
+    // float16, // NOTE: A lot of CPU do not support this dtype
     // undefined,
     // numoptions
   )
+
+  inline def genTensor[D <: DType]: Gen[Tensor[D]] =
+    Gen.oneOf(allDTypes.filter(_.isInstanceOf[D])).map { dtype =>
+      ones(10, dtype = dtype.asInstanceOf[D])
+    }
+
+  val genDType = Gen.oneOf(allDTypes)
   given Arbitrary[DType] = Arbitrary(genDType)

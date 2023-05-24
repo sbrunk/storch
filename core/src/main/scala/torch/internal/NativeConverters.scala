@@ -18,12 +18,15 @@ package torch
 package internal
 
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.ScalarTypeOptional
-import org.bytedeco.pytorch.LayoutOptional
-import org.bytedeco.pytorch.DeviceOptional
-import org.bytedeco.pytorch.BoolOptional
-import org.bytedeco.pytorch.LongOptional
-import org.bytedeco.pytorch.TensorOptional
+import org.bytedeco.pytorch.{
+  ScalarTypeOptional,
+  LayoutOptional,
+  DeviceOptional,
+  DoubleOptional,
+  BoolOptional,
+  LongOptional,
+  TensorOptional
+}
 
 import scala.reflect.Typeable
 import org.bytedeco.javacpp.LongPointer
@@ -39,6 +42,8 @@ private[torch] object NativeConverters:
     case i: T         => f(i)
 
   def toOptional(l: Long | Option[Long]): LongOptional = toOptional(l, pytorch.LongOptional(_))
+  def toOptional(l: Double | Option[Double]): DoubleOptional =
+    toOptional(l, pytorch.DoubleOptional(_))
 
   def toOptional[D <: DType](t: Tensor[D] | Option[Tensor[D]]): TensorOptional =
     toOptional(t, t => pytorch.TensorOptional(t.native))
