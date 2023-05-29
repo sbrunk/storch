@@ -211,13 +211,12 @@ class TensorSuite extends ScalaCheckSuite {
 
   // TODO clamp
 
-  // TODO Handle Complex Tensors
-  // testUnaryOp(
-  //   op = conjPhysical,
-  //   opName = "conjPhysical",
-  //   inputTensor = Tensor(Seq(180.0, -180.0, 360.0, -360.0, 90.0, -90.0)),
-  //   expectedTensor = Tensor(Seq(3.1416, -3.1416, 6.2832, -6.2832, 1.5708, -1.5708))
-  // )
+  testUnaryOp(
+    op = conjPhysical,
+    opName = "conjPhysical",
+    inputTensor = Tensor(Seq(Complex(-1.0, 1.0), Complex(-2.0, 2.0), Complex(3.0, -3.0))),
+    expectedTensor = Tensor(Seq(Complex(-1.0, -1.0), Complex(-2.0, -2.0), Complex(3.0, 3.0)))
+  )
 
   // TODO copysign
 
@@ -325,13 +324,19 @@ class TensorSuite extends ScalaCheckSuite {
 
   // TODO gradient
 
-  // TODO Handle Complex Tensors
-  // testUnaryOp(
-  //   op = imag,
-  //   opName = "imag",
-  //   inputTensor = Tensor(Seq((0.3100+0.3553j), (-0.5445-0.7896j), (-1.6492-0.0633j), (-0.0638-0.8119j))),
-  //   expectedTensor = Tensor(Seq(0.3553, -0.7896, -0.0633, -0.8119))
-  // )
+  testUnaryOp(
+    op = imag,
+    opName = "imag",
+    inputTensor = Tensor(
+      Seq(
+        Complex(0.31, 0.3553),
+        Complex(-0.5445, -0.7896),
+        Complex(-1.6492, -0.0633),
+        Complex(-0.0638, -0.8119)
+      )
+    ),
+    expectedTensor = Tensor(Seq(0.3553, -0.7896, -0.0633, -0.8119))
+  )
 
   // TODO ldexp
   // TODO lerp
@@ -433,13 +438,19 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(180.0233, -180.0233, 359.9894, -359.9894, 89.9544, -89.9544))
   )
 
-  // TODO Handle Complex Tensors
-  // testUnaryOp(
-  //   op = real,
-  //   opName = "real",
-  //   inputTensor = Tensor(Seq((0.3100+0.3553j), (-0.5445-0.7896j), (-1.6492-0.0633j), (-0.0638-0.8119j))),
-  //   expectedTensor = Tensor(Seq(0.3100, -0.5445, -1.6492, -0.0638))
-  // )
+  testUnaryOp(
+    op = real,
+    opName = "real",
+    inputTensor = Tensor(
+      Seq(
+        Complex(0.31, 0.3553),
+        Complex(-0.5445, -0.7896),
+        Complex(-1.6492, -0.0633),
+        Complex(-0.0638, -0.8119)
+      )
+    ),
+    expectedTensor = Tensor(Seq(0.3100, -0.5445, -1.6492, -0.0638))
+  )
 
   testUnaryOp(
     op = reciprocal,
@@ -468,13 +479,15 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(1.0, -1.0, 0.0, 1.0))
   )
 
-  // TODO Fix Complex Tensor creation
-  // testUnaryOp(
-  //   op = sgn,
-  //   opName = "sgn",
-  //   inputTensor = Tensor(Seq(Complex(3.0,4.0), Complex(7.0, -24.0), Complex(0.0, 0.0), Complex(1.0, 2.0))),
-  //   expectedTensor = Tensor(Seq(false, true, false, true, false))
-  // )
+  testUnaryOp(
+    op = sgn,
+    opName = "sgn",
+    inputTensor =
+      Tensor(Seq(Complex(3.0, 4.0), Complex(7.0, -24.0), Complex(0.0, 0.0), Complex(1.0, 2.0))),
+    expectedTensor = Tensor(
+      Seq(Complex(0.6, 0.8), Complex(0.28, -0.96), Complex(0.0, 0.0), Complex(0.4472, 0.8944))
+    )
+  )
 
   testUnaryOp(
     op = signbit,

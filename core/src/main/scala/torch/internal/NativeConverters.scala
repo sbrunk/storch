@@ -65,9 +65,8 @@ private[torch] object NativeConverters:
     case x: Long                           => pytorch.Scalar(x)
     case x: Float                          => pytorch.Scalar(x)
     case x: Double                         => pytorch.Scalar(x)
-    case x @ Complex(r: Float, i: Float)   => ???
-    case x @ Complex(r: Double, i: Double) => ???
-
+    case x @ Complex(r: Float, i: Float)   => Tensor(Seq(x)).to(dtype = complex64).native.item()
+    case x @ Complex(r: Double, i: Double) => Tensor(Seq(x)).to(dtype = complex128).native.item()
   def tensorOptions(
       dtype: DType,
       layout: Layout,
