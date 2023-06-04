@@ -18,6 +18,7 @@ package torch
 
 import shapeless3.typeable.{TypeCase, Typeable}
 import shapeless3.typeable.syntax.typeable.*
+import scala.util.NotGiven
 import spire.math.Complex
 
 /* Typeable instance for Array[T]
@@ -34,3 +35,13 @@ given iterableTypeable[T](using tt: Typeable[T]): Typeable[Array[T]] with
 /* TypeCase helpers to perform pattern matching on `Complex` higher kinded types */
 val complexDoubleArray = TypeCase[Array[Complex[Double]]]
 val complexFloatArray = TypeCase[Array[Complex[Float]]]
+
+/* Type helper to describe inputs that accept Tensor or Real scalars */
+type TensorOrReal[D <: RealNN] = Tensor[D] | Real
+
+/* Evidence used in operations where Bool is accepted, but only on one of the two inputs, not both
+ */
+type OnlyOneBool[A <: DType, B <: DType] = NotGiven[A =:= Bool & B =:= Bool]
+
+/* Evidence used in operations where at least one Float is required */
+type AtLeastOneFloat[A <: DType, B <: DType] = A <:< FloatNN | B <:< FloatNN

@@ -16,71 +16,11 @@
 
 package torch
 
-import DeviceType.CUDA
-
-import java.nio.{IntBuffer, LongBuffer}
-
-import munit.ScalaCheckSuite
-import torch.DeviceType.CUDA
 import org.scalacheck.Prop.*
-import org.bytedeco.pytorch.global.torch as torch_native
-import org.scalacheck.{Arbitrary, Gen}
-import org.scalacheck._
-import Gen._
-import Arbitrary.arbitrary
-import DeviceType.CPU
 import Generators.{*, given}
-import scala.util.Try
 import spire.math.Complex
-import spire.implicits.DoubleAlgebra
 
-class TensorSuite extends ScalaCheckSuite {
-
-  inline private def testUnaryOp[In <: DType, InS <: ScalaType](
-      op: Tensor[In] => Tensor[?],
-      opName: String,
-      inline inputTensor: Tensor[ScalaToDType[InS]],
-      inline expectedTensor: Tensor[?],
-      absolutePrecision: Double = 1e-04
-  )(using ScalaToDType[InS] <:< In): Unit =
-    val propertyTestName = s"${opName}.property-test"
-    test(propertyTestName) {
-      forAll(genTensor[In]) { (tensor) =>
-        val result = Try(op(tensor))
-        // TODO Validate output types
-        assert(
-          result.isSuccess,
-          s"""|
-              |Tensor operation 'torch.${opName}' does not support ${tensor.dtype} inputs
-              |
-              |${result.failed.get}
-              """.stripMargin
-        )
-      }
-    }
-    val unitTestName = s"${opName}.unit-test"
-    test(unitTestName) {
-      val outputTensor = op(inputTensor.asInstanceOf[Tensor[In]])
-      val allclose = outputTensor.allclose(
-        other = expectedTensor,
-        atol = absolutePrecision,
-        equalNan = true
-      )
-      assert(
-        allclose,
-        s"""|
-            |Tensor results are not all close for 'torch.${opName}'
-            |
-            |Input tensor:
-            |${inputTensor}
-            |
-            |Output tensor:
-            |${outputTensor}
-            |
-            |Expected tensor:
-            |${expectedTensor}""".stripMargin
-      )
-    }
+class TensorSuite extends TensorCheckSuite {
 
   test("arange") {
     val t0 = arange(0, 10)
@@ -156,9 +96,60 @@ class TensorSuite extends ScalaCheckSuite {
     assert(t.grad.equal(torch.ones(Seq(3))))
   }
 
+  test("indexing") {
+    val tensor = torch.arange(0, 16).reshape(4, 4)
+    // first row
+    assertEquals(tensor(0), Tensor(Seq(0, 1, 2, 3)))
+    // first column
+    assertEquals(tensor(torch.Slice(), 0), Tensor(Seq(0, 4, 8, 12)))
+    // last column
+    assertEquals(tensor(---, -1), Tensor(Seq(3, 7, 11, 15)))
+  }
+
+  testUnaryOp(
+    op = abs,
+    opName = "abs",
+    inputTensor = Tensor(Seq(-1, -2, 3)),
+    expectedTensor = Tensor(Seq(1, 2, 3))
+  )
+
+  testUnaryOp(
+    op = acos,
+    opName = "acos",
+    inputTensor = Tensor(Seq(0.3348, -0.5889, 0.2005, -0.1584)),
+    expectedTensor = Tensor(Seq(1.2294, 2.2004, 1.3690, 1.7298))
+  )
+
+  testUnaryOp(
+    op = acosh,
+    opName = "acosh",
+    inputTensor = Tensor(Seq(1.3192, 1.9915, 1.9674, 1.7151)),
+    expectedTensor = Tensor(Seq(0.7791, 1.3120, 1.2979, 1.1341))
+  )
+
+  testUnaryOp(
+    op = acosh,
+    opName = "acosh",
+    inputTensor = Tensor(Seq(1.3192, 1.9915, 1.9674, 1.7151)),
+    expectedTensor = Tensor(Seq(0.7791, 1.3120, 1.2979, 1.1341))
+  )
+
+  testUnaryOp(
+    op = add(_, other = 20),
+    opName = "add",
+    inputTensor = Tensor(Seq(0.0202, 1.0985, 1.3506, -0.6056)),
+    expectedTensor = Tensor(Seq(20.0202, 21.0985, 21.3506, 19.3944))
+  )
+
   // TODO addcdiv
   // TODO addcmul
-  // TODO angle
+
+  testUnaryOp(
+    op = angle,
+    opName = "angle",
+    inputTensor = Tensor(Seq(Complex(-1.0, 1.0), Complex(-2.0, 2.0), Complex(3.0, -3.0))),
+    expectedTensor = Tensor(Seq(2.3562, 2.3562, -0.7854))
+  )
 
   testUnaryOp(
     op = asin,
@@ -185,10 +176,18 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(-1.7253, 0.3060, -1.2899, -0.1893))
   )
 
-  // TODO atan2
+  testBinaryOp(
+    op = atan2,
+    opName = "atan2",
+    inputTensors = (
+      Tensor(Seq(0.9041, 0.0196, -0.3108, -2.4423)),
+      Tensor(Seq(1.3104, -1.5804, 0.6674, 0.7710))
+    ),
+    expectedTensor = Tensor(Seq(0.6039, 3.1292, -0.4358, -1.2650))
+  )
 
-  // TODO Test boolean cases for bitwise_not
-  // https://pytorch.org/docs/stable/generated/torch.bitwise_not.html
+  // TODO Test boolean cases for bitwise operations
+
   testUnaryOp(
     op = bitwiseNot,
     opName = "bitwiseNot",
@@ -196,11 +195,57 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(0, 1, -4))
   )
 
-  // TODO bitwise_and
-  // TODO bitwise_or
-  // TODO bitwise_xor
-  // TODO bitwise_left_shift
-  // TODO bitwise_right_shift
+  testBinaryOp(
+    op = bitwiseAnd,
+    opName = "bitwiseAnd",
+    inputTensors = (
+      Tensor(Seq(-1, -2, 3)),
+      Tensor(Seq(1, 0, 3))
+    ),
+    expectedTensor = Tensor(Seq(1, 0, 3))
+  )
+
+  testBinaryOp(
+    op = bitwiseOr,
+    opName = "bitwiseOr",
+    inputTensors = (
+      Tensor(Seq(-1, -2, 3)),
+      Tensor(Seq(1, 0, 3))
+    ),
+    expectedTensor = Tensor(Seq(-1, -2, 3))
+  )
+
+  testBinaryOp(
+    op = bitwiseXor,
+    opName = "bitwiseXor",
+    inputTensors = (
+      Tensor(Seq(-1, -2, 3)),
+      Tensor(Seq(1, 0, 3))
+    ),
+    expectedTensor = Tensor(Seq(-2, -2, 0))
+  )
+
+  // TODO Enable property test once we figure out to consider OnlyOneBool evidence in genDType
+  unitTestBinaryOp(
+    op = bitwiseLeftShift,
+    opName = "bitwiseLeftShift",
+    inputTensors = (
+      Tensor(Seq(-1, -2, 3)),
+      Tensor(Seq(1, 0, 3))
+    ),
+    expectedTensor = Tensor(Seq(-2, -2, 24))
+  )
+
+  // TODO Enable property test once we figure out to consider OnlyOneBool evidence in genDType
+  unitTestBinaryOp(
+    op = bitwiseRightShift,
+    opName = "bitwiseRightShift",
+    inputTensors = (
+      Tensor(Seq(-2, -7, 31)),
+      Tensor(Seq(1, 0, 3))
+    ),
+    expectedTensor = Tensor(Seq(-1, -7, 3))
+  )
 
   testUnaryOp(
     op = ceil,
@@ -209,7 +254,13 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(-0.0, -1.0, -1.0, 1.0))
   )
 
-  // TODO clamp
+  // TODO test min max inputs
+  testUnaryOp(
+    op = clamp(_, min = Some(-0.5), max = Some(0.5)),
+    opName = "clamp",
+    inputTensor = Tensor(Seq(-1.7120, 0.1734, -0.0478, -0.0922)),
+    expectedTensor = Tensor(Seq(-0.5, 0.1734, -0.0478, -0.0922))
+  )
 
   testUnaryOp(
     op = conjPhysical,
@@ -218,7 +269,15 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(Complex(-1.0, -1.0), Complex(-2.0, -2.0), Complex(3.0, 3.0)))
   )
 
-  // TODO copysign
+  testBinaryOp(
+    op = copysign,
+    opName = "copysign",
+    inputTensors = (
+      Tensor(Seq(0.7079, 0.2778, -1.0249, 0.5719)),
+      Tensor(Seq(0.2373, 0.3120, 0.3190, -1.1128))
+    ),
+    expectedTensor = Tensor(Seq(0.7079, 0.2778, 1.0249, -0.5719))
+  )
 
   testUnaryOp(
     op = cos,
@@ -241,7 +300,15 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(3.1416, -3.1416, 6.2832, -6.2832, 1.5708, -1.5708))
   )
 
-  // TODO div
+  testBinaryOp(
+    op = div,
+    opName = "div",
+    inputTensors = (
+      Tensor(Seq(-0.3711, -1.9353, -0.4605, -0.2917)),
+      Tensor(Seq(0.8032, 0.2930, -0.8113, -0.2308))
+    ),
+    expectedTensor = Tensor(Seq(-0.4620, -6.6051, 0.5676, 1.2639))
+  )
 
   testUnaryOp(
     op = digamma,
@@ -294,7 +361,23 @@ class TensorSuite extends ScalaCheckSuite {
 
   // TODO fakeQuantizePerChannelAffine
   // TODO fakeQuantizePerTensorAffine
-  // TODO floatPower
+
+  testUnaryOp(
+    op = fix,
+    opName = "fix",
+    inputTensor = Tensor(Seq(3.4742, 0.5466, -0.8008, -0.9079)),
+    expectedTensor = Tensor(Seq(3.0, 0.0, -0.0, -0.0))
+  )
+
+  testBinaryOp(
+    op = floatPower,
+    opName = "floatPower",
+    inputTensors = (
+      Tensor(Seq(1, 2, 3, 4)),
+      Tensor(Seq(2, -3, 4, -5))
+    ),
+    expectedTensor = Tensor(Seq(1.0, 0.125, 81.0, 9.7656e-4))
+  )
 
   testUnaryOp(
     op = floor,
@@ -303,8 +386,27 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(-1.0, 1.0, -1.0, -1.0))
   )
 
-  // TODO floorDivide
-  // TODO fmod
+  // TODO Enable property test once we figure out to consider OnlyOneBool evidence in genDType
+  unitTestBinaryOp(
+    op = floorDivide,
+    opName = "floorDivide",
+    inputTensors = (
+      Tensor(Seq(4.0, 3.0)),
+      Tensor(Seq(2.0, 2.0))
+    ),
+    expectedTensor = Tensor(Seq(2.0, 1.0))
+  )
+
+  // TODO Enable property test once we figure out to consider OnlyOneBool evidence in genDType
+  unitTestBinaryOp(
+    op = fmod,
+    opName = "fmod",
+    inputTensors = (
+      Tensor(Seq(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0)),
+      Tensor(Seq(2.0, 2.0, 2.0, 2.0, 2.0, 2.0))
+    ),
+    expectedTensor = Tensor(Seq(-1.0, -0.0, -1.0, 1.0, 0.0, 1.0))
+  )
 
   testUnaryOp(
     op = frac,
@@ -338,8 +440,36 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(0.3553, -0.7896, -0.0633, -0.8119))
   )
 
-  // TODO ldexp
-  // TODO lerp
+  testBinaryOp(
+    op = ldexp,
+    opName = "ldexp",
+    inputTensors = (
+      Tensor(Seq(1.0)),
+      Tensor(Seq(1, 2, 3, 4))
+    ),
+    expectedTensor = Tensor(Seq(2.0, 4.0, 8.0, 16.0))
+  )
+
+  // TODO Test weight as tensor
+  // TODO Lerp must accepts the same type so we wrap this for generators to work properly
+  // testBinaryOp(
+  //   op = lerp(_, _, weight = 0.5),
+  //   opName = "lerp",
+  //   inputTensors = (
+  //     Tensor(Seq(1.0, 2.0, 3.0, 4.0)),
+  //     Tensor(Seq(10.0, 10.0, 10.0, 10.0))
+  //   ),
+  //   expectedTensor = Tensor(Seq(5.5, 6.0, 6.5, 7.0))
+  // )
+  unitTestBinaryOp(
+    op = lerp(_, _, weight = 0.5),
+    opName = "lerp",
+    inputTensors = (
+      Tensor(Seq(1.0, 2.0, 3.0, 4.0)),
+      Tensor(Seq(10.0, 10.0, 10.0, 10.0))
+    ),
+    expectedTensor = Tensor(Seq(5.5, 6.0, 6.5, 7.0))
+  )
 
   testUnaryOp(
     op = lgamma,
@@ -378,12 +508,40 @@ class TensorSuite extends ScalaCheckSuite {
     absolutePrecision = 1e-2
   )
 
-  // TODO logaddexp
-  // TODO logaddexp2
-  // TODO logicalAnd
+  // TODO Enable property test once we figure out to consider OnlyOneBool evidence in genDType
+  unitTestBinaryOp(
+    op = logaddexp,
+    opName = "logaddexp",
+    inputTensors = (
+      Tensor(Seq(-100.0, -200.0, -300.0)),
+      Tensor(Seq(-1.0, -2.0, -3.0))
+    ),
+    expectedTensor = Tensor(Seq(-1.0, -2.0, -3.0))
+  )
 
-  // TODO Handle numeric cases for logical_not
-  // https://pytorch.org/docs/stable/generated/torch.logical_not.html
+  // TODO Enable property test once we figure out to consider OnlyOneBool evidence in genDType
+  unitTestBinaryOp(
+    op = logaddexp2,
+    opName = "logaddexp2",
+    inputTensors = (
+      Tensor(Seq(-100.0, -200.0, -300.0)),
+      Tensor(Seq(-1.0, -2.0, -3.0))
+    ),
+    expectedTensor = Tensor(Seq(-1.0, -2.0, -3.0))
+  )
+
+  // TODO Test int32 tensors
+  testBinaryOp(
+    op = logicalAnd,
+    opName = "logicalAnd",
+    inputTensors = (
+      Tensor(Seq(true, false, true)),
+      Tensor(Seq(true, false, false))
+    ),
+    expectedTensor = Tensor(Seq(true, false, false))
+  )
+
+  // TODO Test int32 tensors
   testUnaryOp(
     op = logicalNot,
     opName = "logicalNot",
@@ -391,10 +549,43 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(false, true))
   )
 
-  // TODO logicalOr
-  // TODO logicalXor
-  // TODO logit
-  // TODO hypot
+  // TODO Test int32 tensors
+  testBinaryOp(
+    op = logicalOr,
+    opName = "logicalOr",
+    inputTensors = (
+      Tensor(Seq(true, false, true)),
+      Tensor(Seq(true, false, false))
+    ),
+    expectedTensor = Tensor(Seq(true, false, true))
+  )
+
+  // TODO Test int32 tensors
+  testBinaryOp(
+    op = logicalXor,
+    opName = "logicalXor",
+    inputTensors = (
+      Tensor(Seq(true, false, true)),
+      Tensor(Seq(true, false, false))
+    ),
+    expectedTensor = Tensor(Seq(false, false, true))
+  )
+
+  testUnaryOp(
+    op = logit(_, Some(1e-6)),
+    opName = "logit",
+    inputTensor = Tensor(Seq(0.2796, 0.9331, 0.6486, 0.1523, 0.6516)),
+    expectedTensor = Tensor(Seq(-0.9466, 2.6352, 0.6131, -1.7169, 0.6261)),
+    absolutePrecision = 1e-3
+  )
+
+  // TODO Enable property test once we figure out to compile properly with AtLeastOneFloat
+  unitTestBinaryOp(
+    op = hypot,
+    opName = "hypot",
+    inputTensors = (Tensor(Seq(4.0)), Tensor(Seq(3.0, 4.0, 5.0))),
+    expectedTensor = Tensor(Seq(5.0, 5.6569, 6.4031))
+  )
 
   testUnaryOp(
     op = i0,
@@ -403,11 +594,53 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(1.0, 1.2661, 2.2796, 4.8808, 11.3019))
   )
 
-  // TODO igamma
-  // TODO igammac
-  // TODO mul
-  // TODO mvlgamma
-  // TODO nanToNum
+  // TODO Enable property test once we figure out to compile properly with AtLeastOneFloat
+  unitTestBinaryOp(
+    op = igamma,
+    opName = "igamma",
+    inputTensors = (
+      Tensor(Seq(4.0)),
+      Tensor(Seq(3.0, 4.0, 5.0))
+    ),
+    expectedTensor = Tensor(Seq(0.3528, 0.5665, 0.7350))
+  )
+
+  // TODO Enable property test once we figure out to compile properly with AtLeastOneFloat
+  unitTestBinaryOp(
+    op = igammac,
+    opName = "igammac",
+    inputTensors = (
+      Tensor(Seq(4.0)),
+      Tensor(Seq(3.0, 4.0, 5.0))
+    ),
+    expectedTensor = Tensor(Seq(0.6472, 0.4335, 0.2650))
+  )
+
+  testBinaryOp(
+    op = mul,
+    opName = "mul",
+    inputTensors = (
+      Tensor(Seq(1.1207)),
+      Tensor(Seq(0.5146, 0.1216, -0.5244, 2.2382))
+    ),
+    expectedTensor = Tensor(Seq(0.5767, 0.1363, -0.5877, 2.5083))
+  )
+
+  testUnaryOp(
+    op = mvlgamma(_, p = 2),
+    opName = "mvlgamma",
+    inputTensor = Tensor(Seq(1.6835, 1.8474, 1.1929)),
+    expectedTensor = Tensor(Seq(0.3928, 0.4007, 0.7586))
+  )
+
+  // TODO Test nan, posinf, neginf arguments
+  // TODO Test float32
+  testUnaryOp(
+    op = nanToNum(_, nan = None, posinf = None, neginf = None),
+    opName = "nanToNum",
+    inputTensor = Tensor(Seq(Double.NaN, Double.PositiveInfinity, Double.NegativeInfinity, 3.14)),
+    expectedTensor = Tensor(Seq(0.0, 1.7976931348623157e308, -1.7976931348623157e308, 3.14))
+  )
 
   testUnaryOp(
     op = neg,
@@ -416,8 +649,26 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(-0.0090, 0.2262, 0.0682, 0.2866, -0.3940))
   )
 
-  // TODO nextafter
-  // TODO polygamma
+  // TODO Enable property test once we figure out to compile properly with AtLeastOneFloat
+  // TODO Fix this unit test, as is not really significant due to fp precision
+  unitTestBinaryOp(
+    op = nextafter,
+    opName = "nextafter",
+    inputTensors = (
+      Tensor(Seq(1.0, 2.0)),
+      Tensor(Seq(2.0, 1.0))
+    ),
+    expectedTensor = Tensor(Seq(1.0, 2.0)),
+    absolutePrecision = 1e-8
+  )
+
+  // TODO Test multiple values of `n`
+  testUnaryOp(
+    op = polygamma(1, _),
+    opName = "polygamma",
+    inputTensor = Tensor(Seq(1.0, 0.5)),
+    expectedTensor = Tensor(Seq(1.64493, 4.9348))
+  )
 
   testUnaryOp(
     op = positive,
@@ -426,7 +677,18 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(0.0090, -0.2262, -0.0682, -0.2866, 0.3940))
   )
 
-  // TODO pow
+  // TODO Test scalar exponent
+  // TODO Enable property test once we figure out to consider OnlyOneBool evidence in genDType
+  unitTestBinaryOp(
+    op = pow,
+    opName = "pow",
+    inputTensors = (
+      Tensor(Seq(1.0, 2.0, 3.0, 4.0)),
+      Tensor(Seq(1.0, 2.0, 3.0, 4.0))
+    ),
+    expectedTensor = Tensor(Seq(1.0, 4.0, 27.0, 256.0))
+  )
+
   // TODO quantized_batch_norm
   // TODO quantized_max_pool1d
   // TODO quantized_max_pool2d
@@ -459,8 +721,34 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(-2.1763, -0.4713, -0.6986, 1.3702))
   )
 
-  // TODO remainder
-  // TODO round
+  // TODO Enable property test once we figure out to consider OnlyOneBool evidence in genDType
+  // propertyTestBinaryOp(remainder, "remainder")
+  test("remainder.unit-test") {
+    val result = remainder(Tensor(Seq(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0)), 2)
+    val expected = Tensor(Seq(1.0, 0.0, 1.0, 1.0, 0.0, 1.0))
+    assert(allclose(result, expected))
+
+    val result2 = remainder(-1.5, Tensor(Seq(1, 2, 3, 4, 5))).to(dtype = float64)
+    val expected2 = Tensor(Seq(0.5, 0.5, 1.5, 2.5, 3.5))
+    assert(allclose(result2, expected2))
+
+    val result3 = remainder(Tensor(Seq(1, 2, 3, 4, 5)), Tensor(Seq(1, 2, 3, 4, 5)))
+    val expected3 = Tensor(Seq(0, 0, 0, 0, 0))
+    println(expected3)
+    assert(allclose(result3, expected3))
+  }
+
+  testUnaryOp(
+    op = round(_, decimals = 0),
+    opName = "round",
+    inputTensor = Tensor(Seq(4.7, -2.3, 9.1, -7.7)),
+    expectedTensor = Tensor(Seq(5.0, -2.0, 9.0, -8.0))
+  )
+  test("round.unit-test.decimals") {
+    val input = Tensor(Seq(0.1234567))
+    val result = round(input, decimals = 3)
+    assert(allclose(result, Tensor(Seq(0.123)), atol = 1e-3))
+  }
 
   testUnaryOp(
     op = rsqrt,
@@ -470,7 +758,12 @@ class TensorSuite extends ScalaCheckSuite {
     absolutePrecision = 1e-3
   )
 
-  // TODO sigmoid
+  testUnaryOp(
+    op = sigmoid,
+    opName = "sigmoid",
+    inputTensor = Tensor(Seq(0.9213, 1.0887, -0.8858, -1.7683)),
+    expectedTensor = Tensor(Seq(0.7153, 0.7481, 0.2920, 0.1458))
+  )
 
   testUnaryOp(
     op = sign,
@@ -531,12 +824,18 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(4.3077, 1.0457, 0.0069, 0.2310))
   )
 
-  test("sub") {
+  testBinaryOp(
+    op = sub,
+    opName = "sub",
+    inputTensors = (
+      Tensor(Seq(1, 2)),
+      Tensor(Seq(0, 1))
+    ),
+    expectedTensor = Tensor(Seq(1, 1))
+  )
+  test("sub.unit-test.alpha") {
     val a = Tensor(Seq(1, 2))
     val b = Tensor(Seq(0, 1))
-    val res = sub(a, b)
-    assertEquals(res, Tensor(Seq(1, 1)))
-
     val resAlpha = sub(a, b, alpha = 2)
     assertEquals(
       resAlpha,
@@ -559,6 +858,16 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(0.7156, -0.6218, 0.8257, 0.2553))
   )
 
+  testBinaryOp(
+    op = trueDivide,
+    opName = "trueDivide",
+    inputTensors = (
+      Tensor(Seq(-0.3711, -1.9353, -0.4605, -0.2917)),
+      Tensor(Seq(0.8032, 0.2930, -0.8113, -0.2308))
+    ),
+    expectedTensor = Tensor(Seq(-0.4620, -6.6051, 0.5676, 1.2639))
+  )
+
   testUnaryOp(
     op = trunc,
     opName = "trunc",
@@ -566,13 +875,13 @@ class TensorSuite extends ScalaCheckSuite {
     expectedTensor = Tensor(Seq(3.0, 0.0, -0.0, -0.0))
   )
 
-  test("indexing") {
-    val tensor = torch.arange(0, 16).reshape(4, 4)
-    // first row
-    assertEquals(tensor(0), Tensor(Seq(0, 1, 2, 3)))
-    // first column
-    assertEquals(tensor(torch.Slice(), 0), Tensor(Seq(0, 4, 8, 12)))
-    // last column
-    assertEquals(tensor(---, -1), Tensor(Seq(3, 7, 11, 15)))
-  }
+  testBinaryOp(
+    op = xlogy,
+    opName = "xlogy",
+    inputTensors = (
+      Tensor(Seq(0, 0, 0, 0, 0)),
+      Tensor(Seq(-1.0, 0.0, 1.0, Double.PositiveInfinity, Double.NaN))
+    ),
+    expectedTensor = Tensor(Seq(0.0, 0.0, 0.0, 0.0, Double.NaN))
+  )
 }

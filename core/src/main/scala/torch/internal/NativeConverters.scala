@@ -41,9 +41,18 @@ private[torch] object NativeConverters:
     case i: Option[T] => i.map(f(_)).orNull
     case i: T         => f(i)
 
-  def toOptional(l: Long | Option[Long]): LongOptional = toOptional(l, pytorch.LongOptional(_))
-  def toOptional(l: Double | Option[Double]): DoubleOptional =
+  def toOptional(l: Long | Option[Long]): pytorch.LongOptional =
+    toOptional(l, pytorch.LongOptional(_))
+  def toOptional(l: Double | Option[Double]): pytorch.DoubleOptional =
     toOptional(l, pytorch.DoubleOptional(_))
+
+  def toOptional(l: Real | Option[Real]): pytorch.ScalarOptional =
+    toOptional(
+      l,
+      (r: Real) =>
+        val scalar = toScalar(r)
+        pytorch.ScalarOptional(scalar)
+    )
 
   def toOptional[D <: DType](t: Tensor[D] | Option[Tensor[D]]): TensorOptional =
     toOptional(t, t => pytorch.TensorOptional(t.native))

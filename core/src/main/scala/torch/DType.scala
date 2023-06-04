@@ -32,7 +32,7 @@ import java.nio.{
 }
 import scala.annotation.{targetName, unused}
 import scala.reflect.ClassTag
-import spire.math.*
+import spire.math.{Complex, UByte}
 
 import scala.compiletime.{erasedValue, summonFrom}
 
@@ -209,6 +209,7 @@ private object Derive:
   val derive: Derive = Derive()
 export Derive.derive
 
+/** DType combinations * */
 type FloatNN = Float16 | Float32 | Float64 | BFloat16
 
 type IntNN = Int8 | UInt8 | Int16 | Int32 | Int64
@@ -223,9 +224,16 @@ type RealNN = NumericRealNN | Bool
 
 type NumericNN = NumericRealNN | ComplexNN
 
-type Real = Boolean | Byte | UByte | Short | Int | Long | Float | Double
+/** Scala type combinations * */
+type NumericReal = Byte | UByte | Short | Int | Long | Float | Double
 
-type ScalaType = Real | Complex[Float] | Complex[Double]
+type Real = NumericReal | Boolean
+
+type ComplexScala = Complex[Float] | Complex[Double]
+
+type Numeric = NumericReal | ComplexScala
+
+type ScalaType = Real | ComplexScala
 
 type DTypeToScala[T <: DType] <: ScalaType = T match
   case UInt8      => UByte
@@ -297,8 +305,6 @@ type DTypeOrDeriveFromScalar[T <: DType | Derive, U <: ScalaType] <: DType = T m
 type DTypeOrDeriveFromTensor[D1 <: DType, U <: DType | Derive] <: DType = U match
   case Derive => D1
   case U      => TensorType[U]
-
-type TensorOrReal[D <: DType] = Tensor[D] | Real
 
 type PromotedDType[A <: DType, B <: DType] <: Float32 | Int32 | Int64 = (A, B) match
   case (Float64, B) => Float32

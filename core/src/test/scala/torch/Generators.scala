@@ -40,7 +40,7 @@ object Generators:
     int64,
     float32,
     float64,
-    complex32,
+    // complex32, // NOTE: A lot of CPU operations do not support this dtype yet
     complex64,
     complex128,
     bool,
@@ -49,7 +49,7 @@ object Generators:
     // qint32,
     bfloat16
     // quint4x2,
-    // float16, // NOTE: A lot of CPU do not support this dtype
+    // float16, // NOTE: A lot of CPU operations do not support this dtype yet
     // undefined,
     // numoptions
   )

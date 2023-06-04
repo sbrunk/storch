@@ -40,7 +40,7 @@ package object special:
     Tensor(torchNative.erfinv(input.native))
 
   /** Computes the base two exponential function of `input`. */
-  def exp2[D <: RealNN](input: Tensor[D]): Tensor[FloatPromoted[D]] =
+  def exp2[D <: DType](input: Tensor[D]): Tensor[FloatPromoted[D]] =
     Tensor(torchNative.exp2(input.native))
 
   /** Computes the exponential of the elements minus 1 of `input`. */
@@ -55,36 +55,38 @@ package object special:
 
   /** Computes the regularized lower incomplete gamma function */
   // NOTE it is named `gammainc` in pytorch torch.special
-  def igamma[D <: DType, D2 <: DType](
+  // TODO Change `D2 <: RealNN` once we fix property testing compilation
+  def igamma[D <: RealNN, D2 <: FloatNN](
       input: Tensor[D],
       other: Tensor[D2]
-  ): Tensor[FloatPromoted[Promoted[D, D2]]] =
+  )(using AtLeastOneFloat[D, D2]): Tensor[FloatPromoted[Promoted[D, D2]]] =
     Tensor(torchNative.igamma(input.native, other.native))
 
   /** Computes the regularized upper incomplete gamma function */
   // NOTE it is named `gamaincc` in pytorch torch.special
-  def igammac[D <: DType, D2 <: DType](
+  // TODO Change `D2 <: RealNN` once we fix property testing compilation
+  def igammac[D <: RealNN, D2 <: FloatNN](
       input: Tensor[D],
       other: Tensor[D2]
-  ): Tensor[FloatPromoted[Promoted[D, D2]]] =
+  )(using AtLeastOneFloat[D, D2]): Tensor[FloatPromoted[Promoted[D, D2]]] =
     Tensor(torchNative.igammac(input.native, other.native))
 
   /** Returns a new tensor with the logit of the elements of `input`. `input` is clamped to [eps, 1
     * \- eps] when eps is not None. When eps is None and input < 0 or input > 1, the function will
     * yields NaN.
     */
-  def logit[D <: DType](input: Tensor[D], eps: Option[Double]): Tensor[FloatPromoted[D]] =
+  def logit[D <: RealNN](input: Tensor[D], eps: Option[Double]): Tensor[FloatPromoted[D]] =
     Tensor(torchNative.logit(input.native, toOptional(eps)))
 
   /** Computes the multivariate log-gamma function with dimension p element-wise */
   // NOTE it is named `multigammaln` in pytorch torch.special
-  def mvlgamma[D <: DType](input: Tensor[D], p: Int): Tensor[FloatPromoted[D]] =
+  def mvlgamma[D <: NumericRealNN](input: Tensor[D], p: Int): Tensor[FloatPromoted[D]] =
     Tensor(torchNative.mvlgamma(input.native, p))
 
   /** Computes the nth derivative of the digamma function on `input`. n≥0 is called the order of the
     * polygamma function.
     */
-  def polygamma[D <: DType](n: Int, input: Tensor[D]): Tensor[FloatPromoted[D]] =
+  def polygamma[D <: RealNN](n: Int, input: Tensor[D]): Tensor[FloatPromoted[D]] =
     Tensor(torchNative.polygamma(n, input.native))
 
   /** Computes the expit (also known as the logistic sigmoid function) of the elements of `input`.
@@ -94,5 +96,19 @@ package object special:
     Tensor(torchNative.sigmoid(input.native))
 
   /** Returns a new tensor with the normalized sinc of the elements of `input`. */
-  def sinc[D <: RealNN](input: Tensor[D]): Tensor[FloatPromoted[D]] =
+  def sinc[D <: DType](input: Tensor[D]): Tensor[FloatPromoted[D]] =
     Tensor(torchNative.sinc(input.native))
+
+  /** Computes `input * log(other)` with the following cases. */
+  // TODO handle Scalar `input`
+  def xlogy[D <: RealNN, D2 <: RealNN](
+      input: Tensor[D],
+      other: TensorOrReal[D2]
+  ): Tensor[FloatPromoted[D]] =
+    Tensor(
+      other match
+        case other: Tensor[D2] =>
+          torchNative.xlogy(input.native, other.native)
+        case other: Real =>
+          torchNative.xlogy(input.native, toScalar(other))
+    )
