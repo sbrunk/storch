@@ -32,7 +32,7 @@ import java.nio.{
 }
 import scala.annotation.{targetName, unused}
 import scala.reflect.ClassTag
-import spire.math.*
+import spire.math.{Complex, UByte}
 
 import scala.compiletime.{erasedValue, summonFrom}
 
@@ -209,14 +209,31 @@ private object Derive:
   val derive: Derive = Derive()
 export Derive.derive
 
+/** DType combinations * */
 type FloatNN = Float16 | Float32 | Float64 | BFloat16
 
 type IntNN = Int8 | UInt8 | Int16 | Int32 | Int64
 
 type ComplexNN = Complex32 | Complex64 | Complex128
 
-type ScalaType = Boolean | Byte | UByte | Short | Int | Long | Float | Double | Complex[Float] |
-  Complex[Double]
+type BitwiseNN = Bool | IntNN
+
+type NumericRealNN = IntNN | FloatNN
+
+type RealNN = NumericRealNN | Bool
+
+type NumericNN = NumericRealNN | ComplexNN
+
+/** Scala type combinations * */
+type NumericReal = Byte | UByte | Short | Int | Long | Float | Double
+
+type Real = NumericReal | Boolean
+
+type ComplexScala = Complex[Float] | Complex[Double]
+
+type Numeric = NumericReal | ComplexScala
+
+type ScalaType = Real | ComplexScala
 
 type DTypeToScala[T <: DType] <: ScalaType = T match
   case UInt8      => UByte
@@ -366,15 +383,40 @@ type Promoted[T <: DType, U <: DType] <: DType = (T, U) match
   case (T, Complex128)                           => T
   case _                                         => DType
 
+/** Promoted type for tensor operations that always output numbers (e.g. `square`) */
+type NumericPromoted[D <: DType] <: DType = D match
+  case Bool => Int64
+  case _    => D
+
+/** Promoted type for tensor operations that always output floats (e.g. `sin`) */
+type FloatPromoted[D <: DType] <: FloatNN = D match
+  case Float64 => Float64
+  case _       => Float32
+
+/** Demoted type for complex to real type extractions (e.g. `imag`, `real`) */
+type ComplexToReal[D <: DType] <: DType = D match
+  case Complex32  => Float16
+  case Complex64  => Float32
+  case Complex128 => Float64
+  case _          => D
+
+/** Promoted type for tensor operations that always output full sized complex or real (e.g.
+  * `floatPower`)
+  */
+type ComplexPromoted[T <: DType, U <: DType] <: Float64 | Complex128 = (T, U) match
+  case (ComplexNN, U) => Complex128
+  case (T, ComplexNN) => Complex128
+  case _              => Float64
+
 /** Promoted type for tensor division */
 type Div[T <: DType, U <: DType] <: DType = (T, U) match
-  case (Bool | IntNN, Bool | IntNN) => Float32
-  case _                            => Promoted[T, U]
+  case (BitwiseNN, BitwiseNN) => Float32
+  case _                      => Promoted[T, U]
 
 /** Promoted type for elementwise tensor sum */
 type Sum[D <: DType] <: DType = D match
-  case Bool | IntNN => Int64
-  case D            => D
+  case BitwiseNN => Int64
+  case D         => D
 
 private[torch] type TypedBuffer[T <: ScalaType] <: Buffer = T match
   case Short  => ShortBuffer

@@ -80,6 +80,7 @@ lazy val core = project
     libraryDependencies ++= Seq(
       "org.bytedeco" % "pytorch" % s"$pytorchVersion-${javaCppVersion.value}",
       "org.typelevel" %% "spire" % "0.18.0",
+      "org.typelevel" %% "shapeless3-typeable" % "3.2.0",
       "com.lihaoyi" %% "os-lib" % "0.9.0",
       "com.lihaoyi" %% "sourcecode" % "0.3.0",
       "dev.dirs" % "directories" % "26",

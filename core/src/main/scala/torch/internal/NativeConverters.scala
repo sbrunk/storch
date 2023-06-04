@@ -18,12 +18,15 @@ package torch
 package internal
 
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.ScalarTypeOptional
-import org.bytedeco.pytorch.LayoutOptional
-import org.bytedeco.pytorch.DeviceOptional
-import org.bytedeco.pytorch.BoolOptional
-import org.bytedeco.pytorch.LongOptional
-import org.bytedeco.pytorch.TensorOptional
+import org.bytedeco.pytorch.{
+  ScalarTypeOptional,
+  LayoutOptional,
+  DeviceOptional,
+  DoubleOptional,
+  BoolOptional,
+  LongOptional,
+  TensorOptional
+}
 
 import scala.reflect.Typeable
 import org.bytedeco.javacpp.LongPointer
@@ -38,7 +41,18 @@ private[torch] object NativeConverters:
     case i: Option[T] => i.map(f(_)).orNull
     case i: T         => f(i)
 
-  def toOptional(l: Long | Option[Long]): LongOptional = toOptional(l, pytorch.LongOptional(_))
+  def toOptional(l: Long | Option[Long]): pytorch.LongOptional =
+    toOptional(l, pytorch.LongOptional(_))
+  def toOptional(l: Double | Option[Double]): pytorch.DoubleOptional =
+    toOptional(l, pytorch.DoubleOptional(_))
+
+  def toOptional(l: Real | Option[Real]): pytorch.ScalarOptional =
+    toOptional(
+      l,
+      (r: Real) =>
+        val scalar = toScalar(r)
+        pytorch.ScalarOptional(scalar)
+    )
 
   def toOptional[D <: DType](t: Tensor[D] | Option[Tensor[D]]): TensorOptional =
     toOptional(t, t => pytorch.TensorOptional(t.native))
@@ -60,9 +74,8 @@ private[torch] object NativeConverters:
     case x: Long                           => pytorch.Scalar(x)
     case x: Float                          => pytorch.Scalar(x)
     case x: Double                         => pytorch.Scalar(x)
-    case x @ Complex(r: Float, i: Float)   => ???
-    case x @ Complex(r: Double, i: Double) => ???
-
+    case x @ Complex(r: Float, i: Float)   => Tensor(Seq(x)).to(dtype = complex64).native.item()
+    case x @ Complex(r: Double, i: Double) => Tensor(Seq(x)).to(dtype = complex128).native.item()
   def tensorOptions(
       dtype: DType,
       layout: Layout,

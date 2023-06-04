@@ -321,17 +321,21 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def item: DTypeToScala[D] =
     import ScalarType.*
     val out = native.dtype().toScalarType().intern() match
-      case Byte                   => UByte(native.item_int())
-      case Char                   => native.item_byte()
-      case Short                  => native.item_short()
-      case Int                    => native.item_int()
-      case Long                   => native.item_long()
-      case Half                   => native.item().toHalf.asFloat()
-      case Float                  => native.item_float()
-      case Double                 => native.item_double()
-      case ComplexHalf            => ??? // TODO how to access complex scalar values?
-      case ComplexFloat           => ???
-      case ComplexDouble          => ???
+      case Byte        => UByte(native.item_int())
+      case Char        => native.item_byte()
+      case Short       => native.item_short()
+      case Int         => native.item_int()
+      case Long        => native.item_long()
+      case Half        => native.item().toHalf.asFloat()
+      case Float       => native.item_float()
+      case Double      => native.item_double()
+      case ComplexHalf => ??? // TODO how to access complex scalar values?
+      case ComplexFloat =>
+        val b = native.contiguous.createBuffer[FloatBuffer]
+        Complex(b.get(), b.get())
+      case ComplexDouble =>
+        val b = native.contiguous.createBuffer[DoubleBuffer]
+        Complex(b.get(), b.get())
       case Bool                   => native.item().toBool
       case QInt8                  => native.item_byte()
       case QUInt8                 => native.item_short()
@@ -771,6 +775,20 @@ object Tensor:
           case longs: Array[Long]     => (new LongPointer(LongBuffer.wrap(longs)), int64)
           case floats: Array[Float]   => (new FloatPointer(FloatBuffer.wrap(floats)), float32)
           case doubles: Array[Double] => (new DoublePointer(DoubleBuffer.wrap(doubles)), float64)
+          case complexFloatArray(complexFloats) =>
+            (
+              new FloatPointer(
+                FloatBuffer.wrap(complexFloats.flatMap(c => Array(c.real, c.imag)))
+              ),
+              complex64
+            )
+          case complexDoubleArray(complexDoubles) =>
+            (
+              new DoublePointer(
+                DoubleBuffer.wrap(complexDoubles.flatMap(c => Array(c.real, c.imag)))
+              ),
+              complex128
+            )
           case _ => throw new IllegalArgumentException(s"Unsupported sequence type")
         Tensor(
           torchNative
