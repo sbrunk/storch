@@ -26,6 +26,6 @@ import torch.internal.NativeConverters.toOptional
 
 def maxPool2d[D <: DType](input: Tensor[D], kernelSize: Long | (Long, Long)): Tensor[D] =
   val kernelSizeNative = kernelSize match
-    case (h, w): (Long, Long) => Array(h, w)
-    case x: Long              => Array(x, x)
+    case (h, w)  => Array(h, w)
+    case x: Long => Array(x, x)
   Tensor(torchNative.max_pool2d(input.native, kernelSizeNative*))

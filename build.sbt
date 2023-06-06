@@ -23,11 +23,11 @@ ThisBuild / tlSitePublishBranch := Some("main")
 
 ThisBuild / apiURL := Some(new URL("https://storch.dev/api/"))
 
-val scrImageVersion = "4.0.32"
+val scrImageVersion = "4.0.34"
 val pytorchVersion = "2.0.1"
 val openblasVersion = "0.3.23"
 val mklVersion = "2023.1"
-ThisBuild / scalaVersion := "3.2.2"
+ThisBuild / scalaVersion := "3.3.0"
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 
@@ -37,7 +37,7 @@ ThisBuild / enableGPU := false
 
 lazy val commonSettings = Seq(
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
-  javaCppVersion := "1.5.9-SNAPSHOT",
+  javaCppVersion := "1.5.9",
   javaCppPlatform := Seq(),
   resolvers ++= Resolver.sonatypeOssRepos("snapshots")
   // This is a hack to avoid depending on the native libs when publishing
@@ -80,8 +80,8 @@ lazy val core = project
     libraryDependencies ++= Seq(
       "org.bytedeco" % "pytorch" % s"$pytorchVersion-${javaCppVersion.value}",
       "org.typelevel" %% "spire" % "0.18.0",
-      "org.typelevel" %% "shapeless3-typeable" % "3.2.0",
-      "com.lihaoyi" %% "os-lib" % "0.9.0",
+      "org.typelevel" %% "shapeless3-typeable" % "3.3.0",
+      "com.lihaoyi" %% "os-lib" % "0.9.1",
       "com.lihaoyi" %% "sourcecode" % "0.3.0",
       "dev.dirs" % "directories" % "26",
       "org.scalameta" %% "munit" % "0.7.29" % Test,
