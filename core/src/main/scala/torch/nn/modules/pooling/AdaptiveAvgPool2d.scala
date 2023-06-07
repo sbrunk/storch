@@ -26,7 +26,6 @@ import org.bytedeco.pytorch
 import torch.internal.NativeConverters.{toNative, toOptional}
 import org.bytedeco.pytorch.LongOptionalVector
 import org.bytedeco.pytorch.LongOptional
-import scala.annotation.nowarn
 
 /** Applies a 2D adaptive average pooling over an input signal composed of several input planes.
   *
@@ -37,13 +36,11 @@ final class AdaptiveAvgPool2d(
     outputSize: Int | Option[Int] | (Option[Int], Option[Int]) | (Int, Int)
 ) extends Module {
 
-  // TODO find a better way to remove that warning instead of just silencing
-  // See https://users.scala-lang.org/t/alternative-for-type-ascriptions-after-tuple-patterns-in-scala-3-3-0/9328
-  @nowarn("msg=Type ascriptions after patterns other than")
   private def nativeOutputSize = outputSize match
     case (h: Int, w: Int) => new LongOptionalVector(new LongOptional(h), new LongOptional(w))
     case x: Int           => new LongOptionalVector(new LongOptional(x), new LongOptional(x))
-    case (h, w): (Option[Int], Option[Int]) =>
+    // We know this can only be int so we can suppress the type test for Option[Int] cannot be checked at runtime warning
+    case (h: Option[Int @unchecked], w: Option[Int @unchecked]) =>
       new LongOptionalVector(toOptional(h.map(_.toLong)), toOptional(w.map(_.toLong)))
     case x: Option[Int] =>
       new LongOptionalVector(toOptional(x.map(_.toLong)), toOptional(x.map(_.toLong)))
