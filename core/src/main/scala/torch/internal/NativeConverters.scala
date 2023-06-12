@@ -58,12 +58,12 @@ private[torch] object NativeConverters:
     toOptional(t, t => pytorch.TensorOptional(t.native))
 
   def toArray(i: Long | (Long, Long)) = i match
-    case i: Long              => Array(i)
-    case (i, j): (Long, Long) => Array(i, j)
+    case i: Long => Array(i)
+    case (i, j)  => Array(i, j)
 
   def toNative(input: Int | (Int, Int)) = input match
-    case (h, w): (Int, Int) => LongPointer(Array(h.toLong, w.toLong)*)
-    case x: Int             => LongPointer(Array(x.toLong, x.toLong)*)
+    case (h, w) => LongPointer(Array(h.toLong, w.toLong)*)
+    case x: Int => LongPointer(Array(x.toLong, x.toLong)*)
 
   def toScalar(x: ScalaType): pytorch.Scalar = x match
     case x: Boolean                        => pytorch.Scalar(if true then 1: Byte else 0: Byte)

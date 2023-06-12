@@ -37,9 +37,10 @@ final class AdaptiveAvgPool2d(
 ) extends Module {
 
   private def nativeOutputSize = outputSize match
-    case (h, w): (Int, Int) => new LongOptionalVector(new LongOptional(h), new LongOptional(w))
-    case x: Int             => new LongOptionalVector(new LongOptional(x), new LongOptional(x))
-    case (h, w): (Option[Int], Option[Int]) =>
+    case (h: Int, w: Int) => new LongOptionalVector(new LongOptional(h), new LongOptional(w))
+    case x: Int           => new LongOptionalVector(new LongOptional(x), new LongOptional(x))
+    // We know this can only be int so we can suppress the type test for Option[Int] cannot be checked at runtime warning
+    case (h: Option[Int @unchecked], w: Option[Int @unchecked]) =>
       new LongOptionalVector(toOptional(h.map(_.toLong)), toOptional(w.map(_.toLong)))
     case x: Option[Int] =>
       new LongOptionalVector(toOptional(x.map(_.toLong)), toOptional(x.map(_.toLong)))
