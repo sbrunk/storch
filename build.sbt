@@ -28,6 +28,7 @@ val pytorchVersion = "2.0.1"
 val openblasVersion = "0.3.23"
 val mklVersion = "2023.1"
 ThisBuild / scalaVersion := "3.3.0"
+ThisBuild / javaCppVersion := "1.5.9"
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 
@@ -37,7 +38,7 @@ ThisBuild / enableGPU := false
 
 lazy val commonSettings = Seq(
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
-  javaCppVersion := "1.5.9",
+  javaCppVersion := (ThisBuild / javaCppVersion).value,
   javaCppPlatform := Seq(),
   resolvers ++= Resolver.sonatypeOssRepos("snapshots")
   // This is a hack to avoid depending on the native libs when publishing
@@ -137,3 +138,6 @@ lazy val root = project
   .enablePlugins(NoPublishPlugin)
   .in(file("."))
   .aggregate(core, vision, examples, docs)
+  .settings(
+    javaCppVersion := (ThisBuild / javaCppVersion).value
+  )
