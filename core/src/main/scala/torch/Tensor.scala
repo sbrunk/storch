@@ -797,6 +797,7 @@ object Tensor:
               Array(data.length.toLong),
               NativeConverters.tensorOptions(inputDType, layout, CPU, requiresGrad)
             )
+            .clone()
         ).to(device = device)
       case data: U =>
         val dtype = scalaToDType(data)

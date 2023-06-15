@@ -884,4 +884,17 @@ class TensorSuite extends TensorCheckSuite {
     ),
     expectedTensor = Tensor(Seq(0.0, 0.0, 0.0, 0.0, Double.NaN))
   )
+  test("Tensor creation properly handling buffers") {
+    val value = 100L
+    val data = Seq.fill(10000)(value)
+    val tensors = 1.to(1000).map { _ =>
+      Tensor(data)
+    }
+    assert(
+      tensors.forall { t =>
+        t.min().item == value &&
+        t.max().item == value
+      }
+    )
+  }
 }
