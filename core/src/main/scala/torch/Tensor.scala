@@ -426,6 +426,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     */
   def t: Tensor[D] = Tensor(native.t())
 
+  /** Calculates the variance of all elements of this tensor. */
+  def variance = Tensor(native.`var`())
+
   /** Returns a new tensor with a dimension of size one inserted at the specified position.
     *
     * The returned tensor shares the same underlying data with this tensor.

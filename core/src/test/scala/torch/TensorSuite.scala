@@ -106,6 +106,22 @@ class TensorSuite extends TensorCheckSuite {
     assertEquals(tensor(---, -1), Tensor(Seq(3, 7, 11, 15)))
   }
 
+  // Random sampling
+
+  test("randn.unit-test") {
+    val randnTensor = randn(Seq(100000))
+    val randnMean = randnTensor.mean
+    val expectedMean = Tensor(0.0).to(dtype = float32)
+    val randnVariance = randnTensor.variance
+    val expectedVariance = Tensor(1.0).to(dtype = float32)
+
+    assert(
+      allclose(randnMean, expectedMean, atol = 1e-2) &&
+        allclose(randnVariance, expectedVariance, atol = 1e-2)
+    )
+  }
+
+  // End Random sampling
   testUnaryOp(
     op = abs,
     opName = "abs",

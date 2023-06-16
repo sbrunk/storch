@@ -418,7 +418,7 @@ def randn[D <: FloatNN](
     requiresGrad: Boolean = false
 ): Tensor[D] =
   Tensor(
-    torchNative.torch_rand(
+    torchNative.torch_randn(
       size.toArray.map(_.toLong),
       NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
     )
