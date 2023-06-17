@@ -167,17 +167,17 @@
 // [1.0000, 1.0000, 1.0000, 1.0000, 1.0000]
 </span><span class="keyword">val</span><span> </span><span class="identifier">w</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">randn</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">5</span><span>, </span><span class="number-literal">3</span><span>), </span><span class="identifier">requiresGrad</span><span>=</span><span class="boolean-literal">true</span><span>)
 </span><span class="comment">// w: Tensor[Float32] = tensor dtype=float32, shape=[5, 3], device=CPU 
-// [[0.4901, 0.8964, 0.4556],
-//  [0.6323, 0.3489, 0.4017],
-//  [0.0223, 0.1689, 0.2939],
-//  [0.5185, 0.6977, 0.8000],
-//  [0.1610, 0.2823, 0.6816]]
+// [[1.2645, -0.6874, 0.1604],
+//  [-0.6065, -0.7831, 1.0622],
+//  [-0.2613, 1.0667, 0.4159],
+//  [0.8396, -0.8265, -0.7949],
+//  [-0.9528, 0.3717, 0.4087]]
 </span><span class="keyword">val</span><span> </span><span class="identifier">b</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">randn</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">3</span><span>), </span><span class="identifier">requiresGrad</span><span>=</span><span class="boolean-literal">true</span><span>)
 </span><span class="comment">// b: Tensor[Float32] = tensor dtype=float32, shape=[3], device=CPU 
-// [0.9152, 0.3971, 0.8742]
+// [1.4214, 0.1494, -0.6709]
 </span><span class="keyword">val</span><span> </span><span class="identifier">z</span><span> = (</span><span class="identifier">x</span><span> </span><span class="identifier">matmul</span><span> </span><span class="identifier">w</span><span>) + </span><span class="identifier">b</span><span>
 </span><span class="comment">// z: Tensor[Float32] = tensor dtype=float32, shape=[3], device=CPU 
-// [2.7395, 2.7912, 3.5070]</span></code></pre>
+// [1.7048, -0.7091, 0.5814]</span></code></pre>
         <p>One notable difference is that tensors in Storch are statically typed regarding the underlying <code>dtype</code>.
         So you&#39;ll see <code>Tensor[Float32]</code> or <code>Tensor[Int8]</code> instead of just <code>Tensor</code>.</p>
         <p>Tracking the data type at compile time enables us to catch certain errors earlier. For instance, <code>torch.rand</code> is only implemented for float types and the following will trigger a runtime error in PyTorch:</p>

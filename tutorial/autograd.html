@@ -191,14 +191,14 @@
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">loss</span><span>.</span><span class="identifier">backward</span><span>()
 </span><span class="identifier">println</span><span>(</span><span class="identifier">w</span><span>.</span><span class="identifier">grad</span><span>)
 </span><span class="comment">// tensor dtype=float32, shape=[5, 3], device=CPU 
-// [[0.3027, 0.3201, 0.3118],
-//  [0.3027, 0.3201, 0.3118],
-//  [0.3027, 0.3201, 0.3118],
-//  [0.3027, 0.3201, 0.3118],
-//  [0.3027, 0.3201, 0.3118]]
+// [[0.2661, 0.1179, 0.0027],
+//  [0.2661, 0.1179, 0.0027],
+//  [0.2661, 0.1179, 0.0027],
+//  [0.2661, 0.1179, 0.0027],
+//  [0.2661, 0.1179, 0.0027]]
 </span><span class="identifier">println</span><span>(</span><span class="identifier">b</span><span>.</span><span class="identifier">grad</span><span>)
 </span><span class="comment">// tensor dtype=float32, shape=[3], device=CPU 
-// [0.3027, 0.3201, 0.3118]</span></code></pre>
+// [0.2661, 0.1179, 0.0027]</span></code></pre>
         <div class="callout info">
           <i class="icofont-laika">&#xef4e;</i>
           <ul>
@@ -223,7 +223,7 @@
         <code>torch.noGrad</code> block:</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">var</span><span> </span><span class="identifier">z</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">matmul</span><span>(</span><span class="identifier">x</span><span>, </span><span class="identifier">w</span><span>) + </span><span class="identifier">b</span><span>
 </span><span class="comment">// z: Tensor[Float32] = tensor dtype=float32, shape=[3], device=CPU 
-// [2.2915, 3.1875, 2.6738]
+// [1.3755, -0.6023, -4.8127]
 </span><span class="identifier">println</span><span>(</span><span class="identifier">z</span><span>.</span><span class="identifier">requiresGrad</span><span>)
 </span><span class="comment">// true
 </span><span class="identifier">torch</span><span>.</span><span class="identifier">noGrad</span><span> {
@@ -235,10 +235,10 @@
         on the tensor:</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">z</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">matmul</span><span>(</span><span class="identifier">x</span><span>, </span><span class="identifier">w</span><span>)+</span><span class="identifier">b</span><span>
 </span><span class="comment">// z: Tensor[Float32] = tensor dtype=float32, shape=[3], device=CPU 
-// [2.2915, 3.1875, 2.6738]
+// [1.3755, -0.6023, -4.8127]
 </span><span class="keyword">val</span><span> </span><span class="identifier">zDet</span><span> = </span><span class="identifier">z</span><span>.</span><span class="identifier">detach</span><span>()
 </span><span class="comment">// zDet: Tensor[Float32] = tensor dtype=float32, shape=[3], device=CPU 
-// [2.2915, 3.1875, 2.6738]
+// [1.3755, -0.6023, -4.8127]
 </span><span class="identifier">println</span><span>(</span><span class="identifier">zDet</span><span>.</span><span class="identifier">requiresGrad</span><span>)
 </span><span class="comment">// false</span></code></pre>
         <p>There are reasons you might want to disable gradient tracking:</p>
