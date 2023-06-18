@@ -42,7 +42,7 @@ trait TensorCheckSuite extends ScalaCheckSuite {
       opName: String,
       skipPropertyTestReason: Option[String] = None
   ): Unit =
-    test(propertyTestName(opName)) {
+    property(propertyTestName(opName)) {
       assume(skipPropertyTestReason.isEmpty, skipPropertyTestReason)
 
       // TODO Validate output types
@@ -76,7 +76,7 @@ trait TensorCheckSuite extends ScalaCheckSuite {
       op: Function1[Tensor[In], ?],
       opName: String
   ): Unit =
-    test(propertyTestName(opName)) {
+    property(propertyTestName(opName)) {
       // TODO Validate output types
       val tensorInCase = TypeCase[Tensor[In]]
       forAll(genTensor) {
