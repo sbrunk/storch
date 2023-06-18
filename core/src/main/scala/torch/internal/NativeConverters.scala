@@ -85,7 +85,7 @@ private[torch] object NativeConverters:
 
   extension (x: ScalaType)
     def toScalar: pytorch.Scalar = x match
-      case x: Boolean                        => pytorch.Scalar(if true then 1: Byte else 0: Byte)
+      case x: Boolean                        => pytorch.Scalar(if x then 1: Byte else 0: Byte)
       case x: UByte                          => Tensor(x.toInt).to(dtype = uint8).native.item()
       case x: Byte                           => pytorch.Scalar(x)
       case x: Short                          => pytorch.Scalar(x)

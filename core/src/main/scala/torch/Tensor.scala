@@ -351,6 +351,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   /** Returns the tensor with elements logged. */
   def log: Tensor[D] = Tensor(native.log())
 
+  def long: Tensor[Int64] = to(dtype = int64)
+
   def matmul[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] =
     Tensor[Promoted[D, D2]](native.matmul(u.native))
 

@@ -65,7 +65,7 @@ import org.bytedeco.pytorch.ScalarTypeOptional
   *   whether the output tensor has `dim` retained or not.
   * @return
   */
-def argmax[D <: DType](
+def argmax[D <: IntNN | FloatNN](
     input: Tensor[D],
     dim: Long | Option[Long] = None,
     keepdim: Boolean = false
@@ -94,7 +94,7 @@ def argmax[D <: DType](
   *   whether the output tensor has `dim` retained or not.
   * @return
   */
-def argmin[D <: DType](
+def argmin[D <: IntNN | FloatNN](
     input: Tensor[D],
     dim: Long | Option[Long] = None,
     keepdim: Boolean = false
@@ -114,7 +114,11 @@ def argmin[D <: DType](
   *   whether the output tensor has `dim` retained or not.
   * @return
   */
-def amax[D <: DType](input: Tensor[D], dim: Long | Seq[Long], keepdim: Boolean = false): Tensor[D] =
+def amax[D <: RealNN](
+    input: Tensor[D],
+    dim: Long | Seq[Long],
+    keepdim: Boolean = false
+): Tensor[D] =
   Tensor(
     torchNative.amax(input.native, dim.toArray, keepdim)
   )
@@ -131,7 +135,11 @@ def amax[D <: DType](input: Tensor[D], dim: Long | Seq[Long], keepdim: Boolean =
   *   whether the output tensor has `dim` retained or not.
   * @return
   */
-def amin[D <: DType](input: Tensor[D], dim: Long | Seq[Long], keepdim: Boolean = false): Tensor[D] =
+def amin[D <: RealNN](
+    input: Tensor[D],
+    dim: Long | Seq[Long],
+    keepdim: Boolean = false
+): Tensor[D] =
   Tensor(
     torchNative.amin(input.native, dim.toArray, keepdim)
   )
@@ -147,7 +155,7 @@ def amin[D <: DType](input: Tensor[D], dim: Long | Seq[Long], keepdim: Boolean =
   *   whether the output tensor has `dim` retained or not.
   * @return
   */
-def aminmax[D <: DType](
+def aminmax[D <: RealNN](
     input: Tensor[D],
     dim: Long | Option[Long] = None,
     keepdim: Boolean = false
@@ -203,7 +211,7 @@ def any[D <: DType](input: Tensor[D], dim: Long, keepdim: Boolean = false): Tens
   *
   * @group reduction_ops
   */
-def max(input: Tensor[?]): Tensor[Int64] = Tensor(input.native.max())
+def max[D <: RealNN](input: Tensor[D]): Tensor[Int64] = Tensor(input.native.max())
 
 /** Returns a [[TensorTuple]] `(values, indices)` where `values` is the maximum value of each row of
   * the `input` tensor in the given dimension `dim`. And `indices` is the index location of each
@@ -222,7 +230,7 @@ def max(input: Tensor[?]): Tensor[Int64] = Tensor(input.native.max())
   * @param keepdim
   *   whether the output tensor has `dim` retained or not.
   */
-def max[D <: DType](input: Tensor[D], dim: Long, keepdim: Boolean = false): TensorTuple[D] =
+def max[D <: RealNN](input: Tensor[D], dim: Long, keepdim: Boolean = false): TensorTuple[D] =
   val nativeTuple = torchNative.max(input.native, dim, keepdim)
   TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
 
@@ -230,7 +238,7 @@ def max[D <: DType](input: Tensor[D], dim: Long, keepdim: Boolean = false): Tens
   *
   * @group reduction_ops
   */
-def min(input: Tensor[?]): Tensor[Int64] = Tensor(input.native.min())
+def min[D <: RealNN](input: Tensor[D]): Tensor[Int64] = Tensor(input.native.min())
 
 /** Returns a [[TensorTuple]] `(values, indices)` where `values` is the minimum value of each row of
   * the `input` tensor in the given dimension `dim`. And `indices` is the index location of each
@@ -249,7 +257,7 @@ def min(input: Tensor[?]): Tensor[Int64] = Tensor(input.native.min())
   * @param keepdim
   *   whether the output tensor has `dim` retained or not.
   */
-def min[D <: DType](input: Tensor[D], dim: Long, keepdim: Boolean = false): TensorTuple[D] =
+def min[D <: RealNN](input: Tensor[D], dim: Long, keepdim: Boolean = false): TensorTuple[D] =
   val nativeTuple = torchNative.min(input.native, dim, keepdim)
   TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
 
@@ -263,8 +271,11 @@ def min[D <: DType](input: Tensor[D], dim: Long, keepdim: Boolean = false): Tens
   *   the norm to be computed
   */
 // TODO dtype promotion floatNN/complexNN => highest floatNN
-// TODO (using AtLeastOneFloat[D, D2]
-def dist[D <: DType, D2 <: DType](input: Tensor[D], other: Tensor[D2], p: Float = 2): Tensor[D] =
+def dist[D <: NumericNN, D2 <: NumericNN](
+    input: Tensor[D],
+    other: Tensor[D2],
+    p: Float = 2
+)(using AtLeastOneFloat[D, D2]): Tensor[D] =
   Tensor(torchNative.dist(input.native, other.native, toScalar(p)))
 
 /** Returns the log of summed exponentials of each row of the `input` tensor in the given dimension
@@ -283,7 +294,7 @@ def dist[D <: DType, D2 <: DType](input: Tensor[D], other: Tensor[D2], p: Float 
   * @param keepdim
   *   whether the output tensor has `dim` retained or not.
   */
-def logsumexp[D <: DType](
+def logsumexp[D <: RealNN](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false
@@ -295,7 +306,7 @@ def logsumexp[D <: DType](
   *
   * @group reduction_ops
   */
-def mean[D <: DType](
+def mean[D <: FloatNN | ComplexNN](
     input: Tensor[D]
 ): Tensor[D] = Tensor(torchNative.mean(input.native))
 
@@ -306,7 +317,7 @@ def mean[D <: DType](
   * @param dtype
   *   $reduceops_dtype
   */
-def mean[D <: DType](
+def mean[D <: FloatNN | ComplexNN](
     input: Tensor[?],
     dtype: D
 ): Tensor[D] = Tensor(torchNative.mean(input.native, new ScalarTypeOptional(dtype.toScalarType)))
@@ -362,7 +373,7 @@ def mean[D <: DType, D2 <: DType | Derive](
   * @param dtype
   *   $reduceops_dtype
   */
-def nanmean[D <: DType, D2 <: DType | Derive](
+def nanmean[D <: FloatNN, D2 <: DType | Derive](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
@@ -394,7 +405,7 @@ def nanmean[D <: DType, D2 <: DType | Derive](
     *
     * @group reduction_ops
     */
-def median[D <: DType](
+def median[D <: NumericRealNN](
     input: Tensor[D]
 ): Tensor[D] = Tensor(torchNative.median(input.native))
 
@@ -427,7 +438,7 @@ def median[D <: DType](
   * @param dtype
   *   $reduceops_dtype
   */
-def median[D <: DType, D2 <: DType | Derive](
+def median[D <: NumericRealNN, D2 <: DType | Derive](
     input: Tensor[D],
     dim: Long = -1,
     keepdim: Boolean = false
@@ -444,7 +455,7 @@ def median[D <: DType, D2 <: DType | Derive](
     *
     * @group reduction_ops
     */
-def nanmedian[D <: DType](
+def nanmedian[D <: NumericRealNN](
     input: Tensor[D]
 ): Tensor[D] = Tensor(torchNative.nanmedian(input.native))
 
@@ -466,7 +477,7 @@ def nanmedian[D <: DType](
   * @param dtype
   *   $reduceops_dtype
   */
-def nanmedian[D <: DType, D2 <: DType | Derive](
+def nanmedian[D <: NumericRealNN, D2 <: DType | Derive](
     input: Tensor[D],
     dim: Long = -1,
     keepdim: Boolean = false
@@ -493,7 +504,7 @@ def nanmedian[D <: DType, D2 <: DType | Derive](
   * @param keepdim
   *   whether the output tensor has `dim` retained or not.
   */
-def mode[D <: DType](input: Tensor[D], dim: Long, keepdim: Boolean = false): TensorTuple[D] =
+def mode[D <: RealNN](input: Tensor[D], dim: Long = -1, keepdim: Boolean = false): TensorTuple[D] =
   val nativeTuple = torchNative.mode(input.native, dim, keepdim)
   TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
 
@@ -511,7 +522,7 @@ def mode[D <: DType](input: Tensor[D], dim: Long, keepdim: Boolean = false): Ten
   * @param dtype
   *   $reduceops_dtype
   */
-def nansum[D <: DType, D2 <: DType | Derive](
+def nansum[D <: RealNN, D2 <: DType | Derive](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
@@ -658,7 +669,7 @@ def prod[D <: DType, D2 <: DType | Derive](
   *   difference between the sample size and sample degrees of freedom. Defaults to [Bessel\'s
   *   correction](https://en.wikipedia.org/wiki/Bessel%27s_correction), `correction=1`.
   */
-def std[D <: DType](
+def std[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
@@ -697,7 +708,7 @@ def std[D <: DType](
   * @return
   *   A tuple (std, mean) containing the standard deviation and mean.
   */
-def std_mean[D <: DType](
+def std_mean[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
@@ -801,7 +812,7 @@ def sum[D <: DType, D2 <: DType | Derive](
   *   difference between the sample size and sample degrees of freedom. Defaults to [Bessel\'s
   *   correction](https://en.wikipedia.org/wiki/Bessel%27s_correction), `correction=1`.
   */
-def variance[D <: DType](
+def variance[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
@@ -840,7 +851,7 @@ def variance[D <: DType](
   * @return
   *   A tuple (var, mean) containing the variance and mean.
   */
-def var_mean[D <: DType](
+def var_mean[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
