@@ -19,7 +19,7 @@ package torch
 class ReductionOpsSuite extends TensorCheckSuite {
 
   testUnaryOp(
-    op = sum(_, Array(), false, None),
+    op = sum(_),
     opName = "sum",
     inputTensor = Tensor(Seq(5.0, 5.0)),
     expectedTensor = Tensor(10.0)

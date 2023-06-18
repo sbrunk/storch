@@ -45,3 +45,6 @@ type OnlyOneBool[A <: DType, B <: DType] = NotGiven[A =:= Bool & B =:= Bool]
 
 /* Evidence used in operations where at least one Float is required */
 type AtLeastOneFloat[A <: DType, B <: DType] = A <:< FloatNN | B <:< FloatNN
+
+/* Evidence used in operations where at least one Float or Complex is required */
+type AtLeastOneFloatOrComplex[A <: DType, B <: DType] = A <:< FloatNN | B <:< FloatNN

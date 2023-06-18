@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
-package object torch {}
+/** @groupname pointwise_ops Pointwise Ops
+  * @groupname reduction_ops Reduction Ops
+  */
+package object torch
