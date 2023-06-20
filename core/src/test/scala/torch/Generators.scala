@@ -56,7 +56,7 @@ object Generators:
 
   inline def genTensor[D <: DType]: Gen[Tensor[D]] =
     Gen.oneOf(allDTypes.filter(_.isInstanceOf[D])).map { dtype =>
-      ones(10, dtype = dtype.asInstanceOf[D])
+      ones(Seq(4, 4), dtype = dtype.asInstanceOf[D])
     }
 
   val genDType = Gen.oneOf(allDTypes)
