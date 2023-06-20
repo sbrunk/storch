@@ -270,12 +270,13 @@ def min[D <: RealNN](input: Tensor[D], dim: Long, keepdim: Boolean = false): Ten
   * @param p
   *   the norm to be computed
   */
-// TODO dtype promotion floatNN/complexNN => highest floatNN
 def dist[D <: NumericNN, D2 <: NumericNN](
     input: Tensor[D],
     other: Tensor[D2],
     p: Float = 2
-)(using AtLeastOneFloat[D, D2]): Tensor[D] =
+)(using
+    AtLeastOneFloat[D, D2]
+): Tensor[Promoted[FloatPromoted[ComplexToReal[D]], FloatPromoted[ComplexToReal[D2]]]] =
   Tensor(torchNative.dist(input.native, other.native, toScalar(p)))
 
 /** Returns the log of summed exponentials of each row of the `input` tensor in the given dimension
