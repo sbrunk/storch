@@ -122,7 +122,7 @@ def randint(low: Long, high: Int, size: Seq[Int]) =
 // TODO randint_like Returns a tensor with the same shape as Tensor input filled with random integers generated uniformly between low (inclusive) and high (exclusive).
 
 // TODO Randnd acepts Seq[Int] | Int
-def randn[D <: FloatNN](
+def randn[D <: FloatNN | ComplexNN](
     size: Seq[Int],
     dtype: D = float32,
     layout: Layout = Strided,

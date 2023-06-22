@@ -205,7 +205,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     * @param keepdim
     * @return
     */
-  def argmax(dim: Long | Option[Long] = None, keepdim: Boolean = false): Tensor[Int64] = Tensor(
+  def argmax(dim: Int | Option[Int] = None, keepdim: Boolean = false): Tensor[Int64] = Tensor(
     native.argmax(NativeConverters.toOptional(dim), keepdim)
   )
 

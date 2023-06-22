@@ -41,9 +41,9 @@ final class AdaptiveAvgPool2d(
     case x: Int           => new LongOptionalVector(new LongOptional(x), new LongOptional(x))
     // We know this can only be int so we can suppress the type test for Option[Int] cannot be checked at runtime warning
     case (h: Option[Int @unchecked], w: Option[Int @unchecked]) =>
-      new LongOptionalVector(toOptional(h.map(_.toLong)), toOptional(w.map(_.toLong)))
+      new LongOptionalVector(h.toOptional, w.toOptional)
     case x: Option[Int] =>
-      new LongOptionalVector(toOptional(x.map(_.toLong)), toOptional(x.map(_.toLong)))
+      new LongOptionalVector(x.toOptional, x.toOptional)
 
   override private[torch] val nativeModule: AdaptiveAvgPool2dImpl = AdaptiveAvgPool2dImpl(
     nativeOutputSize.get(0)

@@ -28,19 +28,19 @@ def conv1d[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     weight: Tensor[D],
     bias: Tensor[D] | Option[Tensor[D]] = None,
-    stride: Long = 1,
-    padding: Long = 0,
-    dilation: Long = 1,
-    groups: Long = 1
+    stride: Int = 1,
+    padding: Int = 0,
+    dilation: Int = 1,
+    groups: Int = 1
 ): Tensor[D] =
   Tensor(
     torchNative.conv1d(
       input.native,
       weight.native,
       toOptional(bias),
-      Array(stride),
-      Array(padding),
-      Array(dilation),
+      Array(stride.toLong),
+      Array(padding.toLong),
+      Array(dilation.toLong),
       groups
     )
   )
@@ -50,10 +50,10 @@ def conv2d[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     weight: Tensor[D],
     bias: Tensor[D] | Option[Tensor[D]] = None,
-    stride: Long | (Long, Long) = 1,
-    padding: Long | (Long, Long) = 0,
-    dilation: Long | (Long, Long) = 1,
-    groups: Long = 1
+    stride: Int | (Int, Int) = 1,
+    padding: Int | (Int, Int) = 0,
+    dilation: Int | (Int, Int) = 1,
+    groups: Int = 1
 ): Tensor[D] =
   Tensor(
     torchNative.conv2d(
@@ -64,5 +64,105 @@ def conv2d[D <: FloatNN | ComplexNN](
       toArray(padding),
       toArray(dilation),
       groups
+    )
+  )
+
+/** Applies a 3D convolution over an input image composed of several input planes. */
+def conv3d[D <: FloatNN | ComplexNN](
+    input: Tensor[D],
+    weight: Tensor[D],
+    bias: Tensor[D] | Option[Tensor[D]] = None,
+    stride: Int = 1,
+    padding: Int = 0,
+    dilation: Int = 1,
+    groups: Int = 1
+): Tensor[D] =
+  Tensor(
+    torchNative.conv3d(
+      input.native,
+      weight.native,
+      toOptional(bias),
+      Array(stride.toLong),
+      Array(padding.toLong),
+      Array(dilation.toLong),
+      groups
+    )
+  )
+
+/** Applies a 1D transposed convolution operator over an input signal composed of several input
+  * planes, sometimes also called “deconvolution”.
+  */
+def convTranspose1d[D <: FloatNN | ComplexNN](
+    input: Tensor[D],
+    weight: Tensor[D],
+    bias: Tensor[D] | Option[Tensor[D]] = None,
+    stride: Int | (Int, Int) = 1,
+    padding: Int | (Int, Int) = 0,
+    outputPadding: Int | (Int, Int) = 0,
+    groups: Int = 1,
+    dilation: Int | (Int, Int) = 1
+): Tensor[D] =
+  Tensor(
+    torchNative.conv_transpose1d(
+      input.native,
+      weight.native,
+      toOptional(bias),
+      toArray(stride),
+      toArray(padding),
+      toArray(outputPadding),
+      groups,
+      toArray(dilation): _*
+    )
+  )
+
+/** Applies a 2D transposed convolution operator over an input image composed of several input
+  * planes, sometimes also called “deconvolution”.
+  */
+def convTranspose2d[D <: FloatNN | ComplexNN](
+    input: Tensor[D],
+    weight: Tensor[D],
+    bias: Tensor[D] | Option[Tensor[D]] = None,
+    stride: Int | (Int, Int) = 1,
+    padding: Int | (Int, Int) = 0,
+    outputPadding: Int | (Int, Int) = 0,
+    groups: Int = 1,
+    dilation: Int | (Int, Int) = 1
+): Tensor[D] =
+  Tensor(
+    torchNative.conv_transpose2d(
+      input.native,
+      weight.native,
+      toOptional(bias),
+      toArray(stride),
+      toArray(padding),
+      toArray(outputPadding),
+      groups,
+      toArray(dilation): _*
+    )
+  )
+
+/** Applies a 3D transposed convolution operator over an input image composed of several input
+  * planes, sometimes also called “deconvolution”.
+  */
+def convTranspose3d[D <: FloatNN | ComplexNN](
+    input: Tensor[D],
+    weight: Tensor[D],
+    bias: Tensor[D] | Option[Tensor[D]] = None,
+    stride: Int | (Int, Int, Int) = 1,
+    padding: Int | (Int, Int, Int) = 0,
+    outputPadding: Int | (Int, Int, Int) = 0,
+    groups: Int = 1,
+    dilation: Int | (Int, Int) = 1
+): Tensor[D] =
+  Tensor(
+    torchNative.conv_transpose3d(
+      input.native,
+      weight.native,
+      toOptional(bias),
+      toArray(stride),
+      toArray(padding),
+      toArray(outputPadding),
+      groups,
+      toArray(dilation): _*
     )
   )

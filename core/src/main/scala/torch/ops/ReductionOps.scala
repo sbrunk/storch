@@ -67,7 +67,7 @@ import org.bytedeco.pytorch.ScalarTypeOptional
   */
 def argmax[D <: IntNN | FloatNN](
     input: Tensor[D],
-    dim: Long | Option[Long] = None,
+    dim: Int | Option[Int] = None,
     keepdim: Boolean = false
 ): Tensor[Int64] = Tensor(
   torchNative.argmax(input.native, dim.toOptional, keepdim)
@@ -96,7 +96,7 @@ def argmax[D <: IntNN | FloatNN](
   */
 def argmin[D <: IntNN | FloatNN](
     input: Tensor[D],
-    dim: Long | Option[Long] = None,
+    dim: Int | Option[Int] = None,
     keepdim: Boolean = false
 ): Tensor[Int64] = Tensor(
   torchNative.argmin(input.native, dim.toOptional, keepdim)
@@ -116,7 +116,7 @@ def argmin[D <: IntNN | FloatNN](
   */
 def amax[D <: RealNN](
     input: Tensor[D],
-    dim: Long | Seq[Long],
+    dim: Int | Seq[Int],
     keepdim: Boolean = false
 ): Tensor[D] =
   Tensor(
@@ -137,7 +137,7 @@ def amax[D <: RealNN](
   */
 def amin[D <: RealNN](
     input: Tensor[D],
-    dim: Long | Seq[Long],
+    dim: Int | Seq[Int],
     keepdim: Boolean = false
 ): Tensor[D] =
   Tensor(
@@ -157,7 +157,7 @@ def amin[D <: RealNN](
   */
 def aminmax[D <: RealNN](
     input: Tensor[D],
-    dim: Long | Option[Long] = None,
+    dim: Int | Option[Int] = None,
     keepdim: Boolean = false
 ): (Tensor[D], Tensor[D]) =
   val native = torchNative.aminmax(input.native, dim.toOptional, keepdim)
@@ -181,7 +181,7 @@ def all[D <: DType](input: Tensor[D]): Tensor[Bool] = Tensor(torchNative.all(inp
   * @param keepdim
   *   whether the output tensor has `dim` retained or not.
   */
-def all[D <: DType](input: Tensor[D], dim: Long, keepdim: Boolean = false): Tensor[Bool] = Tensor(
+def all[D <: DType](input: Tensor[D], dim: Int, keepdim: Boolean = false): Tensor[Bool] = Tensor(
   torchNative.all(input.native, dim, keepdim)
 )
 
@@ -203,7 +203,7 @@ def any[D <: DType](input: Tensor[D]): Tensor[Bool] = Tensor(torchNative.any(inp
   * @param keepdim
   *   whether the output tensor has `dim` retained or not.
   */
-def any[D <: DType](input: Tensor[D], dim: Long, keepdim: Boolean = false): Tensor[Bool] = Tensor(
+def any[D <: DType](input: Tensor[D], dim: Int, keepdim: Boolean = false): Tensor[Bool] = Tensor(
   torchNative.any(input.native, dim, keepdim)
 )
 
@@ -230,7 +230,7 @@ def max[D <: RealNN](input: Tensor[D]): Tensor[Int64] = Tensor(input.native.max(
   * @param keepdim
   *   whether the output tensor has `dim` retained or not.
   */
-def max[D <: RealNN](input: Tensor[D], dim: Long, keepdim: Boolean = false): TensorTuple[D] =
+def max[D <: RealNN](input: Tensor[D], dim: Int, keepdim: Boolean = false): TensorTuple[D] =
   val nativeTuple = torchNative.max(input.native, dim, keepdim)
   TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
 
@@ -257,7 +257,7 @@ def min[D <: RealNN](input: Tensor[D]): Tensor[Int64] = Tensor(input.native.min(
   * @param keepdim
   *   whether the output tensor has `dim` retained or not.
   */
-def min[D <: RealNN](input: Tensor[D], dim: Long, keepdim: Boolean = false): TensorTuple[D] =
+def min[D <: RealNN](input: Tensor[D], dim: Int, keepdim: Boolean = false): TensorTuple[D] =
   val nativeTuple = torchNative.min(input.native, dim, keepdim)
   TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
 
@@ -441,7 +441,7 @@ def median[D <: NumericRealNN](
   */
 def median[D <: NumericRealNN, D2 <: DType | Derive](
     input: Tensor[D],
-    dim: Long = -1,
+    dim: Int = -1,
     keepdim: Boolean = false
 ): TensorTuple[D] =
   val nativeTuple = torchNative.median(input.native, dim, keepdim)
@@ -480,7 +480,7 @@ def nanmedian[D <: NumericRealNN](
   */
 def nanmedian[D <: NumericRealNN, D2 <: DType | Derive](
     input: Tensor[D],
-    dim: Long = -1,
+    dim: Int = -1,
     keepdim: Boolean = false
 ): TensorTuple[D] =
   val nativeTuple = torchNative.nanmedian(input.native, dim, keepdim)
@@ -505,7 +505,7 @@ def nanmedian[D <: NumericRealNN, D2 <: DType | Derive](
   * @param keepdim
   *   whether the output tensor has `dim` retained or not.
   */
-def mode[D <: RealNN](input: Tensor[D], dim: Long = -1, keepdim: Boolean = false): TensorTuple[D] =
+def mode[D <: RealNN](input: Tensor[D], dim: Int = -1, keepdim: Boolean = false): TensorTuple[D] =
   val nativeTuple = torchNative.mode(input.native, dim, keepdim)
   TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
 
@@ -577,7 +577,7 @@ def prod[D <: DType](
   */
 def prod[D <: DType, D2 <: DType | Derive](
     input: Tensor[D],
-    dim: Long,
+    dim: Int,
     keepdim: Boolean = false,
     dtype: D2 = derive
 ): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
@@ -631,7 +631,7 @@ def prod[D <: DType, D2 <: DType | Derive](
 // def quantile[D <: DType, D2 <: DType | Derive](
 //     input: Tensor[D],
 //     q: Double | Tensor[?], // TODO only float tensor?
-//     dim: Option[Long] = None,
+//     dim: Option[Int] = None,
 //     keepdim: Boolean = false,
 
 // ): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
@@ -674,7 +674,7 @@ def std[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
-    correction: Long = 1
+    correction: Int = 1
 ): Tensor[D] =
   Tensor(
     torchNative.std(
@@ -709,11 +709,11 @@ def std[D <: FloatNN | ComplexNN](
   * @return
   *   A tuple (std, mean) containing the standard deviation and mean.
   */
-def std_mean[D <: FloatNN | ComplexNN](
+def stdMean[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
-    correction: Long = 1
+    correction: Int = 1
 ): (Tensor[D], Tensor[D]) =
   val nativeTuple =
     torchNative.std_mean(
@@ -817,7 +817,7 @@ def variance[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
-    correction: Long = 1
+    correction: Int = 1
 ): Tensor[D] =
   Tensor(
     torchNative.`var`(
@@ -852,11 +852,11 @@ def variance[D <: FloatNN | ComplexNN](
   * @return
   *   A tuple (var, mean) containing the variance and mean.
   */
-def var_mean[D <: FloatNN | ComplexNN](
+def varMean[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     dim: Int | Seq[Int] = Seq.empty,
     keepdim: Boolean = false,
-    correction: Long = 1
+    correction: Int = 1
 ): (Tensor[D], Tensor[D]) =
   val nativeTuple =
     torchNative.var_mean(
@@ -875,7 +875,7 @@ def var_mean[D <: FloatNN | ComplexNN](
   * @param dim
   *   Dim or seq of dims along which to count non-zeros.
   */
-def count_nonzero(
+def countNonzero(
     input: Tensor[?],
     dim: Int | Seq[Int] = Seq.empty
 ): Tensor[Int64] =

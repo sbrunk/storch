@@ -44,7 +44,7 @@ private[torch] object NativeConverters:
     case i: Option[T] => i.map(f(_)).orNull
     case i: T         => f(i)
 
-  extension (l: Long | Option[Long])
+  extension (l: Int | Option[Int])
     def toOptional: pytorch.LongOptional = convertToOptional(l, pytorch.LongOptional(_))
 
   extension (l: Double | Option[Double])
@@ -63,22 +63,13 @@ private[torch] object NativeConverters:
     def toOptional: TensorOptional =
       convertToOptional(t, t => pytorch.TensorOptional(t.native))
 
-  extension (i: Long | (Long, Long))
-    def toArray = i match
-      case i: Long => Array(i)
-      case (i, j)  => Array(i, j)
-
-  extension (i: Int | Seq[Int])
+  extension (i: Int | Seq[Int] | (Int, Int) | (Int, Int, Int))
     @targetName("intOrIntSeqToArray")
     def toArray: Array[Long] = i match
       case i: Int      => Array(i.toLong)
       case i: Seq[Int] => i.map(_.toLong).toArray
-
-  extension (i: Long | Seq[Long])
-    @targetName("longOrLongSeqToArray")
-    def toArray: Array[Long] = i match
-      case i: Long      => Array(i)
-      case i: Seq[Long] => i.toArray
+      case (i, j)      => Array(i.toLong, j.toLong)
+      case (i, j, k)   => Array(i, j, k).map(_.toLong)
 
   extension (input: Int | (Int, Int))
     def toNative = input match
