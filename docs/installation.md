@@ -153,7 +153,7 @@ resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
   "org.bytedeco" % "pytorch-platform-gpu" % "@PYTORCH_VERSION@-@JAVACPP_VERSION@",
-  "org.bytedeco" % "cuda-platform-redist" % "11.8-8.6-@JAVACPP_VERSION@"
+  "org.bytedeco" % "cuda-platform-redist" % "@CUDA_VERSION@-@JAVACPP_VERSION@"
 )
 fork := true
 ```
@@ -165,7 +165,7 @@ fork := true
 //> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch-platform-gpu:@PYTORCH_VERSION@-@JAVACPP_VERSION@"
-//> using lib "org.bytedeco:cuda-platform-redist:11.8-8.6-@JAVACPP_VERSION@"
+//> using lib "org.bytedeco:cuda-platform-redist:@CUDA_VERSION@-@JAVACPP_VERSION@"
 ```
 
 @:@
@@ -189,7 +189,7 @@ libraryDependencies += Seq(
   "org.bytedeco" % "pytorch" % "@PYTORCH_VERSION@-@JAVACPP_VERSION@",
   "org.bytedeco" % "pytorch" % "@PYTORCH_VERSION@-@JAVACPP_VERSION@" classifier "linux-x86_64-gpu",
   "org.bytedeco" % "openblas" % "@OPENBLAS_VERSION@-@JAVACPP_VERSION@" classifier "linux-x86_64",
-  "org.bytedeco" % "cuda" % "11.8-8.6-@JAVACPP_VERSION@" classifier "linux-x86_64-redist"
+  "org.bytedeco" % "cuda" % "@CUDA_VERSION@-@JAVACPP_VERSION@" classifier "linux-x86_64-redist"
 )
 fork := true
 ```
@@ -202,7 +202,7 @@ fork := true
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch:@PYTORCH_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64-gpu"
 //> using lib "org.bytedeco:openblas:@OPENBLAS_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64"
-//> using lib "org.bytedeco:cuda:11.8-8.6-@JAVACPP_VERSION@,classifier=linux-x86_64-redist"
+//> using lib "org.bytedeco:cuda:@CUDA_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64-redist"
 ```
 
 @:@
@@ -223,7 +223,7 @@ resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
 )
-javaCppPresetLibs ++= Seq("pytorch-gpu" -> "@PYTORCH_VERSION@", "openblas" -> "@OPENBLAS_VERSION@", "cuda-redist" -> "11.8-8.6")
+javaCppPresetLibs ++= Seq("pytorch-gpu" -> "@PYTORCH_VERSION@", "openblas" -> "@OPENBLAS_VERSION@", "cuda-redist" -> "@CUDA_VERSION@")
 fork := true
 ```
 
