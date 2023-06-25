@@ -64,6 +64,7 @@ import org.bytedeco.pytorch.DoubleArrayRef
 import org.bytedeco.pytorch.EllipsisIndexType
 import org.bytedeco.pytorch.SymInt
 import org.bytedeco.pytorch.SymIntOptional
+import internal.LoadCusolver
 
 case class TensorTuple[D <: DType](
     values: Tensor[D],
@@ -729,6 +730,8 @@ type IntTensor = UInt8Tensor | Int8Tensor | Int16Tensor | Int32Tensor | Int64Ten
 type ComplexTensor = Complex32Tensor | Complex64Tensor | Complex128Tensor
 
 object Tensor:
+  LoadCusolver // TODO workaround for https://github.com/bytedeco/javacpp-presets/issues/1376
+
   def apply[D <: DType](native: pytorch.Tensor): Tensor[D] = (native.scalar_type().intern() match
     case ScalarType.Byte          => new UInt8Tensor(native)
     case ScalarType.Char          => new Int8Tensor(native)

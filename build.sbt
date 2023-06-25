@@ -75,7 +75,8 @@ lazy val core = project
       (if (enableGPU.value) "pytorch-gpu" else "pytorch") -> pytorchVersion,
       "mkl" -> mklVersion,
       "openblas" -> openblasVersion
-    ) ++ (if (enableGPU.value) Seq("cuda-redist" -> "12.1-8.9") else Seq()),
+      // TODO remove cuda (not cuda-redist) once https://github.com/bytedeco/javacpp-presets/issues/1376 is fixed
+    ) ++ (if (enableGPU.value) Seq("cuda-redist" -> cudaVersion, "cuda" -> cudaVersion) else Seq()),
     javaCppPlatform := org.bytedeco.sbt.javacpp.Platform.current,
     fork := true,
     Test / fork := true,
