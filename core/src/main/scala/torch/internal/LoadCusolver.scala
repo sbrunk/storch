@@ -18,11 +18,15 @@ package torch
 package internal
 
 import org.bytedeco.javacpp.Loader
-import org.bytedeco.cuda.global.cusolver
-import org.bytedeco.cuda.global.cudart
 
 // This is a workaround for https://github.com/bytedeco/javacpp-presets/issues/1376
 // TODO remove once the issue is fixed
 object LoadCusolver {
-  Loader.load(classOf[cusolver])
+  try {
+    val cusolver = Class.forName("org.bytedeco.cuda.global.cusolver")
+    Loader.load(cusolver)
+  } catch {
+    case e: ClassNotFoundException => // ignore to avoid breaking CPU only builds
+  }
+
 }
