@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="Laika 0.18.1 + Helium Theme" />
-    <title>About</title>
+    <title>Frequently Asked Questions</title>
     
       <meta name="author" content="Sören Brunk"/>
     
@@ -87,8 +87,8 @@
       </div>
 
       <ul class="nav-list">
-        <li class="level1 active"><a href="#">About</a></li>
-        <li class="level1"><a href="faq.html">Frequently Asked Questions</a></li>
+        <li class="level1"><a href="about.html">About</a></li>
+        <li class="level1 active"><a href="#">Frequently Asked Questions</a></li>
         <li class="level1"><a href="installation.html">Installation</a></li>
         <li class="level1"><a href="modules.html">Modules</a></li>
         <li class="level1"><a href="pre-trained-weights.html">Converting pre-trained weights</a></li>
@@ -112,9 +112,11 @@
     <div id="container">
 
       <nav id="page-nav">
-        <p class="header"><a href="#">About</a></p>
+        <p class="header"><a href="#">Frequently Asked Questions</a></p>
 
         <ul class="nav-list">
+          <li class="level1"><a href="#q-i-want-to-run-operations-on-the-gpu-but-storch-seems-to-hang">Q: I want to run operations on the GPU, but Storch seems to hang?</a></li>
+          <li class="level1"><a href="#q-what-about-gpu-support-on-my-mac">Q: What about GPU support on my Mac?</a></li>
         </ul>
 
         <p class="footer"></p>
@@ -122,76 +124,23 @@
 
       <main class="content">
 
-        <h1 id="about" class="title">About</h1>
-        <p>Storch is a Scala library for fast tensor computations and deep learning, based on <a href="https://pytorch.org/">PyTorch</a>.</p>
-        <p>Like PyTorch, Storch provides</p>
-        <ul>
-          <li>A NumPy like API for working with tensors</li>
-        </ul>
-        <ul>
-          <li>GPU support</li>
-        </ul>
-        <ul>
-          <li>Automatic differentiation</li>
-        </ul>
-        <ul>
-          <li>A neural network API for building and training neural networks.</li>
-        </ul>
-        <p>Storch aims to stay close to the original PyTorch API to make porting existing models and the life of people already familiar with PyTorch easier.</p>
-        <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">data</span><span> = </span><span class="type-name">Seq</span><span>(</span><span class="number-literal">0</span><span>,</span><span class="number-literal">1</span><span>,</span><span class="number-literal">2</span><span>,</span><span class="number-literal">3</span><span>)
-</span><span class="comment">// data: Seq[Int] = List(0, 1, 2, 3)
-</span><span class="keyword">val</span><span> </span><span class="identifier">t1</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="type-name">Tensor</span><span>(</span><span class="identifier">data</span><span>)
-</span><span class="comment">// t1: Tensor[Int32] = tensor dtype=int32, shape=[4], device=CPU 
-// [0, 1, 2, 3]
-</span><span class="identifier">t1</span><span>.</span><span class="identifier">equal</span><span>(</span><span class="identifier">torch</span><span>.</span><span class="identifier">arange</span><span>(</span><span class="number-literal">0</span><span>,</span><span class="number-literal">4</span><span>))
-</span><span class="comment">// res1: Boolean = true
-</span><span class="keyword">val</span><span> </span><span class="identifier">t2</span><span> = </span><span class="identifier">t1</span><span>.</span><span class="identifier">to</span><span>(</span><span class="identifier">dtype</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="identifier">float32</span><span>)
-</span><span class="comment">// t2: Tensor[Float32] = tensor dtype=float32, shape=[4], device=CPU 
-// [0.0000, 1.0000, 2.0000, 3.0000]
-</span><span class="keyword">val</span><span> </span><span class="identifier">t3</span><span> = </span><span class="identifier">t1</span><span> + </span><span class="identifier">t2</span><span>
-</span><span class="comment">// t3: Tensor[Float32] = tensor dtype=float32, shape=[4], device=CPU 
-// [0.0000, 2.0000, 4.0000, 6.0000]
-</span><span>
-</span><span class="keyword">val</span><span> </span><span class="identifier">shape</span><span> = </span><span class="type-name">Seq</span><span>(</span><span class="number-literal">2</span><span>,</span><span class="number-literal">3</span><span>)
-</span><span class="comment">// shape: Seq[Int] = List(2, 3)
-</span><span class="keyword">val</span><span> </span><span class="identifier">randTensor</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="identifier">shape</span><span>)
-</span><span class="comment">// randTensor: Tensor[Float32] = tensor dtype=float32, shape=[2, 3], device=CPU 
-// [[0.4963, 0.7682, 0.0885],
-//  [0.1320, 0.3074, 0.6341]]
-</span><span class="keyword">val</span><span> </span><span class="identifier">zerosTensor</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">zeros</span><span>(</span><span class="identifier">shape</span><span>, </span><span class="identifier">dtype</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="identifier">int64</span><span>)
-</span><span class="comment">// zerosTensor: Tensor[Int64] = tensor dtype=int64, shape=[2, 3], device=CPU 
-// [[0, 0, 0],
-//  [0, 0, 0]]
-</span><span>
-</span><span class="keyword">val</span><span> </span><span class="identifier">x</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">ones</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">5</span><span>))
-</span><span class="comment">// x: Tensor[Float32] = tensor dtype=float32, shape=[5], device=CPU 
-// [1.0000, 1.0000, 1.0000, 1.0000, 1.0000]
-</span><span class="keyword">val</span><span> </span><span class="identifier">w</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">randn</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">5</span><span>, </span><span class="number-literal">3</span><span>), </span><span class="identifier">requiresGrad</span><span>=</span><span class="boolean-literal">true</span><span>)
-</span><span class="comment">// w: Tensor[Float32] = tensor dtype=float32, shape=[5, 3], device=CPU 
-// [[1.2645, -0.6874, 0.1604],
-//  [-0.6065, -0.7831, 1.0622],
-//  [-0.2613, 1.0667, 0.4159],
-//  [0.8396, -0.8265, -0.7949],
-//  [-0.9528, 0.3717, 0.4087]]
-</span><span class="keyword">val</span><span> </span><span class="identifier">b</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">randn</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">3</span><span>), </span><span class="identifier">requiresGrad</span><span>=</span><span class="boolean-literal">true</span><span>)
-</span><span class="comment">// b: Tensor[Float32] = tensor dtype=float32, shape=[3], device=CPU 
-// [1.4214, 0.1494, -0.6709]
-</span><span class="keyword">val</span><span> </span><span class="identifier">z</span><span> = (</span><span class="identifier">x</span><span> </span><span class="identifier">matmul</span><span> </span><span class="identifier">w</span><span>) + </span><span class="identifier">b</span><span>
-</span><span class="comment">// z: Tensor[Float32] = tensor dtype=float32, shape=[3], device=CPU 
-// [1.7048, -0.7091, 0.5814]</span></code></pre>
-        <p>One notable difference is that tensors in Storch are statically typed regarding the underlying <code>dtype</code>.
-        So you&#39;ll see <code>Tensor[Float32]</code> or <code>Tensor[Int8]</code> instead of just <code>Tensor</code>.</p>
-        <p>Tracking the data type at compile time enables us to catch certain errors earlier. For instance, <code>torch.rand</code> is only implemented for float types and the following will trigger a runtime error in PyTorch:</p>
-        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>([</span><span class="number-literal">3</span><span>,</span><span class="number-literal">3</span><span>], </span><span class="identifier">dtype</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="identifier">int32</span><span>) </span><span class="comment"># RuntimeError: &quot;check_uniform_bounds&quot; not implemented for &#39;Int&#39;</span></code></pre>
-        <p>In Storch, the same code does not compile:</p>
-        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">3</span><span>,</span><span class="number-literal">3</span><span>), </span><span class="identifier">dtype</span><span>=</span><span class="identifier">torch</span><span>.</span><span class="identifier">int32</span><span>)
-</span><span class="comment">// error:
-// Found:    (torch.int32 : torch.Int32)
-// Required: torch.FloatNN | torch.ComplexNN
-// torch.rand(Seq(3,3), dtype=torch.int32)
-//                            ^^^^^^^^^^^</span></code></pre>
-        <p>Storch is powered by <a href="https://pytorch.org/cppdocs/index.html">LibTorch</a>, the C++ library underlying PyTorch and
-        <a href="https://github.com/bytedeco/javacpp">JavaCPP</a>, which provides generated Java bindings for LibTorch as well as important utilities to integrate with native code on the JVM.</p>
+        <h1 id="frequently-asked-questions" class="title">Frequently Asked Questions</h1>
+        
+        <h2 id="q-i-want-to-run-operations-on-the-gpu-but-storch-seems-to-hang" class="section">Q: I want to run operations on the GPU, but Storch seems to hang?<a class="anchor-link right" href="#q-i-want-to-run-operations-on-the-gpu-but-storch-seems-to-hang"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>Depending on your hardware, the CUDA version and capability settings, CUDA might need to do <a href="#">just-in-time compilation</a>
+        <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#just-in-time-compilation">https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#just-in-time-compilation</a>) of your kernels, which
+        can take a few minutes. The result is cached, so it should load faster on subsequent runs.</p>
+        <p>If you&#39;re unsure, you can watch the size of the cache:</p>
+        <pre class="keep-together pdf epub"><code class="bash">watch -d du -sm ~/.nv/ComputeCache</code></pre>
+        <p>If it&#39;s still growing, it&#39;s very likely that CUDA is doing just-in-time compilation.</p>
+        <p>You can also increase the cache size to up to 4GB, to avoid recomputation:</p>
+        <pre class="keep-together pdf epub"><code class="bash">export CUDA_CACHE_MAXSIZE=4294967296</code></pre>
+        
+        <h2 id="q-what-about-gpu-support-on-my-mac" class="section">Q: What about GPU support on my Mac?<a class="anchor-link right" href="#q-what-about-gpu-support-on-my-mac"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>Recent PyTorch versions provide a new backend based on Apple’s Metal Performance Shaders (MPS).
+        The MPS backend enables GPU-accelerated training on the M1/M2 architecture.
+        Right now, there&#39;s no ARM build of PyTorch in JavaCPP and MPS ist not enabled.
+        If you have an M1/M2 machine and want to help, check the umbrella <a href="https://github.com/bytedeco/javacpp-presets/issues/1069">issue for macosx-aarch64 support</a>.</p>
 
       </main>
 
