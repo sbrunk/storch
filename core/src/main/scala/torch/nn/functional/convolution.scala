@@ -23,7 +23,10 @@ import org.bytedeco.pytorch.TensorOptional
 import org.bytedeco.pytorch.global.torch as torchNative
 import torch.internal.NativeConverters.*
 
-/** Applies a 1D convolution over an input signal composed of several input planes. */
+/** Applies a 1D convolution over an input signal composed of several input planes.
+  *
+  * @group nn_conv
+  */
 def conv1d[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     weight: Tensor[D],
@@ -45,7 +48,10 @@ def conv1d[D <: FloatNN | ComplexNN](
     )
   )
 
-/** Applies a 2D convolution over an input signal composed of several input planes. */
+/** Applies a 2D convolution over an input signal composed of several input planes.
+  *
+  * @group nn_conv
+  */
 def conv2d[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     weight: Tensor[D],
@@ -67,7 +73,10 @@ def conv2d[D <: FloatNN | ComplexNN](
     )
   )
 
-/** Applies a 3D convolution over an input image composed of several input planes. */
+/** Applies a 3D convolution over an input image composed of several input planes.
+  *
+  * @group nn_conv
+  */
 def conv3d[D <: FloatNN | ComplexNN](
     input: Tensor[D],
     weight: Tensor[D],
@@ -91,6 +100,8 @@ def conv3d[D <: FloatNN | ComplexNN](
 
 /** Applies a 1D transposed convolution operator over an input signal composed of several input
   * planes, sometimes also called “deconvolution”.
+  *
+  * @group nn_conv
   */
 def convTranspose1d[D <: FloatNN | ComplexNN](
     input: Tensor[D],
@@ -117,6 +128,8 @@ def convTranspose1d[D <: FloatNN | ComplexNN](
 
 /** Applies a 2D transposed convolution operator over an input image composed of several input
   * planes, sometimes also called “deconvolution”.
+  *
+  * @group nn_conv
   */
 def convTranspose2d[D <: FloatNN | ComplexNN](
     input: Tensor[D],
@@ -143,6 +156,8 @@ def convTranspose2d[D <: FloatNN | ComplexNN](
 
 /** Applies a 3D transposed convolution operator over an input image composed of several input
   * planes, sometimes also called “deconvolution”.
+  *
+  * @group nn_conv
   */
 def convTranspose3d[D <: FloatNN | ComplexNN](
     input: Tensor[D],
@@ -166,3 +181,6 @@ def convTranspose3d[D <: FloatNN | ComplexNN](
       toArray(dilation): _*
     )
   )
+
+// TODO unfold
+// TODO fold

@@ -71,10 +71,11 @@ private[torch] object NativeConverters:
       case (i, j)      => Array(i.toLong, j.toLong)
       case (i, j, k)   => Array(i, j, k).map(_.toLong)
 
-  extension (input: Int | (Int, Int))
+  extension (input: Int | (Int, Int) | (Int, Int, Int))
     def toNative = input match
-      case (h, w) => LongPointer(Array(h.toLong, w.toLong)*)
-      case x: Int => LongPointer(Array(x.toLong, x.toLong)*)
+      case x: Int    => LongPointer(Array(x.toLong, x.toLong)*)
+      case (h, w)    => LongPointer(Array(h.toLong, w.toLong)*)
+      case (t, h, w) => LongPointer(Array(t.toLong, h.toLong, w.toLong)*)
 
   extension (x: ScalaType)
     def toScalar: pytorch.Scalar = x match

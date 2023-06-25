@@ -23,6 +23,7 @@ import Generators.{*, given}
 import org.scalacheck.Prop.*
 
 import scala.util.Try
+import org.scalacheck.Gen
 
 trait TensorCheckSuite extends ScalaCheckSuite {
 
@@ -74,7 +75,8 @@ trait TensorCheckSuite extends ScalaCheckSuite {
 
   inline def propertyTestUnaryOp[In <: DType](
       op: Function1[Tensor[In], ?],
-      opName: String
+      opName: String,
+      genTensor: Gen[Tensor[In]] = genTensor[In]
   ): Unit =
     property(propertyTestName(opName)) {
       // TODO Validate output types
