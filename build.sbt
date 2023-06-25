@@ -25,6 +25,7 @@ ThisBuild / apiURL := Some(new URL("https://storch.dev/api/"))
 
 val scrImageVersion = "4.0.34"
 val pytorchVersion = "2.0.1"
+val cudaVersion = "12.1-8.9"
 val openblasVersion = "0.3.23"
 val mklVersion = "2023.1"
 ThisBuild / scalaVersion := "3.3.0"
@@ -74,7 +75,8 @@ lazy val core = project
       (if (enableGPU.value) "pytorch-gpu" else "pytorch") -> pytorchVersion,
       "mkl" -> mklVersion,
       "openblas" -> openblasVersion
-    ) ++ (if (enableGPU.value) Seq("cuda-redist" -> "11.8-8.6") else Seq()),
+      // TODO remove cuda (not cuda-redist) once https://github.com/bytedeco/javacpp-presets/issues/1376 is fixed
+    ) ++ (if (enableGPU.value) Seq("cuda-redist" -> cudaVersion, "cuda" -> cudaVersion) else Seq()),
     javaCppPlatform := org.bytedeco.sbt.javacpp.Platform.current,
     fork := true,
     Test / fork := true,
@@ -125,7 +127,8 @@ lazy val docs = project
       "JAVACPP_VERSION" -> javaCppVersion.value,
       "PYTORCH_VERSION" -> pytorchVersion,
       "OPENBLAS_VERSION" -> openblasVersion,
-      "MKL_VERSION" -> mklVersion
+      "MKL_VERSION" -> mklVersion,
+      "CUDA_VERSION" -> cudaVersion
     ),
     ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(examples),
     Laika / sourceDirectories ++= Seq(sourceDirectory.value),
