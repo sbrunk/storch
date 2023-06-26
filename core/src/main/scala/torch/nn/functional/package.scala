@@ -14,12 +14,30 @@
  * limitations under the License.
  */
 
-package torch.nn
+package torch
+package nn
+
+import functional.*
+import torch.internal.LoadCusolver
 
 /** @groupname nn_conv Convolution functions
   * @groupname nn_pooling Pooling functions
   * @groupname nn_attention Attention mechanisms
   * @groupname nn_activation Non-linear activation functions
   * @groupname nn_linear Linear functions
+  * @groupname nn_dropout Dropout functions
+  * @groupname nn_sparse Sparse functions
+  * @groupname nn_distance Distance functions
+  * @groupname nn_loss Loss functions
+  * @groupname nn_vision Vision functions
   */
 package object functional
+    extends Activations
+    with Convolution
+    with Dropout
+    with Linear
+    with Loss
+    with Pooling
+    with Sparse {
+  LoadCusolver
+}

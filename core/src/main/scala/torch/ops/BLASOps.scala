@@ -15,11 +15,13 @@
  */
 
 package torch
+package ops
 
 /** BLAS and LAPACK Operations
   *
   * https://pytorch.org/docs/stable/torch.html#blas-and-lapack-operations
   */
-
-def matmul[D1 <: DType, D2 <: DType](t1: Tensor[D1], t2: Tensor[D2]): Tensor[Promoted[D1, D2]] =
-  t1.matmul(t2)
+private[torch] trait BLASOps {
+  def matmul[D1 <: DType, D2 <: DType](t1: Tensor[D1], t2: Tensor[D2]): Tensor[Promoted[D1, D2]] =
+    t1.matmul(t2)
+}

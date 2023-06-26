@@ -28,5 +28,4 @@ object LoadCusolver {
   } catch {
     case e: ClassNotFoundException => // ignore to avoid breaking CPU only builds
   }
-
 }

@@ -35,6 +35,7 @@ import org.bytedeco.pytorch.GenericDictIterator
 import spire.math.Complex
 import spire.math.UByte
 import scala.annotation.targetName
+import internal.LoadCusolver
 
 private[torch] object NativeConverters:
 

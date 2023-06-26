@@ -16,11 +16,17 @@
 
 package torch
 
-/** @groupname nn_conv Convolution Layers
+import torch.internal.LoadCusolver
+
+/** These are the basic building blocks for graphs.
+  *
+  * @groupname nn_conv Convolution Layers
   * @groupname nn_linear Linear Layers
   * @groupname nn_utilities Utilities
   */
 package object nn {
+  LoadCusolver
+
   export modules.Module
   export modules.Default
 

@@ -2,7 +2,7 @@
 
 ## Q: I want to run operations on the GPU, but Storch seems to hang?
 
-Depending on your hardware, the CUDA version and capability settings, CUDA might need to do [just-in-time compilation]()
+Depending on your hardware, the CUDA version and capability settings, CUDA might need to do [just-in-time compilation](
 https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#just-in-time-compilation) of your kernels, which
 can take a few minutes. The result is cached, so it should load faster on subsequent runs.
 
