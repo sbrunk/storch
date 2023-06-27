@@ -21,7 +21,7 @@ import functional as F
 import org.scalacheck.Gen
 import torch.Generators.allDTypes
 
-class MaxPoolSuite extends TensorCheckSuite {
+class PoolingSuite extends TensorCheckSuite {
   test("MaxPool2d output shapes") {
     val input = torch.randn(Seq(1, 3, 244, 244))
     // pool of square window of size=3, stride=2
@@ -35,6 +35,7 @@ class MaxPoolSuite extends TensorCheckSuite {
   }
 
   val shape3d = Seq(16, 50, 32)
+  propertyTestUnaryOp(F.avgPool1d(_, 3), "avgPool1d", genRandTensor(shape3d))
   propertyTestUnaryOp(F.maxPool1d(_, 3), "maxPool1d", genRandTensor(shape3d))
   propertyTestUnaryOp(F.maxPool1dWithIndices(_, 3), "maxPool1dWithIndices", genRandTensor(shape3d))
 
@@ -43,19 +44,25 @@ class MaxPoolSuite extends TensorCheckSuite {
       torch.rand(shape, dtype = dtype.asInstanceOf[D])
     }
 
-  val shape4d = Seq(20, 16, 50, 32)
+  val shape4d = Seq(8, 16, 50, 32)
+  propertyTestUnaryOp(F.avgPool2d(_, 3), "avgPool2d", genRandTensor(shape4d))
   propertyTestUnaryOp(F.maxPool2d(_, 3), "maxPool2d", genRandTensor(shape4d))
   propertyTestUnaryOp(F.maxPool2dWithIndices(_, 3), "maxPool2dWithIndices", genRandTensor(shape4d))
 
-  val shape5d = Seq(20, 16, 50, 44, 31)
+  val shape5d = Seq(2, 16, 50, 44, 31)
+  propertyTestUnaryOp(
+    F.avgPool3d(_, (3, 2, 2), stride = (2, 1, 2)),
+    "avgPool3d",
+    genRandTensor(shape5d)
+  )
   propertyTestUnaryOp(
     F.maxPool3d(_, (3, 2, 2), stride = (2, 1, 2)),
     "maxPool3d",
-    genRandTensor(shape4d)
+    genRandTensor(shape5d)
   )
   propertyTestUnaryOp(
     F.maxPool3dWithIndices(_, (3, 2, 2), stride = (2, 1, 2)),
     "maxPool3dWithIndices",
-    genRandTensor(shape4d)
+    genRandTensor(shape5d)
   )
 }

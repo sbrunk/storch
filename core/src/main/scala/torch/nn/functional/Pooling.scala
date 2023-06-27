@@ -96,8 +96,8 @@ private[torch] trait Pooling {
   ): Tensor[D] =
     val options = AvgPool2dOptions(toNative(kernelSize))
     stride match
-      case s: Int => options.stride().put(toNative(s))
-      case None   =>
+      case s: (Int | (Int, Int)) => options.stride().put(toNative(s))
+      case None                  =>
     options.padding().put(toNative(padding))
     options.ceil_mode().put(ceilMode)
     options.count_include_pad().put(countIncludePad)
@@ -110,7 +110,7 @@ private[torch] trait Pooling {
     *
     * @group nn_pooling
     */
-  def avgPool3d[D <: FloatNN | Complex32](
+  def avgPool3d[D <: Float16 | Float32 | Float64 | Complex32](
       input: Tensor[D],
       kernelSize: Int | (Int, Int, Int),
       stride: Int | (Int, Int, Int) | None.type = None,
@@ -121,8 +121,8 @@ private[torch] trait Pooling {
   ): Tensor[D] =
     val options = AvgPool3dOptions(toNative(kernelSize))
     stride match
-      case s: Int => options.stride().put(toNative(s))
-      case None   =>
+      case s: (Int | (Int, Int, Int)) => options.stride().put(toNative(s))
+      case None                       =>
     options.padding().put(toNative(padding))
     options.ceil_mode().put(ceilMode)
     options.count_include_pad().put(countIncludePad)
@@ -300,7 +300,7 @@ private[torch] trait Pooling {
     val options: MaxPool3dOptions = MaxPool3dOptions(toNative(kernelSize))
     stride match
       case s: (Int | (Int, Int, Int)) => options.stride().put(toNative(s))
-      case None                       => // options.stride().put(toNative(kernelSize))
+      case None                       =>
     options.padding().put(toNative(padding))
     options.dilation().put(toNative(dilation))
     options.ceil_mode().put(ceilMode)
