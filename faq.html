@@ -127,9 +127,9 @@
         <h1 id="frequently-asked-questions" class="title">Frequently Asked Questions</h1>
         
         <h2 id="q-i-want-to-run-operations-on-the-gpu-but-storch-seems-to-hang" class="section">Q: I want to run operations on the GPU, but Storch seems to hang?<a class="anchor-link right" href="#q-i-want-to-run-operations-on-the-gpu-but-storch-seems-to-hang"><i class="icofont-laika">&#xef71;</i></a></h2>
-        <p>Depending on your hardware, the CUDA version and capability settings, CUDA might need to do <a href="#">just-in-time compilation</a>
-        <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#just-in-time-compilation">https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#just-in-time-compilation</a>) of your kernels, which
-        can take a few minutes. The result is cached, so it should load faster on subsequent runs.</p>
+        <p>Depending on your hardware, the CUDA version and capability settings, CUDA might need to do
+        <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#just-in-time-compilation">just-in-time compilation</a>
+        of your kernels, which can take a few minutes. The result is cached, so it should load faster on subsequent runs.</p>
         <p>If you&#39;re unsure, you can watch the size of the cache:</p>
         <pre class="keep-together pdf epub"><code class="bash">watch -d du -sm ~/.nv/ComputeCache</code></pre>
         <p>If it&#39;s still growing, it&#39;s very likely that CUDA is doing just-in-time compilation.</p>
