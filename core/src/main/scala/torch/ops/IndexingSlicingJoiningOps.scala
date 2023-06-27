@@ -15,6 +15,7 @@
  */
 
 package torch
+package ops
 
 import org.bytedeco.pytorch.{TensorArrayRef, TensorVector}
 import org.bytedeco.pytorch.global.torch as torchNative
@@ -23,10 +24,11 @@ import org.bytedeco.pytorch.global.torch as torchNative
   *
   * https://pytorch.org/docs/stable/torch.html#indexing-slicing-joining-mutating-ops
   */
+private[torch] trait IndexingSlicingJoiningOps {
 
-def cat[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
-  torchNative.cat(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)), dim.toLong)
-)
+  def cat[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
+    torchNative.cat(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)), dim.toLong)
+  )
 
 // TODO dsplit
 // TODO column_stack
@@ -56,13 +58,13 @@ def cat[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
 // TODO split
 // TODO squeeze
 
-/** Concatenates a sequence of tensors along a new dimension.
-  *
-  * All tensors need to be of the same size.
-  */
-def stack[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
-  torchNative.stack(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)), dim)
-)
+  /** Concatenates a sequence of tensors along a new dimension.
+    *
+    * All tensors need to be of the same size.
+    */
+  def stack[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
+    torchNative.stack(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)), dim)
+  )
 
 // TODO swapaxes
 // TODO swapdims
@@ -77,3 +79,4 @@ def stack[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor
 // TODO vsplit
 // TODO vstack
 // TODO where
+}

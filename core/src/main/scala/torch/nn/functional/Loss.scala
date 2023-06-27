@@ -26,22 +26,26 @@ import torch.internal.NativeConverters.toOptional
 import org.bytedeco.pytorch.BCEWithLogitsLossOptions
 
 // Loss functions
+private[torch] trait Loss {
 
-/** Function that measures Binary Cross Entropy between target and input logits.
-  *
-  * TODO support weight, reduction, pos_weight
-  */
-def binaryCrossEntropyWithLogits[
-    I <: BFloat16 | Float32 | Float64,
-    O <: BFloat16 | Float16 | Float32 | Float64
-](
-    input: Tensor[I],
-    target: Tensor[O]
-): Tensor[O] =
-  Tensor(
-    torchNative.binary_cross_entropy_with_logits(
-      input.native,
-      target.native,
-      BCEWithLogitsLossOptions()
+  /** Function that measures Binary Cross Entropy between target and input logits.
+    *
+    * TODO support weight, reduction, pos_weight
+    *
+    * @group nn_loss
+    */
+  def binaryCrossEntropyWithLogits[
+      I <: BFloat16 | Float32 | Float64,
+      O <: BFloat16 | Float16 | Float32 | Float64
+  ](
+      input: Tensor[I],
+      target: Tensor[O]
+  ): Tensor[O] =
+    Tensor(
+      torchNative.binary_cross_entropy_with_logits(
+        input.native,
+        target.native,
+        BCEWithLogitsLossOptions()
+      )
     )
-  )
+}

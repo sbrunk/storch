@@ -15,6 +15,7 @@
  */
 
 package torch
+package ops
 
 import org.bytedeco.pytorch.global.torch as torchNative
 
@@ -22,12 +23,14 @@ import org.bytedeco.pytorch.global.torch as torchNative
   *
   * https://pytorch.org/docs/stable/torch.html#comparison-ops
   */
+private[torch] trait ComparisonOps {
 
-def allclose(
-    input: Tensor[?],
-    other: Tensor[?],
-    rtol: Double = 1e-05,
-    atol: Double = 1e-08,
-    equalNan: Boolean = false
-) =
-  torchNative.allclose(input.native, other.native, rtol, atol, equalNan)
+  def allclose(
+      input: Tensor[?],
+      other: Tensor[?],
+      rtol: Double = 1e-05,
+      atol: Double = 1e-08,
+      equalNan: Boolean = false
+  ) =
+    torchNative.allclose(input.native, other.native, rtol, atol, equalNan)
+}

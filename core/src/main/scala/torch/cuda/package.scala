@@ -15,17 +15,16 @@
  */
 
 package torch
-package nn
-package functional
 
-import org.bytedeco.javacpp.LongPointer
-import org.bytedeco.pytorch
-import org.bytedeco.pytorch.TensorOptional
 import org.bytedeco.pytorch.global.torch as torchNative
-import torch.internal.NativeConverters.toOptional
+import torch.internal.LoadCusolver
 
-def maxPool2d[D <: DType](input: Tensor[D], kernelSize: Long | (Long, Long)): Tensor[D] =
-  val kernelSizeNative = kernelSize match
-    case (h, w)  => Array(h, w)
-    case x: Long => Array(x, x)
-  Tensor(torchNative.max_pool2d(input.native, kernelSizeNative*))
+/** This package adds support for CUDA tensor types, that implement the same function as CPU
+  * tensors, but they utilize GPUs for computation.
+  */
+package object cuda {
+  LoadCusolver
+
+  /** Returns a Boolean indicating if CUDA is currently available. */
+  def isAvailable: Boolean = torchNative.cuda_is_available()
+}

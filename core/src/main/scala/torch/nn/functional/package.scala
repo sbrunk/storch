@@ -15,30 +15,29 @@
  */
 
 package torch
+package nn
 
+import functional.*
 import torch.internal.LoadCusolver
 
-/** These are the basic building blocks for graphs.
-  *
-  * @groupname nn_conv Convolution Layers
-  * @groupname nn_linear Linear Layers
-  * @groupname nn_utilities Utilities
+/** @groupname nn_conv Convolution functions
+  * @groupname nn_pooling Pooling functions
+  * @groupname nn_attention Attention mechanisms
+  * @groupname nn_activation Non-linear activation functions
+  * @groupname nn_linear Linear functions
+  * @groupname nn_dropout Dropout functions
+  * @groupname nn_sparse Sparse functions
+  * @groupname nn_distance Distance functions
+  * @groupname nn_loss Loss functions
+  * @groupname nn_vision Vision functions
   */
-package object nn {
+package object functional
+    extends Activations
+    with Convolution
+    with Dropout
+    with Linear
+    with Loss
+    with Pooling
+    with Sparse {
   LoadCusolver
-
-  export modules.Module
-  export modules.Default
-
-  export modules.activation.Softmax
-  export modules.activation.ReLU
-  export modules.batchnorm.BatchNorm2d
-  export modules.container.Sequential
-  export modules.conv.Conv2d
-  export modules.flatten.Flatten
-  export modules.linear.Linear
-  export modules.linear.Identity
-  export modules.normalization.GroupNorm
-  export modules.pooling.AdaptiveAvgPool2d
-  export modules.pooling.MaxPool2d
 }

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-//> using scala "3.2"
+//> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
-//> using repository "sonatype:snapshots"
 //> using lib "dev.storch::vision:0.0-5d5568f-SNAPSHOT"
-//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9-SNAPSHOT"
+//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9"
 
 import torch.*
 import torch.nn.functional as F

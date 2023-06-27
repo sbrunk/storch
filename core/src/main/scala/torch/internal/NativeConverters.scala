@@ -35,6 +35,7 @@ import org.bytedeco.pytorch.GenericDictIterator
 import spire.math.Complex
 import spire.math.UByte
 import scala.annotation.targetName
+import internal.LoadCusolver
 
 private[torch] object NativeConverters:
 
@@ -44,7 +45,7 @@ private[torch] object NativeConverters:
     case i: Option[T] => i.map(f(_)).orNull
     case i: T         => f(i)
 
-  extension (l: Long | Option[Long])
+  extension (l: Int | Option[Int])
     def toOptional: pytorch.LongOptional = convertToOptional(l, pytorch.LongOptional(_))
 
   extension (l: Double | Option[Double])
@@ -63,27 +64,19 @@ private[torch] object NativeConverters:
     def toOptional: TensorOptional =
       convertToOptional(t, t => pytorch.TensorOptional(t.native))
 
-  extension (i: Long | (Long, Long))
-    def toArray = i match
-      case i: Long => Array(i)
-      case (i, j)  => Array(i, j)
-
-  extension (i: Int | Seq[Int])
+  extension (i: Int | Seq[Int] | (Int, Int) | (Int, Int, Int))
     @targetName("intOrIntSeqToArray")
     def toArray: Array[Long] = i match
       case i: Int      => Array(i.toLong)
       case i: Seq[Int] => i.map(_.toLong).toArray
+      case (i, j)      => Array(i.toLong, j.toLong)
+      case (i, j, k)   => Array(i, j, k).map(_.toLong)
 
-  extension (i: Long | Seq[Long])
-    @targetName("longOrLongSeqToArray")
-    def toArray: Array[Long] = i match
-      case i: Long      => Array(i)
-      case i: Seq[Long] => i.toArray
-
-  extension (input: Int | (Int, Int))
+  extension (input: Int | (Int, Int) | (Int, Int, Int))
     def toNative = input match
-      case (h, w) => LongPointer(Array(h.toLong, w.toLong)*)
-      case x: Int => LongPointer(Array(x.toLong, x.toLong)*)
+      case x: Int    => LongPointer(Array(x.toLong, x.toLong)*)
+      case (h, w)    => LongPointer(Array(h.toLong, w.toLong)*)
+      case (t, h, w) => LongPointer(Array(t.toLong, h.toLong, w.toLong)*)
 
   extension (x: ScalaType)
     def toScalar: pytorch.Scalar = x match

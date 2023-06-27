@@ -18,28 +18,16 @@ package torch
 package nn
 package functional
 
-import org.bytedeco.javacpp.LongPointer
-import org.bytedeco.pytorch
-import org.bytedeco.pytorch.TensorOptional
 import org.bytedeco.pytorch.global.torch as torchNative
-import torch.internal.NativeConverters.toOptional
 
-// Linear functions
+private[torch] trait Sparse {
 
-def linear[D <: DType](
-    input: Tensor[D],
-    weight: Tensor[D],
-    bias: Tensor[D] | Option[Tensor[D]] = None
-): Tensor[D] =
-  Tensor(
-    torchNative.linear(input.native, weight.native, toOptional(bias))
-  )
-
-def bilinear[D <: DType](
-    input1: Tensor[D],
-    input2: Tensor[D],
-    weight: Tensor[D],
-    bias: Tensor[D] | Option[Tensor[D]] = None
-): Tensor[D] = Tensor(
-  torchNative.bilinear(input1.native, input2.native, weight.native, toOptional(bias))
-)
+  /** Takes LongTensor with index values of shape `(*)` and returns a tensor of shape `(*,
+    * numClasses)` that have zeros everywhere except where the index of last dimension matches the
+    * corresponding value of the input tensor, in which case it will be 1.
+    *
+    * @group nn_sparse
+    */
+  def oneHot(input: Tensor[Int64], numClasses: Long = -1): Tensor[Int64] =
+    Tensor(torchNative.one_hot(input.native, numClasses))
+}

@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-//> using scala "3.2"
+//> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
-//> using repository "sonatype:snapshots"
-//> using lib "dev.storch::vision:0.0-5d5568f-SNAPSHOT"
-//> using lib "com.lihaoyi::os-lib:0.9.0"
+//> using lib "dev.storch::vision:0.0-bfcaab4-SNAPSHOT"
 //> using lib "me.tongfei:progressbar:0.9.5"
 //> using lib "com.github.alexarchambault::case-app:2.1.0-M24"
 //> using lib "org.scala-lang.modules::scala-parallel-collections:1.0.4"
 // replace with pytorch-platform-gpu if you have a CUDA capable GPU
-//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9-SNAPSHOT"
+//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9"
+// enable for CUDA support
+////> using lib "org.bytedeco:cuda-platform:12.1-8.9-1.5.9"
+////> using lib "org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.9"
 
 import Commands.*
 import ImageClassifier.{Prediction, predict, train}

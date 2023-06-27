@@ -54,7 +54,7 @@ object Generators:
     // numoptions
   )
 
-  transparent inline def genTensor[D <: DType]: Gen[Tensor[D]] =
+  inline def genTensor[D <: DType]: Gen[Tensor[D]] =
     Gen.oneOf(allDTypes.filter(_.isInstanceOf[D])).map { dtype =>
       ones(Seq(4, 4), dtype = dtype.asInstanceOf[D])
     }

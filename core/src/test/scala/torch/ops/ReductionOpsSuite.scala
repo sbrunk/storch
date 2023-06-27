@@ -207,7 +207,7 @@ class ReductionOpsSuite extends TensorCheckSuite {
     expectedTensor = Tensor(Seq[Float](1.0311, 0.7477, 1.2204, 0.9087)).reshape(4, 1)
   )
 
-  propertyTestUnaryOp(std_mean(_), "std_mean")
+  propertyTestUnaryOp(stdMean(_), "stdMean")
   // TODO unit test std_mean
 
   testUnaryOp(
@@ -236,12 +236,12 @@ class ReductionOpsSuite extends TensorCheckSuite {
     expectedTensor = Tensor(Seq[Float](1.0631, 0.5590, 1.4893, 0.8258)).reshape(4, 1)
   )
 
-  propertyTestUnaryOp(var_mean(_), "var_mean")
+  propertyTestUnaryOp(varMean(_), "varMean")
   // TODO unit test var_mean
 
   testUnaryOp(
-    op = count_nonzero(_),
-    opName = "count_nonzero",
+    op = countNonzero(_),
+    opName = "countNonzero",
     inputTensor = Tensor(Seq(1, 0, 0, 1, 0)),
     expectedTensor = Tensor(2L)
   )
