@@ -16,7 +16,6 @@
 
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
-//> using repository "sonatype:snapshots"
 //> using lib "dev.storch::vision:0.0-bfcaab4-SNAPSHOT"
 //> using lib "me.tongfei:progressbar:0.9.5"
 //> using lib "com.github.alexarchambault::case-app:2.1.0-M24"
