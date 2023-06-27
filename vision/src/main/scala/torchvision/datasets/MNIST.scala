@@ -27,6 +27,7 @@ import java.util.zip.GZIPInputStream
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+import torch.internal.LoadCusolver
 
 trait MNISTBase(
     val mirrors: Seq[String],
@@ -36,6 +37,7 @@ trait MNISTBase(
     val train: Boolean,
     val download: Boolean
 ) extends TensorDataset[Float32, Int64] {
+  LoadCusolver
 
   private def downloadAndExtractArchive(url: URL, target: Path): Unit =
     println(s"downloading from $url")
