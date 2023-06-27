@@ -76,7 +76,7 @@ trait TensorCheckSuite extends ScalaCheckSuite {
   inline def propertyTestUnaryOp[In <: DType](
       op: Function1[Tensor[In], ?],
       opName: String,
-      genTensor: Gen[Tensor[In]] = genTensor[In]
+      inline genTensor: Gen[Tensor[In]] = genTensor[In]
   ): Unit =
     property(propertyTestName(opName)) {
       // TODO Validate output types
