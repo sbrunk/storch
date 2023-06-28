@@ -22,13 +22,12 @@ package batchnorm
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
 import sourcecode.Name
-import org.bytedeco.pytorch.BatchNorm2dImpl
+import org.bytedeco.pytorch.BatchNorm1dImpl
 import org.bytedeco.pytorch.BatchNormOptions
 import torch.nn.modules.{HasParams, HasWeight, TensorModule}
 
-
 // format: off
-/** Applies Batch Normalization over a 4D input as described in the paper
+/** Applies Batch Normalization over a 2D or 3D input as described in the paper
 [Batch Normalization: Accelerating Deep Network Training by Reducing
 Internal Covariate Shift](https://arxiv.org/abs/1502.03167) .
 
@@ -102,7 +101,7 @@ Examples:
   * TODO use dtype
   */
 // format: on
-final class BatchNorm2d[ParamType <: FloatNN | ComplexNN: Default](
+final class BatchNorm1d[ParamType <: FloatNN | ComplexNN: Default](
     numFeatures: Int,
     eps: Double = 1e-05,
     momentum: Double = 0.1,
@@ -118,8 +117,8 @@ final class BatchNorm2d[ParamType <: FloatNN | ComplexNN: Default](
   options.affine().put(affine)
   options.track_running_stats().put(trackRunningStats)
 
-  override private[torch] val nativeModule: BatchNorm2dImpl = BatchNorm2dImpl(options)
-  nativeModule.asModule.to(paramType.toScalarType, false)
+  override private[torch] val nativeModule: BatchNorm1dImpl = BatchNorm1dImpl(options)
+  nativeModule.asModule.to(paramType.toScalarType)
 
   override def registerWithParent[M <: pytorch.Module](parent: M)(using
       name: sourcecode.Name
