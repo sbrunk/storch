@@ -16,7 +16,7 @@
 
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-5d5568f-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-3e0f9b1-SNAPSHOT"
 //> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9"
 
 import torch.*
