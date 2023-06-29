@@ -16,7 +16,7 @@
 
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-bfcaab4-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-3e0f9b1-SNAPSHOT"
 //> using lib "me.tongfei:progressbar:0.9.5"
 //> using lib "com.github.alexarchambault::case-app:2.1.0-M24"
 //> using lib "org.scala-lang.modules::scala-parallel-collections:1.0.4"
