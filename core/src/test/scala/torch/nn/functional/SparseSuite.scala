@@ -18,6 +18,8 @@ package torch
 package nn
 package functional
 
+import Generators.genTensor
+
 class SparseSuite extends TensorCheckSuite {
 
   // TODO Test multi-dimensional tensors
@@ -25,7 +27,9 @@ class SparseSuite extends TensorCheckSuite {
     op = nn.functional.oneHot(_, numClasses = 6),
     opName = "nn.functional.oneHot",
     inputTensor = Tensor(3L),
-    expectedTensor = Tensor(Seq(0L, 0L, 0L, 1L, 0L, 0L))
+    expectedTensor = Tensor(Seq(0L, 0L, 0L, 1L, 0L, 0L)),
+    // TODO Fix genTensor for cases where the tensor type is not a union, but a concrete one, such as Tensor[Int64]
+    genTensor = genTensor[Int64](filterDTypes = true)
   )
 
 }
