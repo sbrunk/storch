@@ -757,47 +757,58 @@ object Tensor:
 
   /** Constructs a tensor with no autograd history (also known as a “leaf tensor”) by copying data.
     */
-  // TODO support multidimensional arrays as input
+  // TODO support arbitrary multidimensional arrays as input
   // TODO support explicit dtype
   def apply[U <: ScalaType: ClassTag](
-      data: Seq[U] | U,
+      data: U | Seq[U] | Seq[Seq[U]] | Seq[Seq[Seq[U]]],
       layout: Layout = Strided,
       device: Device = CPU,
       requiresGrad: Boolean = false
   ): Tensor[ScalaToDType[U]] =
     data match
-      case data: Seq[?] =>
-        val (pointer, inputDType) = data.toArray match
-          case bools: Array[Boolean] =>
-            (
-              {
-                val p = new BoolPointer(bools.length)
-                for ((b, i) <- bools.zipWithIndex) p.put(i, b)
-                p
-              },
-              bool
-            )
-          case bytes: Array[Byte]     => (new BytePointer(ByteBuffer.wrap(bytes)), int8)
-          case shorts: Array[Short]   => (new ShortPointer(ShortBuffer.wrap(shorts)), int16)
-          case ints: Array[Int]       => (new IntPointer(IntBuffer.wrap(ints)), int32)
-          case longs: Array[Long]     => (new LongPointer(LongBuffer.wrap(longs)), int64)
-          case floats: Array[Float]   => (new FloatPointer(FloatBuffer.wrap(floats)), float32)
-          case doubles: Array[Double] => (new DoublePointer(DoubleBuffer.wrap(doubles)), float64)
-          case complexFloatArray(complexFloats) =>
-            (
-              new FloatPointer(
-                FloatBuffer.wrap(complexFloats.flatMap(c => Array(c.real, c.imag)))
-              ),
-              complex64
-            )
-          case complexDoubleArray(complexDoubles) =>
-            (
-              new DoublePointer(
-                DoubleBuffer.wrap(complexDoubles.flatMap(c => Array(c.real, c.imag)))
-              ),
-              complex128
-            )
-          case _ => throw new IllegalArgumentException(s"Unsupported sequence type")
+      case tripleSeq(data) =>
+        apply(data.flatten.flatten.asInstanceOf[Seq[U]], layout, device, requiresGrad)
+          .view(data.length, data.head.length, data.head.head.length)
+      case doubleSeq(data) =>
+        apply(data.flatten.asInstanceOf[Seq[U]], layout, device, requiresGrad)
+          .view(data.length, data.head.length)
+      case singleSeq(data) =>
+        val (pointer, inputDType) =
+          data.asInstanceOf[Seq[U]].toArray match
+            case bools: Array[Boolean] =>
+              (
+                {
+                  val p = new BoolPointer(bools.length)
+                  for ((b, i) <- bools.zipWithIndex) p.put(i, b)
+                  p
+                },
+                bool
+              )
+            case bytes: Array[Byte]     => (new BytePointer(ByteBuffer.wrap(bytes)), int8)
+            case shorts: Array[Short]   => (new ShortPointer(ShortBuffer.wrap(shorts)), int16)
+            case ints: Array[Int]       => (new IntPointer(IntBuffer.wrap(ints)), int32)
+            case longs: Array[Long]     => (new LongPointer(LongBuffer.wrap(longs)), int64)
+            case floats: Array[Float]   => (new FloatPointer(FloatBuffer.wrap(floats)), float32)
+            case doubles: Array[Double] => (new DoublePointer(DoubleBuffer.wrap(doubles)), float64)
+            case complexFloatArray(complexFloats) =>
+              (
+                new FloatPointer(
+                  FloatBuffer.wrap(complexFloats.flatMap(c => Array(c.real, c.imag)))
+                ),
+                complex64
+              )
+            case complexDoubleArray(complexDoubles) =>
+              (
+                new DoublePointer(
+                  DoubleBuffer.wrap(complexDoubles.flatMap(c => Array(c.real, c.imag)))
+                ),
+                complex128
+              )
+            case _ =>
+              throw new IllegalArgumentException(
+                s"Unsupported data type ${summon[ClassTag[U]].runtimeClass.getSimpleName}"
+              )
+
         Tensor(
           torchNative
             .from_blob(
