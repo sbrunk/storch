@@ -173,6 +173,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def acos: Tensor[D] = Tensor(native.acos())
 
+  def adjoint: Tensor[D] = Tensor(native.adjoint())
+
   /** Tests if all elements of this tensor evaluate to `true`. */
   def all: Tensor[Bool] = Tensor(native.all())
 
@@ -285,6 +287,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     */
   def eq(other: Tensor[?]): Tensor[Bool] = Tensor(native.eq(other.native))
 
+  def ==(other: Tensor[?]): Tensor[Bool] = eq(other)
+
   override def equals(that: Any): Boolean =
     that match
       case other: Tensor[?] if dtype == other.dtype => native.equal(other.native)
@@ -308,6 +312,14 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     */
   def grad: Tensor[D | Undefined] = Tensor(native.grad())
 
+  def ge(other: ScalaType): Tensor[Bool] = Tensor(native.ge(toScalar(other)))
+
+  def >=(other: ScalaType): Tensor[Bool] = ge(other)
+
+  def gt(other: ScalaType): Tensor[Bool] = Tensor(native.gt(toScalar(other)))
+
+  def >(other: ScalaType): Tensor[Bool] = gt(other)
+
   def isContiguous: Boolean = native.is_contiguous()
 
   def isCuda: Boolean = native.is_cuda()
@@ -317,6 +329,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def isnan: Tensor[Bool] = Tensor(native.isnan())
 
   def isNonzero: Boolean = native.is_nonzero()
+
+  def isConj: Boolean = native.is_conj()
 
   // TODO override in subclasses instead?
   def item: DTypeToScala[D] =
@@ -353,6 +367,14 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def log: Tensor[D] = Tensor(native.log())
 
   def long: Tensor[Int64] = to(dtype = int64)
+
+  def le(other: ScalaType): Tensor[Bool] = Tensor(native.le(toScalar(other)))
+
+  def <=(other: ScalaType): Tensor[Bool] = le(other)
+
+  def lt(other: ScalaType): Tensor[Bool] = Tensor(native.lt(toScalar(other)))
+
+  def <(other: ScalaType): Tensor[Bool] = lt(other)
 
   def matmul[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] =
     Tensor[Promoted[D, D2]](native.matmul(u.native))
