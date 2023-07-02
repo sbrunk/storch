@@ -32,7 +32,7 @@ object Generators:
   val genTensorSize = Gen.choose(0, 5).flatMap(listSize => Gen.listOfN(listSize, genDimSize))
   given Arbitrary[Device] = Arbitrary(genDevice)
 
-  val allDTypes = List(
+  val allDTypes: List[DType] = List(
     int8,
     uint8,
     int16,
@@ -54,9 +54,16 @@ object Generators:
     // numoptions
   )
 
-  inline def genTensor[D <: DType]: Gen[Tensor[D]] =
-    Gen.oneOf(allDTypes.filter(_.isInstanceOf[D])).map { dtype =>
-      ones(Seq(4, 4), dtype = dtype.asInstanceOf[D])
+  /* This method generates tensors of multiple DTypes, and it casts them to the given concrete subtype of DType,
+   * so we can use them in operations that require a specific dtype at compile time but may fail with a runtime error.
+   * It is being used for property testing, and complement-property testing of tensor operations.
+   */
+  inline def genTensor[D <: DType](
+      filterDTypes: Boolean = false,
+      tensorDimensions: Int = 2
+  ): Gen[Tensor[D]] =
+    Gen.oneOf(allDTypes.filter(_.isInstanceOf[D] || !filterDTypes)).map { dtype =>
+      ones(Seq.fill(tensorDimensions)(4), dtype = dtype.asInstanceOf[D])
     }
 
   val genDType = Gen.oneOf(allDTypes)

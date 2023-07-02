@@ -173,6 +173,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def acos: Tensor[D] = Tensor(native.acos())
 
+  def adjoint: Tensor[D] = Tensor(native.adjoint())
+
   /** Tests if all elements of this tensor evaluate to `true`. */
   def all: Tensor[Bool] = Tensor(native.all())
 
@@ -285,6 +287,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     */
   def eq(other: Tensor[?]): Tensor[Bool] = Tensor(native.eq(other.native))
 
+  def ==(other: Tensor[?]): Tensor[Bool] = eq(other)
+
   override def equals(that: Any): Boolean =
     that match
       case other: Tensor[?] if dtype == other.dtype => native.equal(other.native)
@@ -308,6 +312,14 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     */
   def grad: Tensor[D | Undefined] = Tensor(native.grad())
 
+  def ge(other: ScalaType): Tensor[Bool] = Tensor(native.ge(toScalar(other)))
+
+  def >=(other: ScalaType): Tensor[Bool] = ge(other)
+
+  def gt(other: ScalaType): Tensor[Bool] = Tensor(native.gt(toScalar(other)))
+
+  def >(other: ScalaType): Tensor[Bool] = gt(other)
+
   def isContiguous: Boolean = native.is_contiguous()
 
   def isCuda: Boolean = native.is_cuda()
@@ -317,6 +329,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def isnan: Tensor[Bool] = Tensor(native.isnan())
 
   def isNonzero: Boolean = native.is_nonzero()
+
+  def isConj: Boolean = native.is_conj()
 
   // TODO override in subclasses instead?
   def item: DTypeToScala[D] =
@@ -353,6 +367,14 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def log: Tensor[D] = Tensor(native.log())
 
   def long: Tensor[Int64] = to(dtype = int64)
+
+  def le(other: ScalaType): Tensor[Bool] = Tensor(native.le(toScalar(other)))
+
+  def <=(other: ScalaType): Tensor[Bool] = le(other)
+
+  def lt(other: ScalaType): Tensor[Bool] = Tensor(native.lt(toScalar(other)))
+
+  def <(other: ScalaType): Tensor[Bool] = lt(other)
 
   def matmul[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] =
     Tensor[Promoted[D, D2]](native.matmul(u.native))
@@ -757,47 +779,58 @@ object Tensor:
 
   /** Constructs a tensor with no autograd history (also known as a “leaf tensor”) by copying data.
     */
-  // TODO support multidimensional arrays as input
+  // TODO support arbitrary multidimensional arrays as input
   // TODO support explicit dtype
   def apply[U <: ScalaType: ClassTag](
-      data: Seq[U] | U,
+      data: U | Seq[U] | Seq[Seq[U]] | Seq[Seq[Seq[U]]],
       layout: Layout = Strided,
       device: Device = CPU,
       requiresGrad: Boolean = false
   ): Tensor[ScalaToDType[U]] =
     data match
-      case data: Seq[?] =>
-        val (pointer, inputDType) = data.toArray match
-          case bools: Array[Boolean] =>
-            (
-              {
-                val p = new BoolPointer(bools.length)
-                for ((b, i) <- bools.zipWithIndex) p.put(i, b)
-                p
-              },
-              bool
-            )
-          case bytes: Array[Byte]     => (new BytePointer(ByteBuffer.wrap(bytes)), int8)
-          case shorts: Array[Short]   => (new ShortPointer(ShortBuffer.wrap(shorts)), int16)
-          case ints: Array[Int]       => (new IntPointer(IntBuffer.wrap(ints)), int32)
-          case longs: Array[Long]     => (new LongPointer(LongBuffer.wrap(longs)), int64)
-          case floats: Array[Float]   => (new FloatPointer(FloatBuffer.wrap(floats)), float32)
-          case doubles: Array[Double] => (new DoublePointer(DoubleBuffer.wrap(doubles)), float64)
-          case complexFloatArray(complexFloats) =>
-            (
-              new FloatPointer(
-                FloatBuffer.wrap(complexFloats.flatMap(c => Array(c.real, c.imag)))
-              ),
-              complex64
-            )
-          case complexDoubleArray(complexDoubles) =>
-            (
-              new DoublePointer(
-                DoubleBuffer.wrap(complexDoubles.flatMap(c => Array(c.real, c.imag)))
-              ),
-              complex128
-            )
-          case _ => throw new IllegalArgumentException(s"Unsupported sequence type")
+      case tripleSeq(data) =>
+        apply(data.flatten.flatten.asInstanceOf[Seq[U]], layout, device, requiresGrad)
+          .view(data.length, data.head.length, data.head.head.length)
+      case doubleSeq(data) =>
+        apply(data.flatten.asInstanceOf[Seq[U]], layout, device, requiresGrad)
+          .view(data.length, data.head.length)
+      case singleSeq(data) =>
+        val (pointer, inputDType) =
+          data.asInstanceOf[Seq[U]].toArray match
+            case bools: Array[Boolean] =>
+              (
+                {
+                  val p = new BoolPointer(bools.length)
+                  for ((b, i) <- bools.zipWithIndex) p.put(i, b)
+                  p
+                },
+                bool
+              )
+            case bytes: Array[Byte]     => (new BytePointer(ByteBuffer.wrap(bytes)), int8)
+            case shorts: Array[Short]   => (new ShortPointer(ShortBuffer.wrap(shorts)), int16)
+            case ints: Array[Int]       => (new IntPointer(IntBuffer.wrap(ints)), int32)
+            case longs: Array[Long]     => (new LongPointer(LongBuffer.wrap(longs)), int64)
+            case floats: Array[Float]   => (new FloatPointer(FloatBuffer.wrap(floats)), float32)
+            case doubles: Array[Double] => (new DoublePointer(DoubleBuffer.wrap(doubles)), float64)
+            case complexFloatArray(complexFloats) =>
+              (
+                new FloatPointer(
+                  FloatBuffer.wrap(complexFloats.flatMap(c => Array(c.real, c.imag)))
+                ),
+                complex64
+              )
+            case complexDoubleArray(complexDoubles) =>
+              (
+                new DoublePointer(
+                  DoubleBuffer.wrap(complexDoubles.flatMap(c => Array(c.real, c.imag)))
+                ),
+                complex128
+              )
+            case _ =>
+              throw new IllegalArgumentException(
+                s"Unsupported data type ${summon[ClassTag[U]].runtimeClass.getSimpleName}"
+              )
+
         Tensor(
           torchNative
             .from_blob(

@@ -36,6 +36,11 @@ given iterableTypeable[T](using tt: Typeable[T]): Typeable[Array[T]] with
 val complexDoubleArray = TypeCase[Array[Complex[Double]]]
 val complexFloatArray = TypeCase[Array[Complex[Float]]]
 
+/* TypeCase helpers to perform pattern matching on `Seq` higher kinded types */
+val singleSeq = TypeCase[Seq[?]]
+val doubleSeq = TypeCase[Seq[Seq[?]]]
+val tripleSeq = TypeCase[Seq[Seq[Seq[?]]]]
+
 /* Type helper to describe inputs that accept Tensor or Real scalars */
 type TensorOrReal[D <: RealNN] = Tensor[D] | Real
 

@@ -49,7 +49,7 @@ trait TensorCheckSuite extends ScalaCheckSuite {
       // TODO Validate output types
       val tensorInACase = TypeCase[Tensor[InA]]
       val tensorInBCase = TypeCase[Tensor[InB]]
-      forAll(genTensor, genTensor) {
+      forAll(genTensor(), genTensor()) {
         case (tensorInACase(tensorA), tensorInBCase(tensorB)) =>
           val result = Try(op(tensorA, tensorB))
           assert(
@@ -76,7 +76,7 @@ trait TensorCheckSuite extends ScalaCheckSuite {
   inline def propertyTestUnaryOp[In <: DType](
       op: Function1[Tensor[In], ?],
       opName: String,
-      inline genTensor: Gen[Tensor[In]] = genTensor[In]
+      inline genTensor: Gen[Tensor[In]] = genTensor[In]()
   ): Unit =
     property(propertyTestName(opName)) {
       // TODO Validate output types
@@ -187,9 +187,10 @@ trait TensorCheckSuite extends ScalaCheckSuite {
       opName: String,
       inline inputTensor: Tensor[ScalaToDType[InS]],
       inline expectedTensor: Tensor[?],
-      absolutePrecision: Double = 1e-04
+      absolutePrecision: Double = 1e-04,
+      inline genTensor: Gen[Tensor[In]] = genTensor[In]()
   )(using ScalaToDType[InS] <:< In): Unit =
-    propertyTestUnaryOp(op, opName)
+    propertyTestUnaryOp(op, opName, genTensor)
     unitTestUnaryOp(op, opName, inputTensor, expectedTensor, absolutePrecision)
 
 }

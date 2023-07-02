@@ -15,21 +15,14 @@
  */
 
 package torch
-package nn
-package functional
 
-import Generators.genTensor
+class ComparisonOpsSuite extends TensorCheckSuite {
 
-class SparseSuite extends TensorCheckSuite {
-
-  // TODO Test multi-dimensional tensors
   testUnaryOp(
-    op = nn.functional.oneHot(_, numClasses = 6),
-    opName = "nn.functional.oneHot",
-    inputTensor = Tensor(3L),
-    expectedTensor = Tensor(Seq(0L, 0L, 0L, 1L, 0L, 0L)),
-    // TODO Fix genTensor for cases where the tensor type is not a union, but a concrete one, such as Tensor[Int64]
-    genTensor = genTensor[Int64](filterDTypes = true)
+    op = argsort(_),
+    opName = "argsort",
+    inputTensor = Tensor(Seq(1, 3, 2)),
+    expectedTensor = Tensor(Seq(0L, 2L, 1L))
   )
 
 }
