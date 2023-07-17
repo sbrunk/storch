@@ -19,6 +19,7 @@ package ops
 
 import internal.NativeConverters.*
 import org.bytedeco.pytorch.global.torch as torchNative
+import scala.annotation.implicitNotFound
 
 /** Pointwise Ops
   *
@@ -673,22 +674,28 @@ private[torch] trait PointwiseOps {
     *
     * @group pointwise_ops
     */
-  def pow[D <: DType, D2 <: DType](
-      input: Tensor[D],
-      exponent: Tensor[D2]
-  )(using OnlyOneBool[D, D2]): Tensor[Promoted[D, D2]] =
+  def pow[D <: DType, D2 <: DType](input: Tensor[D], exponent: Tensor[D2])(using
+      @implicitNotFound(""""pow" not implemented for bool""")
+      ev1: Promoted[D, D2] NotEqual Bool,
+      @implicitNotFound(""""pow" not implemented for complex32""")
+      ev2: Promoted[D, D2] NotEqual Complex32
+  ): Tensor[Promoted[D, D2]] =
     Tensor(torchNative.pow(input.native, exponent.native))
 
-  def pow[D <: DType, S <: ScalaType](
-      input: Tensor[D],
-      exponent: S
-  )(using OnlyOneBool[D, ScalaToDType[S]]): Tensor[Promoted[D, ScalaToDType[S]]] =
+  def pow[D <: DType, S <: ScalaType](input: Tensor[D], exponent: S)(using
+      @implicitNotFound(""""pow" not implemented for bool""")
+      ev1: Promoted[D, ScalaToDType[S]] NotEqual Bool,
+      @implicitNotFound(""""pow" not implemented for complex32""")
+      ev2: Promoted[D, ScalaToDType[S]] NotEqual Complex32
+  ): Tensor[Promoted[D, ScalaToDType[S]]] =
     Tensor(torchNative.pow(input.native, toScalar(exponent)))
 
-  def pow[S <: ScalaType, D <: DType](
-      input: S,
-      exponent: Tensor[D]
-  )(using OnlyOneBool[ScalaToDType[S], D]): Tensor[Promoted[ScalaToDType[S], D]] =
+  def pow[S <: ScalaType, D <: DType](input: S, exponent: Tensor[D])(using
+      @implicitNotFound(""""pow" not implemented for bool""")
+      ev1: Promoted[D, ScalaToDType[S]] NotEqual Bool,
+      @implicitNotFound(""""pow" not implemented for complex32""")
+      ev2: Promoted[D, ScalaToDType[S]] NotEqual Complex32
+  ): Tensor[Promoted[ScalaToDType[S], D]] =
     Tensor(torchNative.pow(toScalar(input), exponent.native))
 
 // TODO Implement creation of QInts

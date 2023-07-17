@@ -54,3 +54,6 @@ type AtLeastOneFloat[A <: DType, B <: DType] = A <:< FloatNN | B <:< FloatNN
 /* Evidence used in operations where at least one Float or Complex is required */
 type AtLeastOneFloatOrComplex[A <: DType, B <: DType] = A <:< (FloatNN | ComplexNN) |
   B <:< (FloatNN | ComplexNN)
+
+/* Evidence that two dtypes are not the same */
+type NotEqual[D <: DType, D2 <: DType] = NotGiven[D =:= D2]

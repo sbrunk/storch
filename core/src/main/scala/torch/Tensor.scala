@@ -52,8 +52,10 @@ import spire.math.{Complex, UByte}
 
 import scala.reflect.Typeable
 import internal.NativeConverters
-import torch.Device.CPU
-import torch.Layout.Strided
+import internal.NativeConverters.toArray
+import internal.LoadCusolver
+import Device.CPU
+import Layout.Strided
 import org.bytedeco.pytorch.ByteArrayRef
 import org.bytedeco.pytorch.ShortArrayRef
 import org.bytedeco.pytorch.BoolArrayRef
@@ -64,7 +66,8 @@ import org.bytedeco.pytorch.DoubleArrayRef
 import org.bytedeco.pytorch.EllipsisIndexType
 import org.bytedeco.pytorch.SymInt
 import org.bytedeco.pytorch.SymIntOptional
-import internal.LoadCusolver
+import org.bytedeco.pytorch.ScalarTypeOptional
+import scala.annotation.implicitNotFound
 
 case class TensorTuple[D <: DType](
     values: Tensor[D],
@@ -306,6 +309,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     native.flatten(startDim, endDim)
   )
 
+  def float: Tensor[Float32] = to(dtype = float32)
+
   /** This function returns an undefined tensor by default and returns a defined tensor the first
     * time a call to backward() computes gradients for this Tensor. The attribute will then contain
     * the gradients computed and future calls to backward() will accumulate (add) gradients into it.
@@ -406,6 +411,26 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def mean: Tensor[D] = Tensor(native.mean())
 
+  /** @see
+    *   [[torch.mean]]
+    */
+  def mean[D2 <: DType | Derive](
+      dim: Int | Seq[Int] = Seq.empty,
+      keepdim: Boolean = false,
+      dtype: D2 = derive
+  ): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
+    val derivedDType = dtype match
+      case _: Derive => this.dtype
+      case d: DType  => d
+    Tensor(
+      torchNative.mean(
+        native,
+        dim.toArray,
+        keepdim,
+        new ScalarTypeOptional(derivedDType.toScalarType)
+      )
+    )
+
   def min(): Tensor[Int64] = Tensor[Int64](native.min())
 
   def minimum[D2 <: DType](other: Tensor[D2]): Tensor[Promoted[D, D2]] =
@@ -425,7 +450,25 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def permute(dims: Int*): Tensor[D] = Tensor(native.permute(dims.map(_.toLong)*))
 
-  def pow(exponent: Double): Tensor[D] = Tensor(native.pow(Scalar.apply(exponent)))
+  /** @see [[torch.pow]] */
+  def pow[D2 <: DType](exponent: Tensor[D2])(using
+      @implicitNotFound(""""pow" not implemented for bool""")
+      ev1: Promoted[D, D2] NotEqual Bool,
+      @implicitNotFound(""""pow" not implemented for complex32""")
+      ev2: Promoted[D, D2] NotEqual Complex32
+  ): Tensor[Promoted[D, D2]] = Tensor(
+    native.pow(exponent.native)
+  )
+
+  /** @see [[torch.pow]] */
+  def pow[S <: ScalaType](exponent: S)(using
+      @implicitNotFound(""""pow" not implemented for bool""")
+      ev1: Promoted[D, ScalaToDType[S]] NotEqual Bool,
+      @implicitNotFound(""""pow" not implemented for complex32""")
+      ev2: Promoted[D, ScalaToDType[S]] NotEqual Complex32
+  ): Tensor[Promoted[D, ScalaToDType[S]]] = Tensor(
+    native.pow(exponent.toScalar)
+  )
 
   def prod[D <: DType](dtype: D = this.dtype) = Tensor(native.prod())
 
@@ -515,6 +558,13 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def takeAlongDim(indices: Tensor[Int64], dim: Int) =
     native.take_along_dim(indices.native, toOptional(dim))
+
+  def to(device: Device | Option[Device]): Tensor[D] = device match
+    case dev: Device => to(dev, this.dtype)
+    case Some(dev)   => to(dev, this.dtype)
+    case None        => this
+
+  def to[U <: DType](dtype: U): Tensor[U] = to(this.device, dtype)
 
   // TODO support memory_format
   /** Performs Tensor dtype and/or device conversion. */
@@ -849,3 +899,16 @@ object Tensor:
           )
         )
       case _ => throw new IllegalArgumentException("Unsupported type")
+
+/** Scalar/Tensor extensions to allow tensor operations directly on scalars */
+extension [S <: ScalaType](s: S)
+  def +[D <: DType](t: Tensor[D]): Tensor[Promoted[D, ScalaToDType[S]]] = t.add(s)
+  def -[D <: DType](t: Tensor[D]): Tensor[Promoted[D, ScalaToDType[S]]] = t.sub(s)
+  def *[D <: DType](t: Tensor[D]): Tensor[Promoted[D, ScalaToDType[S]]] = t.mul(s)
+  def /[D <: DType](t: Tensor[D]): Tensor[Div[D, ScalaToDType[S]]] = t.div(s)
+  def **[D <: DType](t: Tensor[D])(using
+      @implicitNotFound(""""pow" not implemented for bool""")
+      ev1: Promoted[D, ScalaToDType[S]] NotEqual Bool,
+      @implicitNotFound(""""pow" not implemented for complex32""")
+      ev2: Promoted[D, ScalaToDType[S]] NotEqual Complex32
+  ): Tensor[Promoted[D, ScalaToDType[S]]] = t.pow(s)
