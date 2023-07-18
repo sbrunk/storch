@@ -80,14 +80,14 @@ private[torch] object NativeConverters:
 
   extension (x: ScalaType)
     def toScalar: pytorch.Scalar = x match
-      case x: Boolean                        => pytorch.Scalar(if x then 1: Byte else 0: Byte)
-      case x: UByte                          => Tensor(x.toInt).to(dtype = uint8).native.item()
-      case x: Byte                           => pytorch.Scalar(x)
-      case x: Short                          => pytorch.Scalar(x)
-      case x: Int                            => pytorch.Scalar(x)
-      case x: Long                           => pytorch.Scalar(x)
-      case x: Float                          => pytorch.Scalar(x)
-      case x: Double                         => pytorch.Scalar(x)
+      case x: Boolean => pytorch.AbstractTensor.create(x).item()
+      case x: UByte   => pytorch.AbstractTensor.create(x.toInt).to(uint8.toScalarType).item()
+      case x: Byte    => pytorch.Scalar(x)
+      case x: Short   => pytorch.Scalar(x)
+      case x: Int     => pytorch.Scalar(x)
+      case x: Long    => pytorch.Scalar(x)
+      case x: Float   => pytorch.Scalar(x)
+      case x: Double  => pytorch.Scalar(x)
       case x @ Complex(r: Float, i: Float)   => Tensor(Seq(x)).to(dtype = complex64).native.item()
       case x @ Complex(r: Double, i: Double) => Tensor(Seq(x)).to(dtype = complex128).native.item()
 
