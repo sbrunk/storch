@@ -16,8 +16,12 @@
 
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-3e0f9b1-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-ab8d84c-SNAPSHOT"
+// replace with pytorch-platform-gpu if you have a CUDA capable GPU
 //> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9"
+// enable for CUDA support
+////> using lib "org.bytedeco:cuda-platform:12.1-8.9-1.5.9"
+////> using lib "org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.9"
 
 import torch.*
 import torch.nn.functional as F
@@ -27,6 +31,10 @@ import torch.nn.modules.Default
 import torchvision.datasets.MNIST
 import scala.util.Random
 import java.nio.file.Paths
+import torch.Device.CUDA
+import scala.util.Using
+import org.bytedeco.javacpp.PointerScope
+import torch.Device.CPU
 
 // define model architecture
 class LeNet[D <: BFloat16 | Float32: Default] extends nn.Module {
@@ -47,41 +55,51 @@ class LeNet[D <: BFloat16 | Float32: Default] extends nn.Module {
     x
 }
 
+/** Shows how to train a simple LeNet on the MNIST dataset */
 object LeNetApp extends App {
-  val model = LeNet()
+  val device = if torch.cuda.isAvailable then CUDA else CPU
+  println(s"Using device: $device")
+  val model = LeNet().to(device)
 
   // prepare data
-  val dataPath = Paths.get("data")
+  val dataPath = Paths.get("data/mnist")
   val mnistTrain = MNIST(dataPath, train = true, download = true)
   val mnistEval = MNIST(dataPath, train = false)
+  val evalFeatures = mnistEval.features.to(device)
+  val evalTargets = mnistEval.targets.to(device)
   val r = Random(seed = 0)
+
   def dataLoader: Iterator[(Tensor[Float32], Tensor[Int64])] =
     r.shuffle(mnistTrain).grouped(32).map { batch =>
       val (features, targets) = batch.unzip
-      (torch.stack(features), torch.stack(targets))
+      (torch.stack(features).to(device), torch.stack(targets).to(device))
     }
 
   val lossFn = torch.nn.loss.CrossEntropyLoss()
-  val optimizer = Adam(model.parameters, lr = 0.001)
+  // enable AMSGrad to avoid convergence issues
+  val optimizer = Adam(model.parameters, lr = 1e-3, amsgrad = true)
 
   // run training
   for (epoch <- 1 to 5) do
     for (batch <- dataLoader.zipWithIndex) do
-      val ((feature, target), batchIndex) = batch
-      optimizer.zeroGrad()
-      val prediction = model(feature)
-      val loss = lossFn(prediction, target)
-      loss.backward()
-      optimizer.step()
-      if batchIndex % 200 == 0 then
-        // run evaluation
-        val predictions = model(mnistEval.features)
-        val evalLoss = lossFn(predictions, mnistEval.targets)
-        val accuracy =
-          (predictions.argmax(dim = 1).eq(mnistEval.targets).sum / mnistEval.length).item
-        println(
-          f"Epoch: $epoch | Batch: $batchIndex%4d | Training loss: ${loss.item}%.4f | Eval loss: ${evalLoss.item}%.4f | Eval accuracy: $accuracy%.4f"
-        )
+      // make sure we deallocate intermediate tensors in time
+      Using.resource(new PointerScope()) { p =>
+        val ((feature, target), batchIndex) = batch
+        optimizer.zeroGrad()
+        val prediction = model(feature)
+        val loss = lossFn(prediction, target)
+        loss.backward()
+        optimizer.step()
+        if batchIndex % 200 == 0 then
+          // run evaluation
+          val predictions = model(evalFeatures)
+          val evalLoss = lossFn(predictions, evalTargets)
+          val accuracy =
+            (predictions.argmax(dim = 1).eq(evalTargets).sum / mnistEval.length).item
+          println(
+            f"Epoch: $epoch | Batch: $batchIndex%4d | Training loss: ${loss.item}%.4f | Eval loss: ${evalLoss.item}%.4f | Eval accuracy: $accuracy%.4f"
+          )
+      }
     val archive = new OutputArchive
     model.save(archive)
     archive.save_to("net.pt")
