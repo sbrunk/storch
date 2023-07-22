@@ -16,7 +16,7 @@
 
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-3e0f9b1-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-ab8d84c-SNAPSHOT"
 //> using lib "me.tongfei:progressbar:0.9.5"
 //> using lib "com.github.alexarchambault::case-app:2.1.0-M24"
 //> using lib "org.scala-lang.modules::scala-parallel-collections:1.0.4"
@@ -48,7 +48,26 @@ import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
 import scala.util.{Random, Try, Using}
 
-/** Example script for training an image-classification model on your own images */
+// format: off
+/** Example script for training an image-classification model on your own images.
+  *
+  * Usage: scala-cli ImageClassifier.scala -- train <dataset>
+  *  
+  * Where the expected dataset is a directory per class with examples, like this:
+  * .
+  * ├── PetImages
+  *     ├── Cat
+  *     │   ├── 1.jpg
+  *     │   ├── 2.jpg
+  *     │   ├── ...
+  *     └── Dog
+  *         ├── 1.jpg
+  *         ├── 2.jpg
+  *         ├── ...
+  * 
+  * To see all options run scala-cli ImageClassifier.scala -- -h
+  */
+//format: on
 object ImageClassifier extends CommandsEntryPoint:
 
   val fileTypes = Seq("jpg", "png")
@@ -154,6 +173,7 @@ object ImageClassifier extends CommandsEntryPoint:
       if isTraining then model.eval()
       val (loss, correct) = testDL
         .map { (inputBatch, labelBatch) =>
+          // make sure we deallocate intermediate tensors in time
           Using.resource(new PointerScope()) { p =>
             val pred = model(inputBatch.to(device))
             val label = labelBatch.to(device)

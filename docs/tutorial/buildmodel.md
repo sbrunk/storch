@@ -1,4 +1,4 @@
-Learn the Basics] ||
+Learn the Basics ||
 Quickstart ||
 [Tensors](tensors.md) ||
 Datasets & DataLoaders ||
