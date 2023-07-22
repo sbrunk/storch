@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="Laika 0.18.1 + Helium Theme" />
-    <title>Modules</title>
+    <title>Examples</title>
     
       <meta name="author" content="Sören Brunk"/>
     
@@ -89,8 +89,8 @@
       <ul class="nav-list">
         <li class="level1"><a href="about.html">About</a></li>
         <li class="level1"><a href="installation.html">Installation</a></li>
-        <li class="level1 active"><a href="#">Modules</a></li>
-        <li class="level1"><a href="examples.html">Examples</a></li>
+        <li class="level1"><a href="modules.html">Modules</a></li>
+        <li class="level1 active"><a href="#">Examples</a></li>
         <li class="level1"><a href="pre-trained-weights.html">Converting pre-trained weights</a></li>
         <li class="level1"><a href="faq.html">Frequently Asked Questions</a></li>
         <li class="level1"><a href="contributing.html">How to Contribute</a></li>
@@ -114,10 +114,13 @@
     <div id="container">
 
       <nav id="page-nav">
-        <p class="header"><a href="#">Modules</a></p>
+        <p class="header"><a href="#">Examples</a></p>
 
         <ul class="nav-list">
-          <li class="level1"><a href="#simple-custom-module-example">Simple custom module example</a></li>
+          <li class="level1"><a href="#running-the-examples">Running the examples</a></li>
+          <li class="level1"><a href="#image-classifier-example">Image classifier example</a></li>
+          <li class="level2"><a href="#training">Training</a></li>
+          <li class="level2"><a href="#inference">Inference</a></li>
         </ul>
 
         <p class="footer"></p>
@@ -125,44 +128,50 @@
 
       <main class="content">
 
-        <h1 id="modules" class="title">Modules</h1>
-        <p>Storch provides a neural network module API with building blocks for creating stateful neural network architectures.</p>
+        <h1 id="examples" class="title">Examples</h1>
+        <p>You can find runnable examples in the <a href="https://github.com/sbrunk/storch/tree/main/examples/src/main/scala">examples</a> directory.
+        We are planning to add more examples for different tasks.
+        If you have an idea or want to contribute or improve an example, please don&#39;t hesitate to open an issue or create a PR.</p>
         
-        <h2 id="simple-custom-module-example" class="section">Simple custom module example<a class="anchor-link right" href="#simple-custom-module-example"><i class="icofont-laika">&#xef71;</i></a></h2>
-        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.*
-</span><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.</span><span class="identifier">nn</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.</span><span class="identifier">nn</span><span>.</span><span class="identifier">functional</span><span> </span><span class="keyword">as</span><span> </span><span class="type-name">F</span><span>
-
-</span><span class="keyword">class</span><span> </span><span class="type-name">LeNet</span><span>[</span><span class="type-name">D</span><span> &lt;: </span><span class="type-name">BFloat16</span><span> | </span><span class="type-name">Float32</span><span>: </span><span class="identifier">nn</span><span>.</span><span class="type-name">Default</span><span>] </span><span class="keyword">extends</span><span> </span><span class="identifier">nn</span><span>.</span><span class="type-name">Module</span><span>:
-  </span><span class="keyword">val</span><span> </span><span class="identifier">conv1</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Conv2d</span><span>(</span><span class="number-literal">1</span><span>, </span><span class="number-literal">6</span><span>, </span><span class="number-literal">5</span><span>))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">pool</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">MaxPool2d</span><span>((</span><span class="number-literal">2</span><span>, </span><span class="number-literal">2</span><span>)))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">conv2</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Conv2d</span><span>(</span><span class="number-literal">6</span><span>, </span><span class="number-literal">16</span><span>, </span><span class="number-literal">5</span><span>))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">fc1</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Linear</span><span>(</span><span class="number-literal">16</span><span> * </span><span class="number-literal">4</span><span> * </span><span class="number-literal">4</span><span>, </span><span class="number-literal">120</span><span>))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">fc2</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Linear</span><span>(</span><span class="number-literal">120</span><span>, </span><span class="number-literal">84</span><span>))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">fc3</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Linear</span><span>(</span><span class="number-literal">84</span><span>, </span><span class="number-literal">10</span><span>))
-
-  </span><span class="keyword">def</span><span> </span><span class="declaration-name">apply</span><span>(</span><span class="identifier">i</span><span>: </span><span class="type-name">Tensor</span><span>[</span><span class="type-name">D</span><span>]): </span><span class="type-name">Tensor</span><span>[</span><span class="type-name">D</span><span>] =
-    </span><span class="keyword">var</span><span> </span><span class="identifier">x</span><span> = </span><span class="identifier">pool</span><span>(</span><span class="type-name">F</span><span>.</span><span class="identifier">relu</span><span>(</span><span class="identifier">conv1</span><span>(</span><span class="identifier">i</span><span>)))
-    </span><span class="identifier">x</span><span> = </span><span class="identifier">pool</span><span>(</span><span class="type-name">F</span><span>.</span><span class="identifier">relu</span><span>(</span><span class="identifier">conv2</span><span>(</span><span class="identifier">x</span><span>)))
-    </span><span class="identifier">x</span><span> = </span><span class="identifier">x</span><span>.</span><span class="identifier">view</span><span>(-</span><span class="number-literal">1</span><span>, </span><span class="number-literal">16</span><span> * </span><span class="number-literal">4</span><span> * </span><span class="number-literal">4</span><span>)
-    </span><span class="identifier">x</span><span> = </span><span class="type-name">F</span><span>.</span><span class="identifier">relu</span><span>(</span><span class="identifier">fc1</span><span>(</span><span class="identifier">x</span><span>))
-    </span><span class="identifier">x</span><span> = </span><span class="type-name">F</span><span>.</span><span class="identifier">relu</span><span>(</span><span class="identifier">fc2</span><span>(</span><span class="identifier">x</span><span>))
-    </span><span class="identifier">x</span><span> = </span><span class="identifier">fc3</span><span>(</span><span class="identifier">x</span><span>)
-    </span><span class="identifier">x</span></code></pre>
-        <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">model</span><span> = </span><span class="type-name">LeNet</span><span>()
-</span><span class="comment">// model: LeNet[Float32] = LeNet
-</span><span class="keyword">val</span><span> </span><span class="identifier">input</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">1</span><span>, </span><span class="number-literal">1</span><span>, </span><span class="number-literal">28</span><span>, </span><span class="number-literal">28</span><span>))
-</span><span class="comment">// input: Tensor[Float32] = tensor dtype=float32, shape=[1, 1, 28, 28], device=CPU 
-// [[[[0.0239, 0.1741, 0.5066, ..., 0.9512, 0.8070, 0.3739],
-//    [0.5625, 0.4165, 0.1153, ..., 0.3510, 0.0086, 0.2082],
-//    [0.8317, 0.0963, 0.1241, ..., 0.4985, 0.4273, 0.7526],
-//    ...,
-//    [0.1227, 0.3874, 0.4374, ..., 0.4191, 0.5043, 0.0511],
-//    [0.9404, 0.1533, 0.4236, ..., 0.5938, 0.1366, 0.9904],
-//    [0.7634, 0.4054, 0.2530, ..., 0.6332, 0.9523, 0.4602]]]]
-</span><span class="identifier">model</span><span>(</span><span class="identifier">input</span><span>)
-</span><span class="comment">// res1: Tensor[Float32] = tensor dtype=float32, shape=[1, 10], device=CPU 
-// [[0.0094, 0.0280, 0.0906, ..., 0.1166, -0.0993, 0.0102]]</span></code></pre>
+        <h2 id="running-the-examples" class="section">Running the examples<a class="anchor-link right" href="#running-the-examples"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>You can clone the repository and run the examples as part of the build, for instance:</p>
+        <pre class="keep-together pdf epub"><code class="bash">sbt&gt; examples/runMain LeNetApp</code></pre>
+        <p>The examples are also scala-cli scripts so you can run them with <a href="https://scala-cli.virtuslab.org/">scala-cli</a>, either locally or directly from the repo:</p>
+        <pre class="keep-together pdf epub"><code class="bash">scala-cli https://raw.githubusercontent.com/sbrunk/storch/main/examples/src/main/scala/ImageClassifier.scala</code></pre>
+        
+        <h2 id="image-classifier-example" class="section">Image classifier example<a class="anchor-link right" href="#image-classifier-example"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>Example script for training an image-classification model on your own images and running inference.
+        It uses the <a href="https://github.com/sbrunk/storch/blob/main/vision/src/main/scala/torchvision/models/resnet.scala">ResNet</a> model implementation.</p>
+        <p>It will also automatically download converted pre-trained weights from the <a href="https://github.com/sbrunk/storch/releases/tag/pretrained-weights">releases</a>. See <a href="pre-trained-weights.html#converting-pre-trained-weights-from-pytorch">converting pre-trained weights from PyTorch</a> for details.</p>
+        
+        <h3 id="training" class="section">Training<a class="anchor-link right" href="#training"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <p>To train a new image classifier on your own images run:</p>
+        <pre class="keep-together pdf epub"><code class="bash">scala-cli ImageClassifier.scala -- train --dataset-dir &lt;dataset&gt;</code></pre>
+        <p>Where the expected dataset is a directory per class with examples, like this:</p>
+        <pre><code>.
+├── PetImages
+    ├── Cat
+    │   ├── 1.jpg
+    │   ├── 2.jpg
+    │   ├── ...
+    └── Dog
+        ├── 1.jpg
+        ├── 2.jpg
+        ├── ...</code></pre>
+        <p>Using a smaller base model:</p>
+        <pre class="keep-together pdf epub"><code class="bash">scala-cli ImageClassifier.scala -- train --base-model ResNet18 --dataset-dir &lt;dataset&gt;</code></pre>
+        <p>To see all options, run:</p>
+        <pre class="keep-together pdf epub"><code class="bash">scala-cli ImageClassifier.scala -- train -h</code></pre>
+        
+        <h4 id="training-on-the-gpu" class="section">Training on the GPU<a class="anchor-link right" href="#training-on-the-gpu"><i class="icofont-laika">&#xef71;</i></a></h4>
+        <p>Right now, if you&#39;re using scala-cli you have to edit the directives at the top of the <code>ImageClassifier.scala</code>
+        script to enable GPU support (see comments in the script).
+        We&#39;re looking for ways to make this easier in the future.</p>
+        
+        <h3 id="inference" class="section">Inference<a class="anchor-link right" href="#inference"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <p>Once you&#39;ve trained a model, you can use it for predicitons:</p>
+        <pre class="keep-together pdf epub"><code class="bash">scala-cli ImageClassifier.scala -- predict --image-path &lt;some-image.jpg&gt;</code></pre>
+        <p>If you don&#39;t have your own images, you can use an example dataset, for instance, the <a href="https://www.kaggle.com/datasets/karakaggle/kaggle-cat-vs-dog-dataset">Cat VS Dog dataset</a> (alternative <a href="https://www.microsoft.com/en-us/download/details.aspx?id=54765">download</a>) without requiring a kaggle account) is already in the right format.</p>
 
       </main>
 

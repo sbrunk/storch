@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="Laika 0.18.1 + Helium Theme" />
-    <title>Modules</title>
+    <title>How to Contribute</title>
     
       <meta name="author" content="Sören Brunk"/>
     
@@ -89,11 +89,11 @@
       <ul class="nav-list">
         <li class="level1"><a href="about.html">About</a></li>
         <li class="level1"><a href="installation.html">Installation</a></li>
-        <li class="level1 active"><a href="#">Modules</a></li>
+        <li class="level1"><a href="modules.html">Modules</a></li>
         <li class="level1"><a href="examples.html">Examples</a></li>
         <li class="level1"><a href="pre-trained-weights.html">Converting pre-trained weights</a></li>
         <li class="level1"><a href="faq.html">Frequently Asked Questions</a></li>
-        <li class="level1"><a href="contributing.html">How to Contribute</a></li>
+        <li class="level1 active"><a href="#">How to Contribute</a></li>
         <li class="level1 nav-header">tutorial</li>
         <li class="level2"><a href="tutorial/tensors.html">Tensors</a></li>
         <li class="level2"><a href="tutorial/buildmodel.html">Build the Neural Network</a></li>
@@ -114,10 +114,14 @@
     <div id="container">
 
       <nav id="page-nav">
-        <p class="header"><a href="#">Modules</a></p>
+        <p class="header"><a href="#">How to Contribute</a></p>
 
         <ul class="nav-list">
-          <li class="level1"><a href="#simple-custom-module-example">Simple custom module example</a></li>
+          <li class="level1"><a href="#development-setup">Development setup</a></li>
+          <li class="level1"><a href="#enabling-gpu-support-during-development">Enabling GPU support during development</a></li>
+          <li class="level1"><a href="#edit-the-documentation">Edit the documentation</a></li>
+          <li class="level1"><a href="#linting">Linting</a></li>
+          <li class="level1"><a href="#optional-install-dependencies-via-nix-devenv">Optional: Install dependencies via nix + devenv</a></li>
         </ul>
 
         <p class="footer"></p>
@@ -125,44 +129,66 @@
 
       <main class="content">
 
-        <h1 id="modules" class="title">Modules</h1>
-        <p>Storch provides a neural network module API with building blocks for creating stateful neural network architectures.</p>
+        <h1 id="how-to-contribute" class="title">How to Contribute</h1>
+        <p>Contributions to Storch are most welcome. Please have a look at the existing
+        <a href="https://github.com/sbrunk/storch/issues">issues</a> or don&#39;t hesitate to open a new one
+        to discuss ideas.</p>
         
-        <h2 id="simple-custom-module-example" class="section">Simple custom module example<a class="anchor-link right" href="#simple-custom-module-example"><i class="icofont-laika">&#xef71;</i></a></h2>
-        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.*
-</span><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.</span><span class="identifier">nn</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.</span><span class="identifier">nn</span><span>.</span><span class="identifier">functional</span><span> </span><span class="keyword">as</span><span> </span><span class="type-name">F</span><span>
-
-</span><span class="keyword">class</span><span> </span><span class="type-name">LeNet</span><span>[</span><span class="type-name">D</span><span> &lt;: </span><span class="type-name">BFloat16</span><span> | </span><span class="type-name">Float32</span><span>: </span><span class="identifier">nn</span><span>.</span><span class="type-name">Default</span><span>] </span><span class="keyword">extends</span><span> </span><span class="identifier">nn</span><span>.</span><span class="type-name">Module</span><span>:
-  </span><span class="keyword">val</span><span> </span><span class="identifier">conv1</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Conv2d</span><span>(</span><span class="number-literal">1</span><span>, </span><span class="number-literal">6</span><span>, </span><span class="number-literal">5</span><span>))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">pool</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">MaxPool2d</span><span>((</span><span class="number-literal">2</span><span>, </span><span class="number-literal">2</span><span>)))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">conv2</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Conv2d</span><span>(</span><span class="number-literal">6</span><span>, </span><span class="number-literal">16</span><span>, </span><span class="number-literal">5</span><span>))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">fc1</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Linear</span><span>(</span><span class="number-literal">16</span><span> * </span><span class="number-literal">4</span><span> * </span><span class="number-literal">4</span><span>, </span><span class="number-literal">120</span><span>))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">fc2</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Linear</span><span>(</span><span class="number-literal">120</span><span>, </span><span class="number-literal">84</span><span>))
-  </span><span class="keyword">val</span><span> </span><span class="identifier">fc3</span><span> = </span><span class="identifier">register</span><span>(</span><span class="identifier">nn</span><span>.</span><span class="type-name">Linear</span><span>(</span><span class="number-literal">84</span><span>, </span><span class="number-literal">10</span><span>))
-
-  </span><span class="keyword">def</span><span> </span><span class="declaration-name">apply</span><span>(</span><span class="identifier">i</span><span>: </span><span class="type-name">Tensor</span><span>[</span><span class="type-name">D</span><span>]): </span><span class="type-name">Tensor</span><span>[</span><span class="type-name">D</span><span>] =
-    </span><span class="keyword">var</span><span> </span><span class="identifier">x</span><span> = </span><span class="identifier">pool</span><span>(</span><span class="type-name">F</span><span>.</span><span class="identifier">relu</span><span>(</span><span class="identifier">conv1</span><span>(</span><span class="identifier">i</span><span>)))
-    </span><span class="identifier">x</span><span> = </span><span class="identifier">pool</span><span>(</span><span class="type-name">F</span><span>.</span><span class="identifier">relu</span><span>(</span><span class="identifier">conv2</span><span>(</span><span class="identifier">x</span><span>)))
-    </span><span class="identifier">x</span><span> = </span><span class="identifier">x</span><span>.</span><span class="identifier">view</span><span>(-</span><span class="number-literal">1</span><span>, </span><span class="number-literal">16</span><span> * </span><span class="number-literal">4</span><span> * </span><span class="number-literal">4</span><span>)
-    </span><span class="identifier">x</span><span> = </span><span class="type-name">F</span><span>.</span><span class="identifier">relu</span><span>(</span><span class="identifier">fc1</span><span>(</span><span class="identifier">x</span><span>))
-    </span><span class="identifier">x</span><span> = </span><span class="type-name">F</span><span>.</span><span class="identifier">relu</span><span>(</span><span class="identifier">fc2</span><span>(</span><span class="identifier">x</span><span>))
-    </span><span class="identifier">x</span><span> = </span><span class="identifier">fc3</span><span>(</span><span class="identifier">x</span><span>)
-    </span><span class="identifier">x</span></code></pre>
-        <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">model</span><span> = </span><span class="type-name">LeNet</span><span>()
-</span><span class="comment">// model: LeNet[Float32] = LeNet
-</span><span class="keyword">val</span><span> </span><span class="identifier">input</span><span> = </span><span class="identifier">torch</span><span>.</span><span class="identifier">rand</span><span>(</span><span class="type-name">Seq</span><span>(</span><span class="number-literal">1</span><span>, </span><span class="number-literal">1</span><span>, </span><span class="number-literal">28</span><span>, </span><span class="number-literal">28</span><span>))
-</span><span class="comment">// input: Tensor[Float32] = tensor dtype=float32, shape=[1, 1, 28, 28], device=CPU 
-// [[[[0.0239, 0.1741, 0.5066, ..., 0.9512, 0.8070, 0.3739],
-//    [0.5625, 0.4165, 0.1153, ..., 0.3510, 0.0086, 0.2082],
-//    [0.8317, 0.0963, 0.1241, ..., 0.4985, 0.4273, 0.7526],
-//    ...,
-//    [0.1227, 0.3874, 0.4374, ..., 0.4191, 0.5043, 0.0511],
-//    [0.9404, 0.1533, 0.4236, ..., 0.5938, 0.1366, 0.9904],
-//    [0.7634, 0.4054, 0.2530, ..., 0.6332, 0.9523, 0.4602]]]]
-</span><span class="identifier">model</span><span>(</span><span class="identifier">input</span><span>)
-</span><span class="comment">// res1: Tensor[Float32] = tensor dtype=float32, shape=[1, 10], device=CPU 
-// [[0.0094, 0.0280, 0.0906, ..., 0.1166, -0.0993, 0.0102]]</span></code></pre>
+        <h2 id="development-setup" class="section">Development setup<a class="anchor-link right" href="#development-setup"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>You need to have <a href="https://www.scala-sbt.org/">sbt</a> installed to build Storch from source.</p>
+        <p>Then clone the git repo and you should be ready to go.</p>
+        <pre class="keep-together pdf epub"><code class="bash">git clone https://github.com/sbrunk/storch
+sbt</code></pre>
+        
+        <h2 id="enabling-gpu-support-during-development" class="section">Enabling GPU support during development<a class="anchor-link right" href="#enabling-gpu-support-during-development"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>GPU support is disabled by default. To enable it, set the following parameter inside the sbt shell:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">set</span><span> </span><span class="type-name">ThisBuild</span><span> / </span><span class="identifier">enableGPU</span><span> := </span><span class="boolean-literal">true</span></code></pre>
+        <p>You can verify if the GPU is working by running the LeNet example.
+        If it&#39;s working, you should see an output like this:</p>
+        <pre><code>sbt examples/runMain LeNetApp
+[info] running (fork) LeNetApp 
+[info] Using device: Device(CUDA,-1)
+...</code></pre>
+        
+        <h2 id="edit-the-documentation" class="section">Edit the documentation<a class="anchor-link right" href="#edit-the-documentation"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>Documentation sources live in the <em>docs</em> directory.
+        We use <a href="https://scalameta.org/mdoc/">mdoc</a> for typechecked documenation and to embed code output.
+        The website is rendered by <a href="https://typelevel.org/Laika/">Laika</a>.
+        To build the documentation locally, you can run the following command:</p>
+        <pre class="keep-together pdf epub"><code class="bash">sbt ~tlSitePreview</code></pre>
+        <p>Then open <a href="http://localhost:4242">http://localhost:4242</a> in a browser enjoy a live preview while hacking on the docs.</p>
+        <p>To just build Scaladoc for all modules, you can run</p>
+        <pre class="keep-together pdf epub"><code class="bash">sbt ~unidoc</code></pre>
+        
+        <h2 id="linting" class="section">Linting<a class="anchor-link right" href="#linting"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>Manually run headerCrate + scalafmt on all files:</p>
+        <pre class="keep-together pdf epub"><code class="bash">sbt &#39;headerCreateAll ; scalafmtAll&#39;</code></pre>
+        <p>Add useful git pre-push linting checks:</p>
+        <pre class="keep-together pdf epub"><code class="bash">cp git-hooks/pre-push-checks .git/hooks/ &amp;&amp; chmod +x git-hooks/pre-push-checks</code></pre>
+        
+        <h2 id="optional-install-dependencies-via-nix-devenv" class="section">Optional: Install dependencies via nix + devenv<a class="anchor-link right" href="#optional-install-dependencies-via-nix-devenv"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <p>You can use nix and devenv to install your develepment environment, but it&#39;s not required.</p>
+        <ol class="arabic">
+          <li>Install <a href="https://nixos.org">nix</a> package manager</li>
+        </ol>
+        <pre class="keep-together pdf epub"><code class="bash">sh &lt;(curl -L https://nixos.org/nix/install) --daemon</code></pre>
+        <p>For more info, see <a href="https://nixos.org/download.html">https://nixos.org/download.html</a></p>
+        <ol class="arabic">
+          <li>Install <a href="https://devenv.sh">devenv</a></li>
+        </ol>
+        <pre class="keep-together pdf epub"><code class="bash">nix profile install --accept-flake-config github:cachix/devenv/latest</code></pre>
+        <p>For more info, see: <a href="https://devenv.sh/getting-started/#installation">https://devenv.sh/getting-started/#installation</a></p>
+        <ol class="arabic">
+          <li>(Optionally) Install <a href="https://direnv.net/">direnv</a></li>
+        </ol>
+        <p>This will load the specific environment variables upon <code>cd</code> into the storch folder</p>
+        <pre class="keep-together pdf epub"><code class="bash">nix profile install &#39;nixpkgs#direnv&#39;</code></pre>
+        <ol class="arabic">
+          <li>Load environment</li>
+        </ol>
+        <p>If you did not install direnv, run the following in the <code>storch</code> root folder:</p>
+        <pre class="keep-together pdf epub"><code class="bash">devenv shell</code></pre>
+        <p>If you installed direnv, just <code>cd</code> into storch</p>
 
       </main>
 
