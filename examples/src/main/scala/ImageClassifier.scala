@@ -48,7 +48,26 @@ import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
 import scala.util.{Random, Try, Using}
 
-/** Example script for training an image-classification model on your own images */
+// format: off
+/** Example script for training an image-classification model on your own images.
+  *
+  * Usage: scala-cli ImageClassifier.scala -- train <dataset>
+  *  
+  * Where the expected dataset is a directory per class with examples, like this:
+  * .
+  * ├── PetImages
+  *     ├── Cat
+  *     │   ├── 1.jpg
+  *     │   ├── 2.jpg
+  *     │   ├── ...
+  *     └── Dog
+  *         ├── 1.jpg
+  *         ├── 2.jpg
+  *         ├── ...
+  * 
+  * To see all options run scala-cli ImageClassifier.scala -- -h
+  */
+//format: on
 object ImageClassifier extends CommandsEntryPoint:
 
   val fileTypes = Seq("jpg", "png")
@@ -154,6 +173,7 @@ object ImageClassifier extends CommandsEntryPoint:
       if isTraining then model.eval()
       val (loss, correct) = testDL
         .map { (inputBatch, labelBatch) =>
+          // make sure we deallocate intermediate tensors in time
           Using.resource(new PointerScope()) { p =>
             val pred = model(inputBatch.to(device))
             val label = labelBatch.to(device)

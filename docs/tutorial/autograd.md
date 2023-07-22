@@ -2,7 +2,7 @@
 laika.title="Automatic Differentiation"
 %}
 
-Learn the Basics] ||
+Learn the Basics ||
 Quickstart ||
 [Tensors](tensors.md) ||
 Datasets & DataLoaders ||
