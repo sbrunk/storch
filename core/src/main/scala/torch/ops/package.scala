@@ -19,9 +19,13 @@ package torch
 import internal.NativeConverters
 import org.bytedeco.pytorch.global.torch as torchNative
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.MemoryFormatOptional
+import org.bytedeco.pytorch.{MemoryFormatOptional, TensorArrayRef, TensorVector}
 
 package object ops {
+
+  private[torch] def toArrayRef(tensors: Seq[Tensor[?]]): TensorArrayRef =
+    val vector = new TensorVector(tensors.map(_.native) *)
+    new TensorArrayRef(vector.front(), vector.size())
 
   private[torch] def xLike[D <: DType, D2 <: DType | Derive](
       input: Tensor[D],

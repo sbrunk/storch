@@ -120,7 +120,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def cat[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
-    torchNative.cat(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)), dim.toLong)
+    torchNative.cat(toArrayRef(tensors), dim.toLong)
   )
 
   /** Returns a view of `input` with a flipped conjugate bit. If `input` has a non-complex dtype,
@@ -292,9 +292,8 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def columnStack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] = Tensor(
-    torchNative.column_stack(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)))
-  )
+  def columnStack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] =
+    Tensor(torchNative.column_stack(toArrayRef(tensors)))
 
   /** Stack tensors in sequence depthwise (along third axis).
     *
@@ -323,7 +322,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def dstack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] = Tensor(
-    torchNative.dstack(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)))
+    torchNative.dstack(toArrayRef(tensors))
   )
 
   /** Gathers values along an axis specified by `dim`.
@@ -427,9 +426,8 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def hstack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] = Tensor(
-    torchNative.hstack(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)))
-  )
+  def hstack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] =
+    Tensor(torchNative.hstack(toArrayRef(tensors)))
 
   /** Accumulate the elements of `source` into the `input` tensor by adding to the indices in the
     * order given in `index`.
@@ -1080,7 +1078,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *   tensors (inclusive)
     */
   def stack[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
-    torchNative.stack(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)), dim)
+    torchNative.stack(toArrayRef(tensors), dim)
   )
 
   /** Alias for `torch.transpose`.
@@ -1491,7 +1489,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def vstack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] = Tensor(
-    torchNative.vstack(new TensorArrayRef(new TensorVector(tensors.map(_.native)*)))
+    torchNative.vstack(toArrayRef(tensors))
   )
 
   /** Return a tensor of elements selected from either `input` or `other`, depending on `condition`.

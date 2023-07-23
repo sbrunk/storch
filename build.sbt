@@ -29,7 +29,7 @@ val cudaVersion = "12.1-8.9"
 val openblasVersion = "0.3.23"
 val mklVersion = "2023.1"
 ThisBuild / scalaVersion := "3.3.0"
-ThisBuild / javaCppVersion := "1.5.9"
+ThisBuild / javaCppVersion := "1.5.10-SNAPSHOT"
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 

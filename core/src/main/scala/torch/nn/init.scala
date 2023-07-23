@@ -21,7 +21,7 @@ import org.bytedeco.pytorch.global.torch as torchNative
 import org.bytedeco.pytorch.FanModeType
 import org.bytedeco.pytorch.kFanIn
 import org.bytedeco.pytorch.kFanOut
-import org.bytedeco.pytorch.NonlinearityType
+import org.bytedeco.pytorch.Nonlinearity as NonlinearityNative
 import org.bytedeco.pytorch.kLinear
 import org.bytedeco.pytorch.kConv1D
 import org.bytedeco.pytorch.kConv2D
@@ -56,7 +56,7 @@ object init:
   enum NonLinearity:
     case Linear, Conv1D, Conv2D, Conv3D, ConvTranspose1D, ConvTranspose2D, ConvTranspose3D, Sigmoid,
       ReLU, LeakyReLU
-    private[torch] def toNative: NonlinearityType = NonlinearityType(this match
+    private[torch] def toNative: NonlinearityNative = NonlinearityNative(this match
       case NonLinearity.Linear          => kLinear()
       case NonLinearity.Conv1D          => kConv1D()
       case NonLinearity.Conv2D          => kConv2D()

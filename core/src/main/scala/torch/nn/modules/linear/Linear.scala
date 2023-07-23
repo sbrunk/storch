@@ -28,7 +28,7 @@ import torch.nn.modules.{HasParams, TensorModule}
   *
   * This module supports `TensorFloat32<tf32_on_ampere>`.
   *
-  * * Example:
+  * Example:
   *
   * ```scala sc:nocompile
   * import torch.*
@@ -57,7 +57,7 @@ final class Linear[ParamType <: FloatNN: Default](
   private val options = new LinearOptions(inFeatures, outFeatures)
   options.bias().put(bias)
   override private[torch] val nativeModule: LinearImpl = new LinearImpl(options)
-  nativeModule.asModule.to(paramType.toScalarType)
+  nativeModule.asModule.to(paramType.toScalarType, false)
 
   override def registerWithParent[T <: pytorch.Module](parent: T)(using
       name: sourcecode.Name

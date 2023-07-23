@@ -342,7 +342,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     import ScalarType.*
     val out = native.dtype().toScalarType().intern() match
       case Byte        => UByte(native.item_int())
-      case Char        => native.item_byte()
+      case Char        => native.item_char()
       case Short       => native.item_short()
       case Int         => native.item_int()
       case Long        => native.item_long()
@@ -357,7 +357,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
         val b = native.contiguous.createBuffer[DoubleBuffer]
         Complex(b.get(), b.get())
       case Bool                   => native.item().toBool
-      case QInt8                  => native.item_byte()
+      case QInt8                  => native.item_char()
       case QUInt8                 => native.item_short()
       case QInt32                 => native.item_int()
       case BFloat16               => native.item().toBFloat16.asFloat()
