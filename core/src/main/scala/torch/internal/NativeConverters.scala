@@ -36,6 +36,8 @@ import spire.math.Complex
 import spire.math.UByte
 import scala.annotation.targetName
 import org.bytedeco.pytorch.GeneratorOptional
+import org.bytedeco.pytorch.TensorArrayRef
+import org.bytedeco.pytorch.TensorVector
 
 private[torch] object NativeConverters:
 
@@ -125,6 +127,9 @@ private[torch] object NativeConverters:
       .layout(layout.fold(LayoutOptional())(l => LayoutOptional(l.toNative)))
       .device(device.fold(DeviceOptional())(d => DeviceOptional(d.toNative)))
       .requires_grad(BoolOptional(requiresGrad))
+
+  def toArrayRef(tensors: Seq[Tensor[?]]): TensorArrayRef =
+    new TensorArrayRef(TensorVector(tensors.map(_.native)*))
 
   class NativeIterable[Container, NativeIterator, Item](
       container: Container,

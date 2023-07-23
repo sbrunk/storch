@@ -59,6 +59,13 @@ private[torch] trait Activations {
     */
   def sigmoid[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.sigmoid(input.native))
 
+  /** Applies the Sigmoid Linear Unit (SiLU) function, element-wise. The SiLU function is also known
+    * as the swish function.
+    *
+    * @group nn_activation
+    */
+  def silu[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.silu(input.native))
+
   /** Applies a softmax function.
     *
     * @group nn_activation

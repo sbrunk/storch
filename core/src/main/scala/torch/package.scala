@@ -34,7 +34,8 @@ package object torch
     with ops.IndexingSlicingJoiningOps
     with ops.PointwiseOps
     with ops.RandomSamplingOps
-    with ops.ReductionOps {
+    with ops.ReductionOps
+    with ops.OtherOps {
 
   /** Disable gradient calculation for [[op]].
     *

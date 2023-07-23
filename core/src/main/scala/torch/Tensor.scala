@@ -274,6 +274,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     native.copy_(src.native, nonBlocking)
     this
 
+  /** Returns a new tensor with the sine of the elements of this tensor. */
+  def cos: Tensor[FloatPromoted[D]] = Tensor(native.cos())
+
   def device: Device = Device(native.device())
 
   def dim: Int = native.dim().toInt
@@ -302,6 +305,36 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   /** Returns the tensor with elements exponentiated. */
   def exp: Tensor[D] = Tensor(native.exp())
 
+  /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.
+    *
+    * Passing -1 as the size for a dimension means not changing the size of that dimension.
+    *
+    * Tensor can be also expanded to a larger number of dimensions, and the new ones will be
+    * appended at the front. For the new dimensions, the size cannot be set to -1.
+    *
+    * Expanding a tensor does not allocate new memory, but only creates a new view on the existing
+    * tensor where a dimension of size one is expanded to a larger size by setting the `stride` to
+    * 0. Any dimension of size 1 can be expanded to an arbitrary value without allocating new
+    * memory.
+    *
+    * @param sizes
+    *   the desired expanded size
+    *
+    * @note
+    *   More than one element of an expanded tensor may refer to a single memory location. As a
+    *   result, in-place operations (especially ones that are vectorized) may result in incorrect
+    *   behavior. If you need to write to the tensors, please clone them first.
+    *
+    * @example
+    *   ```scala sc
+    *   val x = torch.tensor((Seq(Seq(1), Seq(2), Seq(3)))
+    *   x.size // [3, 1]
+    *   x.expand(3, 4)
+    *   x.expand(-1, 4) // -1 means not changing the size of that dimension
+    *   ```
+    */
+  def expand(sizes: Int*) = Tensor(native.expand(sizes.map(_.toLong)*))
+
   def flatten: Tensor[D] = Tensor(native.flatten())
 
   def flatten(startDim: Int = 0, endDim: Int = -1): Tensor[D] = Tensor(
@@ -309,6 +342,18 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   )
 
   def float: Tensor[Float32] = to(dtype = float32)
+
+  /** Divides each element of this tensor by `s` and floors the result. */
+  def floorDivide[S <: ScalaType](s: S): Tensor[Div[D, ScalaToDType[S]]] = Tensor(
+    native.floor_divide(toScalar(s))
+  )
+
+  /** Divides each element of this tensor by the corresponding element of `other` and floors the
+    * result.
+    */
+  def floorDivide[D2 <: DType](other: Tensor[D2]): Tensor[Div[D, D2]] = Tensor(
+    native.floor_divide(other.native)
+  )
 
   /** This function returns an undefined tensor by default and returns a defined tensor the first
     * time a call to backward() computes gradients for this Tensor. The attribute will then contain
@@ -387,8 +432,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def `@`[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] = matmul(u)
 
-  /** Returns the maximum value of all elements in the ``input`` tensor. */
-  def max(): Tensor[Int64] = Tensor(native.max())
+  /** Returns the maximum value of all elements of this tensor. */
+  def max(): Tensor[D] = Tensor(native.max())
 
   /** Returns a tuple ``(values, indices)`` where ``values`` is the maximum value of each row of the
     * `input` tensor in the given dimension `dim`. And ``indices`` is the index location of each
@@ -446,6 +491,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     */
   def mT: Tensor[D] = Tensor(native.mT())
 
+  /** Returns a new tensor with the negative of the elements of this tensor. */
+  def neg: Tensor[D] = Tensor(native.neg())
+
   /** Returns the total number of elements in the input tensor. */
   def numel: Long = native.numel()
 
@@ -485,6 +533,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def std: Tensor[D] = Tensor[D](native.std())
 
+  /** Returns a new tensor with the sine of the elements of this tensor. */
+  def sin: Tensor[FloatPromoted[D]] = Tensor(native.sin())
+
   /** Returns the sum of all elements of this tensor. */
   def sum: Tensor[Sum[D]] = Tensor(native.sum())
 
@@ -497,6 +548,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   /** Calculates the variance of all elements of this tensor. */
   def variance = Tensor(native.`var`())
+
+  /** Returns a new tensor with the negative of the elements of this tensor. */
+  def unary_- : Tensor[D] = Tensor(native.neg())
 
   /** Returns a new tensor with a dimension of size one inserted at the specified position.
     *
@@ -529,7 +583,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
       indices: (Slice | Int | Long | Tensor[Bool] | Tensor[UInt8] | Tensor[Int64] | Seq[T] |
         None.type | Ellipsis)*
   ): TensorIndexArrayRef =
-    def toSymInt(maybeLong: Option[Long]) = maybeLong.map(l => SymIntOptional(SymInt(l))).orNull
+    def toSymInt(maybeInt: Option[Int]) = maybeInt.map(l => SymIntOptional(SymInt(l))).orNull
     // see https://pytorch.org/cppdocs/notes/tensor_indexing.html
     val nativeIndices: Seq[pytorch.TensorIndex] =
       for (i <- indices) yield i match
@@ -580,6 +634,18 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
   def requiresGrad: Boolean = native.requires_grad()
 
   def requiresGrad_=(requiresGrad: Boolean): Unit = native.requires_grad_(requiresGrad)
+
+  def split(
+      splitSize: Int | Seq[Int],
+      dim: Int = 0
+  ): Seq[Tensor[D]] = {
+    val result =
+      splitSize match {
+        case i: Int      => native.split(i.toLong, dim.toLong)
+        case s: Seq[Int] => native.split(s.map(_.toLong).toArray, dim.toLong)
+      }
+    (0L until result.size()).map(i => Tensor(result.get(i)))
+  }
 
   def take(indices: Tensor[Int64]): Tensor[D] = Tensor(native.take(indices.native))
 
@@ -693,6 +759,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
       flattened: Boolean = false,
       includeInfo: Boolean = true
   ): String =
+    if dtype == int32 then max()
     def format(x: Any): String =
       x match
         case x: Float  => "%1.4f".format(x)
@@ -916,15 +983,22 @@ object Tensor:
             )
             .clone()
         ).to(device = device)
-      case data: U =>
-        val dtype = scalaToDType(data)
-        Tensor(
-          torchNative.scalar_tensor(
-            NativeConverters.toScalar(data),
-            NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
-          )
-        )
-      case _ => throw new IllegalArgumentException("Unsupported type")
+      case data: U => fromScalar(data)
+      case _       => throw new IllegalArgumentException("Unsupported type")
+
+  def fromScalar[S <: ScalaType](
+      s: S,
+      layout: Layout = Strided,
+      device: Device = CPU,
+      requiresGrad: Boolean = false
+  ): Tensor[ScalaToDType[S]] =
+    val dtype = scalaToDType(s)
+    Tensor(
+      torchNative.scalar_tensor(
+        NativeConverters.toScalar(s),
+        NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
+      )
+    )
 
 /** Scalar/Tensor extensions to allow tensor operations directly on scalars */
 extension [S <: ScalaType](s: S)
@@ -938,3 +1012,5 @@ extension [S <: ScalaType](s: S)
       @implicitNotFound(""""pow" not implemented for complex32""")
       ev2: Promoted[D, ScalaToDType[S]] NotEqual Complex32
   ): Tensor[Promoted[D, ScalaToDType[S]]] = t.pow(s)
+  def **[S2 <: ScalaType](other: S2): DTypeToScala[Promoted[ScalaToDType[S], ScalaToDType[S2]]] =
+    Tensor.fromScalar(s).pow(other).item

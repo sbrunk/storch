@@ -18,15 +18,15 @@ package torch
 
 object indexing:
 
-  case class Slice(start: Option[Long], end: Option[Long], step: Option[Long])
+  case class Slice(start: Option[Int], end: Option[Int], step: Option[Int])
   object Slice:
-    private def extract(index: Option[Long] | Long) = index match
-      case i: Option[Long] => i
-      case i: Long         => Option(i)
+    private def extract(index: Option[Int] | Int) = index match
+      case i: Option[Int] => i
+      case i: Int         => Option(i)
     def apply(
-        start: Option[Long] | Long = None,
-        end: Option[Long] | Long = None,
-        step: Option[Long] | Long = None
+        start: Option[Int] | Int = None,
+        end: Option[Int] | Int = None,
+        step: Option[Int] | Int = None
     ): Slice = Slice(extract(start), extract(end), extract(step))
 
   /** Ellipsis or ... in Python syntax. */
@@ -37,5 +37,17 @@ object indexing:
 
   /** Ellipsis or ... in Python syntax. */
   val --- = Ellipsis
+
+  /** Range (colon / :) in python syntax. */
+  val :: = Slice()
+
+  /** Allow for {{{t(1.::)}}} and {{{t(1.::(2)}}} */
+  extension (start: Int | Option[Int])
+    def ::(step: Int | Option[Int]): Slice =
+      // Note that despite the names, :: reverses the operators, that is a :: b calls b.::(a)
+      // So step and start are reversed here
+      Slice(step, None, start)
+
+    def :: : Slice = Slice(start, None, None)
 
 export indexing.*
