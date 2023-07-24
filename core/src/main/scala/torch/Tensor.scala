@@ -333,7 +333,7 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     *   x.expand(-1, 4) // -1 means not changing the size of that dimension
     *   ```
     */
-  def expand(sizes: Int*) = Tensor(native.expand(sizes.map(_.toLong)*))
+  def expand(sizes: Int*): Tensor[D] = Tensor(native.expand(sizes.map(_.toLong)*))
 
   def flatten: Tensor[D] = Tensor(native.flatten())
 
@@ -540,6 +540,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def size: Seq[Int] = ArraySeq.unsafeWrapArray(native.sizes.vec.get.map(_.toInt))
 
+  def sqrt: Tensor[D] = Tensor(native.sqrt())
+
   def std: Tensor[D] = Tensor[D](native.std())
 
   /** Returns a new tensor with the sine of the elements of this tensor. */
@@ -554,6 +556,11 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     * `transpose(input, 0, 1)`.
     */
   def t: Tensor[D] = Tensor(native.t())
+
+  /** Returns a tensor that is a transposed version of this tensor. The given dimensions dim0 and
+    * dim1 are swapped.
+    */
+  def transpose(dim0: Int, dim1: Int): Tensor[D] = Tensor(native.transpose(dim0, dim1))
 
   /** Calculates the variance of all elements of this tensor. */
   def variance = Tensor(native.`var`())
