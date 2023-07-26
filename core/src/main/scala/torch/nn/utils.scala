@@ -19,10 +19,8 @@ package nn
 
 import org.bytedeco.pytorch.global.torch as torchNative
 import org.bytedeco.pytorch.TensorVector
-import torch.internal.LoadCusolver
 
 object utils:
-  LoadCusolver
   def clipGradNorm_(
       parameters: Seq[Tensor[?]],
       max_norm: Double,

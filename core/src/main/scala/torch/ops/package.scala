@@ -23,10 +23,6 @@ import org.bytedeco.pytorch.{MemoryFormatOptional, TensorArrayRef, TensorVector}
 
 package object ops {
 
-  private[torch] def toArrayRef(tensors: Seq[Tensor[?]]): TensorArrayRef =
-    val vector = new TensorVector(tensors.map(_.native) *)
-    new TensorArrayRef(vector.front(), vector.size())
-
   private[torch] def xLike[D <: DType, D2 <: DType | Derive](
       input: Tensor[D],
       dtype: D2,

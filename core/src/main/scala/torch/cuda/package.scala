@@ -17,13 +17,11 @@
 package torch
 
 import org.bytedeco.pytorch.global.torch as torchNative
-import torch.internal.LoadCusolver
 
 /** This package adds support for CUDA tensor types, that implement the same function as CPU
   * tensors, but they utilize GPUs for computation.
   */
 package object cuda {
-  LoadCusolver
 
   /** Returns a Boolean indicating if CUDA is currently available. */
   def isAvailable: Boolean = torchNative.cuda_is_available()

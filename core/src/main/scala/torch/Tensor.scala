@@ -53,7 +53,6 @@ import spire.math.{Complex, UByte}
 import scala.reflect.Typeable
 import internal.NativeConverters
 import internal.NativeConverters.toArray
-import internal.LoadCusolver
 import Device.CPU
 import Layout.Strided
 import org.bytedeco.pytorch.ByteArrayRef
@@ -802,7 +801,6 @@ type IntTensor = UInt8Tensor | Int8Tensor | Int16Tensor | Int32Tensor | Int64Ten
 type ComplexTensor = Complex32Tensor | Complex64Tensor | Complex128Tensor
 
 object Tensor:
-  LoadCusolver // TODO workaround for https://github.com/bytedeco/javacpp-presets/issues/1376
 
   def apply[D <: DType](native: pytorch.Tensor): Tensor[D] = (native.scalar_type().intern() match
     case ScalarType.Byte          => new UInt8Tensor(native)

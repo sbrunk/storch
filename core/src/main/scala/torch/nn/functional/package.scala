@@ -18,7 +18,6 @@ package torch
 package nn
 
 import functional.*
-import torch.internal.LoadCusolver
 
 /** @groupname nn_conv Convolution functions
   * @groupname nn_pooling Pooling functions
@@ -38,6 +37,4 @@ package object functional
     with Linear
     with Loss
     with Pooling
-    with Sparse {
-  LoadCusolver
-}
+    with Sparse

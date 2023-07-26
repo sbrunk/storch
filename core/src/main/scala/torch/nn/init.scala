@@ -33,11 +33,9 @@ import org.bytedeco.pytorch.kSigmoid
 import org.bytedeco.pytorch.kReLU
 import org.bytedeco.pytorch.kLeakyReLU
 import org.bytedeco.pytorch.Scalar
-import torch.internal.LoadCusolver
 
 // TODO implement remaining init functions
 object init:
-  LoadCusolver
   def kaimingNormal_(
       t: Tensor[?],
       a: Double = 0,

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import torch.internal.LoadCusolver
-
 import scala.util.Using
 
 /** The torch package contains data structures for multi-dimensional tensors and defines
@@ -37,7 +35,6 @@ package object torch
     with ops.PointwiseOps
     with ops.RandomSamplingOps
     with ops.ReductionOps {
-  LoadCusolver // TODO workaround for https://github.com/bytedeco/javacpp-presets/issues/1376
 
   /** Disable gradient calculation for [[op]].
     *

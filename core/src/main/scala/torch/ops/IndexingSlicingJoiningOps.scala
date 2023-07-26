@@ -20,13 +20,17 @@ package ops
 import internal.NativeConverters.*
 
 import org.bytedeco.pytorch.global.torch as torchNative
-import org.bytedeco.pytorch.{TensorArrayRef, TensorVector}
+import org.bytedeco.pytorch.TensorArrayRef
+import org.bytedeco.pytorch.TensorVector
 
 /** Indexing, Slicing, Joining, Mutating Ops
   *
   * https://pytorch.org/docs/stable/torch.html#indexing-slicing-joining-mutating-ops
   */
 private[torch] trait IndexingSlicingJoiningOps {
+
+  private def toArrayRef(tensors: Seq[Tensor[?]]): TensorArrayRef =
+    new TensorArrayRef(new TensorVector(tensors.map(_.native)*))
 
   /** Returns a view of the tensor conjugated and with the last two dimensions transposed.
     *
