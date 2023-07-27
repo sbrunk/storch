@@ -27,6 +27,34 @@ import org.bytedeco.pytorch.EmbeddingOptions
 import torch.nn.modules.{HasParams, HasWeight, TensorModule}
 import torch.internal.NativeConverters.{toNative, doubleToDoublePointer}
 
+/** A simple lookup table that stores embeddings of a fixed dictionary and size.
+  *
+  * This module is often used to store word embeddings and retrieve them using indices. The input to
+  * the module is a list of indices, and the output is the corresponding word embeddings.
+  *
+  * @group nn_sparse
+  *
+  * @param numEmbeddings
+  *   Size of the dictionary of embeddings
+  * @param embeddingDim
+  *   The size of each embedding vector
+  * @param paddingIdx
+  *   If specified, the entries at `paddingIdx` do not contribute to the gradient; therefore, the
+  *   embedding vector at `paddingIdx` is not updated during training, i.e. it remains as a fixed
+  *   "pad". For a newly constructed Embedding, the embedding vector at `paddingIdx` will default to
+  *   all zeros, but can be updated to another value to be used as the padding vector.
+  * @param maxNorm
+  *   If given, each embedding vector with norm larger than `maxNorm` is renormalized to have norm
+  *   `maxNorm`.
+  * @param normType
+  *   The p of the p-norm to compute for the `maxNorm` option. Default `2`.
+  * @param scaleGradByFreq
+  *   If given, this will scale gradients by the inverse of frequency of the words in the
+  *   mini-batch. Default `false`.
+  * @param sparse
+  *   If ``True``, gradient w.r.t. `weight` matrix will be a sparse tensor. See Notes for more
+  *   details regarding sparse gradients.
+  */
 final class Embedding[ParamType <: FloatNN | ComplexNN: Default](
     numEmbeddings: Int,
     embeddingDim: Int,

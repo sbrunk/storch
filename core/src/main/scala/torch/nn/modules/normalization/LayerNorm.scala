@@ -20,33 +20,28 @@ package modules
 package normalization
 
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.{GroupNormImpl, GroupNormOptions}
+import org.bytedeco.pytorch.{LayerNormImpl, LayerNormOptions, LongVector}
 import torch.nn.modules.TensorModule
 import torch.{DType, Tensor}
 
-/** Applies Group Normalization over a mini-batch of inputs
-  *
-  * @param numGroups
-  *   number of groups to separate the channels into
-  * @param numChannels
-  *   number of channels expected in input
-  * @param eps
-  *   a value added to the denominator for numerical stability
-  * @param affine
-  *   a boolean value that when set to `true`, this module has learnable per-channel affine
-  *   parameters initialized to ones (for weights) and zeros (for biases)
+/** Applies Layer Normalization over a mini-batch of inputs as described in the paper Layer
+  * Normalization // TODO Add docs
   */
-final class GroupNorm[ParamType <: DType: Default](
-    numGroups: Int,
-    numChannels: Int,
+final class LayerNorm[ParamType <: DType: Default](
+    normalizedShape: Seq[Int] | Int,
     eps: Double = 1e-05,
-    affine: Boolean = true
+    elementwiseAffine: Boolean = true
 ) extends TensorModule[ParamType]:
-  private val options: GroupNormOptions = GroupNormOptions(numGroups, numChannels)
+  private val options: LayerNormOptions = normalizedShape match {
+    case normalizedShape: Seq[Int] =>
+      LayerNormOptions(LongVector(normalizedShape.map(_.toLong)*))
+    case normalizedShape: Int =>
+      LayerNormOptions(LongVector(normalizedShape.toLong))
+  }
   options.eps().put(eps)
-  options.affine().put(affine)
+  options.elementwise_affine().put(elementwiseAffine)
 
-  override private[torch] val nativeModule: GroupNormImpl = GroupNormImpl(options)
+  override private[torch] val nativeModule: LayerNormImpl = LayerNormImpl(options)
 
   override def registerWithParent[M <: pytorch.Module](parent: M)(using
       name: sourcecode.Name
