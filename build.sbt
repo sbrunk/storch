@@ -29,7 +29,8 @@ val cudaVersion = "12.1-8.9"
 val openblasVersion = "0.3.23"
 val mklVersion = "2023.1"
 ThisBuild / scalaVersion := "3.3.0"
-ThisBuild / javaCppVersion := "1.5.9"
+ThisBuild / javaCppVersion := "1.5.10-SNAPSHOT"
+ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 
@@ -40,8 +41,7 @@ ThisBuild / enableGPU := false
 lazy val commonSettings = Seq(
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
   javaCppVersion := (ThisBuild / javaCppVersion).value,
-  javaCppPlatform := Seq(),
-  resolvers ++= Resolver.sonatypeOssRepos("snapshots")
+  javaCppPlatform := Seq()
   // This is a hack to avoid depending on the native libs when publishing
   // but conveniently have them on the classpath during development.
   // There's probably a cleaner way to do this.
@@ -75,8 +75,7 @@ lazy val core = project
       (if (enableGPU.value) "pytorch-gpu" else "pytorch") -> pytorchVersion,
       "mkl" -> mklVersion,
       "openblas" -> openblasVersion
-      // TODO remove cuda (not cuda-redist) once https://github.com/bytedeco/javacpp-presets/issues/1376 is fixed
-    ) ++ (if (enableGPU.value) Seq("cuda-redist" -> cudaVersion, "cuda" -> cudaVersion) else Seq()),
+    ) ++ (if (enableGPU.value) Seq("cuda-redist" -> cudaVersion) else Seq()),
     javaCppPlatform := org.bytedeco.sbt.javacpp.Platform.current,
     fork := true,
     Test / fork := true,

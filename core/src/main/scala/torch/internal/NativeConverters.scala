@@ -35,11 +35,8 @@ import org.bytedeco.pytorch.GenericDictIterator
 import spire.math.Complex
 import spire.math.UByte
 import scala.annotation.targetName
-import internal.LoadCusolver
 
 private[torch] object NativeConverters:
-
-  LoadCusolver // TODO workaround for https://github.com/bytedeco/javacpp-presets/issues/1376
 
   inline def convertToOptional[T, U <: T | Option[T], V >: Null](i: U, f: T => V): V = i match
     case i: Option[T] => i.map(f(_)).orNull

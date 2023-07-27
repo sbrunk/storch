@@ -72,7 +72,7 @@ abstract class Module {
 
   def copy(): this.type =
     val clone = super.clone().asInstanceOf[Module]
-    clone._nativeModule = _nativeModule.clone()
+    clone._nativeModule = _nativeModule.clone(null)
     clone.asInstanceOf[this.type]
 
   protected[torch] def registerWithParent[T <: pytorch.Module](parent: T)(using
@@ -100,15 +100,15 @@ abstract class Module {
 
   def to(device: Device): this.type =
     // val nativeCopy = nativeModule.clone()
-    nativeModule.asModule.to(device.toNative)
+    nativeModule.asModule.to(device.toNative, false)
     // copy
     // val clone: this.type = copy()
     // clone.nativeModule = nativeCopy
     this
 
   def to(dtype: DType, nonBlocking: Boolean = false): this.type =
-    val nativeCopy = nativeModule.clone()
-    nativeCopy.asModule.to(dtype.toScalarType)
+    val nativeCopy = nativeModule.clone(null)
+    nativeCopy.asModule.to(dtype.toScalarType, false)
     this
 
   def save(outputArchive: OutputArchive) = nativeModule.save(outputArchive)

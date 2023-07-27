@@ -119,7 +119,7 @@ final class BatchNorm2d[ParamType <: FloatNN | ComplexNN: Default](
   options.track_running_stats().put(trackRunningStats)
 
   override private[torch] val nativeModule: BatchNorm2dImpl = BatchNorm2dImpl(options)
-  nativeModule.asModule.to(paramType.toScalarType)
+  nativeModule.asModule.to(paramType.toScalarType, false)
 
   override def registerWithParent[M <: pytorch.Module](parent: M)(using
       name: sourcecode.Name

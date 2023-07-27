@@ -25,6 +25,7 @@ libraryDependencies += Seq(
 ```scala
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
+//> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 ```
 
@@ -66,6 +67,7 @@ fork := true
 ```scala
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
+//> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch-platform:@PYTORCH_VERSION@-@JAVACPP_VERSION@"
 ```
@@ -101,6 +103,7 @@ fork := true
 ```scala
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
+//> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:openblas:@OPENBLAS_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64"
 //> using lib "org.bytedeco:pytorch:@PYTORCH_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64"
@@ -159,6 +162,7 @@ fork := true
 ```scala
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
+//> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch-platform-gpu:@PYTORCH_VERSION@-@JAVACPP_VERSION@"
 //> using lib "org.bytedeco:cuda-platform-redist:@CUDA_VERSION@-@JAVACPP_VERSION@"
@@ -193,18 +197,13 @@ fork := true
 ```
 
 @:choice(scala-cli)
-
-**Warning**: This is currently **not working** due to with scala-cli not resolving mixed dependencies with and without
-classifiers or  with multiple classifiers. Please use the platform variant above until it is solved.
-
 ```scala
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
+//> using repository "sonatype:snapshots"
 //> using lib "dev.storch::core:@VERSION@"
 //> using lib "org.bytedeco:pytorch:@PYTORCH_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64-gpu"
 //> using lib "org.bytedeco:openblas:@OPENBLAS_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64"
-//> using lib "org.bytedeco:cuda:@CUDA_VERSION@-@JAVACPP_VERSION@"
-//> using lib "org.bytedeco:cuda:@CUDA_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64"
 //> using lib "org.bytedeco:cuda:@CUDA_VERSION@-@JAVACPP_VERSION@,classifier=linux-x86_64-redist"
 ```
 
@@ -226,12 +225,7 @@ resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies += Seq(
   "dev.storch" %% "core" % "@VERSION@",
 )
-javaCppPresetLibs ++= Seq(
-  "pytorch-gpu" -> "@PYTORCH_VERSION@",
-  "openblas" -> "@OPENBLAS_VERSION@",
-  "cuda-redist" -> "@CUDA_VERSION@",
-  "cuda" -> "@CUDA_VERSION@"
-)
+javaCppPresetLibs ++= Seq("pytorch-gpu" -> "@PYTORCH_VERSION@", "openblas" -> "@OPENBLAS_VERSION@", "cuda-redist" -> "@CUDA_VERSION@")
 fork := true
 ```
 
