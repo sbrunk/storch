@@ -149,13 +149,14 @@
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> ++= </span><span class="type-name">Resolver</span><span>.</span><span class="identifier">sonatypeOssRepos</span><span>(</span><span class="string-literal">&quot;snapshots&quot;</span><span>)
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-e8d6b3f-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-795485b-SNAPSHOT&quot;</span><span>,
 )</span></code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using scala &quot;3.3&quot;
 //&gt; using repository &quot;sonatype-s01:snapshots&quot;
-//&gt; using lib &quot;dev.storch::core:0.0-e8d6b3f-SNAPSHOT&quot;</span></code></pre>
+//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::core:0.0-795485b-SNAPSHOT&quot;</span></code></pre>
           </div>
         </div>
         
@@ -181,16 +182,17 @@
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> ++= </span><span class="type-name">Resolver</span><span>.</span><span class="identifier">sonatypeOssRepos</span><span>(</span><span class="string-literal">&quot;snapshots&quot;</span><span>)
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-e8d6b3f-SNAPSHOT&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch-platform&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.9&quot;</span><span>
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-795485b-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch-platform&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.10-SNAPSHOT&quot;</span><span>
 )
 </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using scala &quot;3.3&quot;
 //&gt; using repository &quot;sonatype-s01:snapshots&quot;
-//&gt; using lib &quot;dev.storch::core:0.0-e8d6b3f-SNAPSHOT&quot;
-//&gt; using lib &quot;org.bytedeco:pytorch-platform:2.0.1-1.5.9&quot;</span></code></pre>
+//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::core:0.0-795485b-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:pytorch-platform:2.0.1-1.5.10-SNAPSHOT&quot;</span></code></pre>
           </div>
         </div>
         <p>There is one downside to this approach. Because <code>pytorch-platform</code> depends on the native libraries for all supported
@@ -209,19 +211,20 @@
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> ++= </span><span class="type-name">Resolver</span><span>.</span><span class="identifier">sonatypeOssRepos</span><span>(</span><span class="string-literal">&quot;snapshots&quot;</span><span>)
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-e8d6b3f-SNAPSHOT&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.9&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.9&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;openblas&quot;</span><span> % </span><span class="string-literal">&quot;0.3.23-1.5.9&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-795485b-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.10-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.10-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;openblas&quot;</span><span> % </span><span class="string-literal">&quot;0.3.23-1.5.10-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>
 )
 </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using scala &quot;3.3&quot;
 //&gt; using repository &quot;sonatype-s01:snapshots&quot;
-//&gt; using lib &quot;dev.storch::core:0.0-e8d6b3f-SNAPSHOT&quot;
-//&gt; using lib &quot;org.bytedeco:openblas:0.3.23-1.5.9,classifier=linux-x86_64&quot;
-//&gt; using lib &quot;org.bytedeco:pytorch:2.0.1-1.5.9,classifier=linux-x86_64&quot;</span></code></pre>
+//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::core:0.0-795485b-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:openblas:0.3.23-1.5.10-SNAPSHOT,classifier=linux-x86_64&quot;
+//&gt; using lib &quot;org.bytedeco:pytorch:2.0.1-1.5.10-SNAPSHOT,classifier=linux-x86_64&quot;</span></code></pre>
           </div>
         </div>
         <p>Now we&#39;re only downloading the native libraries for a single platform. The downside though is that the build is not portable anymore.
@@ -234,7 +237,7 @@
         <p><code>build.sbt</code>:</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> ++= </span><span class="type-name">Resolver</span><span>.</span><span class="identifier">sonatypeOssRepos</span><span>(</span><span class="string-literal">&quot;snapshots&quot;</span><span>)
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-e8d6b3f-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-795485b-SNAPSHOT&quot;</span><span>,
 )
 </span><span class="identifier">javaCppPresetLibs</span><span> ++= </span><span class="type-name">Seq</span><span>(</span><span class="string-literal">&quot;pytorch&quot;</span><span> -&gt; </span><span class="string-literal">&quot;2.0.1&quot;</span><span>, </span><span class="string-literal">&quot;openblas&quot;</span><span> -&gt; </span><span class="string-literal">&quot;0.3.23&quot;</span><span>)
 </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
@@ -253,18 +256,19 @@
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> ++= </span><span class="type-name">Resolver</span><span>.</span><span class="identifier">sonatypeOssRepos</span><span>(</span><span class="string-literal">&quot;snapshots&quot;</span><span>)
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-e8d6b3f-SNAPSHOT&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch-platform-gpu&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.9&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda-platform-redist&quot;</span><span> % </span><span class="string-literal">&quot;12.1-8.9-1.5.9&quot;</span><span>
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-795485b-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch-platform-gpu&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.10-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda-platform-redist&quot;</span><span> % </span><span class="string-literal">&quot;12.1-8.9-1.5.10-SNAPSHOT&quot;</span><span>
 )
 </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using scala &quot;3.3&quot;
 //&gt; using repository &quot;sonatype-s01:snapshots&quot;
-//&gt; using lib &quot;dev.storch::core:0.0-e8d6b3f-SNAPSHOT&quot;
-//&gt; using lib &quot;org.bytedeco:pytorch-platform-gpu:2.0.1-1.5.9&quot;
-//&gt; using lib &quot;org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.9&quot;</span></code></pre>
+//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::core:0.0-795485b-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:pytorch-platform-gpu:2.0.1-1.5.10-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.10-SNAPSHOT&quot;</span></code></pre>
           </div>
         </div>
         <p>This approach should work on any platform with CUDA support (Linux and Windows) but it causes even more overhead than
@@ -282,27 +286,24 @@
           <div class="tab-content active" data-choice-name="sbt">
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> ++= </span><span class="type-name">Resolver</span><span>.</span><span class="identifier">sonatypeOssRepos</span><span>(</span><span class="string-literal">&quot;snapshots&quot;</span><span>)
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-e8d6b3f-SNAPSHOT&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.9&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.9&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64-gpu&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;openblas&quot;</span><span> % </span><span class="string-literal">&quot;0.3.23-1.5.9&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda&quot;</span><span> % </span><span class="string-literal">&quot;12.1-8.9-1.5.9&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda&quot;</span><span> % </span><span class="string-literal">&quot;12.1-8.9-1.5.9&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>,
-  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda&quot;</span><span> % </span><span class="string-literal">&quot;12.1-8.9-1.5.9&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64-redist&quot;</span><span>
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-795485b-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.10-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;pytorch&quot;</span><span> % </span><span class="string-literal">&quot;2.0.1-1.5.10-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64-gpu&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;openblas&quot;</span><span> % </span><span class="string-literal">&quot;0.3.23-1.5.10-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda&quot;</span><span> % </span><span class="string-literal">&quot;12.1-8.9-1.5.10-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda&quot;</span><span> % </span><span class="string-literal">&quot;12.1-8.9-1.5.10-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64&quot;</span><span>,
+  </span><span class="string-literal">&quot;org.bytedeco&quot;</span><span> % </span><span class="string-literal">&quot;cuda&quot;</span><span> % </span><span class="string-literal">&quot;12.1-8.9-1.5.10-SNAPSHOT&quot;</span><span> </span><span class="identifier">classifier</span><span> </span><span class="string-literal">&quot;linux-x86_64-redist&quot;</span><span>
 )
 </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
           </div>
           <div class="tab-content" data-choice-name="scala-cli">
-            <p><strong>Warning</strong>: This is currently <strong>not working</strong> due to with scala-cli not resolving mixed dependencies with and without
-            classifiers or  with multiple classifiers. Please use the platform variant above until it is solved.</p>
             <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">//&gt; using scala &quot;3.3&quot;
 //&gt; using repository &quot;sonatype-s01:snapshots&quot;
-//&gt; using lib &quot;dev.storch::core:0.0-e8d6b3f-SNAPSHOT&quot;
-//&gt; using lib &quot;org.bytedeco:pytorch:2.0.1-1.5.9,classifier=linux-x86_64-gpu&quot;
-//&gt; using lib &quot;org.bytedeco:openblas:0.3.23-1.5.9,classifier=linux-x86_64&quot;
-//&gt; using lib &quot;org.bytedeco:cuda:12.1-8.9-1.5.9&quot;
-//&gt; using lib &quot;org.bytedeco:cuda:12.1-8.9-1.5.9,classifier=linux-x86_64&quot;
-//&gt; using lib &quot;org.bytedeco:cuda:12.1-8.9-1.5.9,classifier=linux-x86_64-redist&quot;</span></code></pre>
+//&gt; using repository &quot;sonatype:snapshots&quot;
+//&gt; using lib &quot;dev.storch::core:0.0-795485b-SNAPSHOT&quot;
+//&gt; using lib &quot;org.bytedeco:pytorch:2.0.1-1.5.10-SNAPSHOT,classifier=linux-x86_64-gpu&quot;
+//&gt; using lib &quot;org.bytedeco:openblas:0.3.23-1.5.10-SNAPSHOT,classifier=linux-x86_64&quot;
+//&gt; using lib &quot;org.bytedeco:cuda:12.1-8.9-1.5.10-SNAPSHOT,classifier=linux-x86_64-redist&quot;</span></code></pre>
           </div>
         </div>
         
@@ -314,14 +315,9 @@
         <p><code>build.sbt</code>:</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">resolvers</span><span> ++= </span><span class="type-name">Resolver</span><span>.</span><span class="identifier">sonatypeOssRepos</span><span>(</span><span class="string-literal">&quot;snapshots&quot;</span><span>)
 </span><span class="identifier">libraryDependencies</span><span> += </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-e8d6b3f-SNAPSHOT&quot;</span><span>,
+  </span><span class="string-literal">&quot;dev.storch&quot;</span><span> %% </span><span class="string-literal">&quot;core&quot;</span><span> % </span><span class="string-literal">&quot;0.0-795485b-SNAPSHOT&quot;</span><span>,
 )
-</span><span class="identifier">javaCppPresetLibs</span><span> ++= </span><span class="type-name">Seq</span><span>(
-  </span><span class="string-literal">&quot;pytorch-gpu&quot;</span><span> -&gt; </span><span class="string-literal">&quot;2.0.1&quot;</span><span>,
-  </span><span class="string-literal">&quot;openblas&quot;</span><span> -&gt; </span><span class="string-literal">&quot;0.3.23&quot;</span><span>,
-  </span><span class="string-literal">&quot;cuda-redist&quot;</span><span> -&gt; </span><span class="string-literal">&quot;12.1-8.9&quot;</span><span>,
-  </span><span class="string-literal">&quot;cuda&quot;</span><span> -&gt; </span><span class="string-literal">&quot;12.1-8.9&quot;</span><span>
-)
+</span><span class="identifier">javaCppPresetLibs</span><span> ++= </span><span class="type-name">Seq</span><span>(</span><span class="string-literal">&quot;pytorch-gpu&quot;</span><span> -&gt; </span><span class="string-literal">&quot;2.0.1&quot;</span><span>, </span><span class="string-literal">&quot;openblas&quot;</span><span> -&gt; </span><span class="string-literal">&quot;0.3.23&quot;</span><span>, </span><span class="string-literal">&quot;cuda-redist&quot;</span><span> -&gt; </span><span class="string-literal">&quot;12.1-8.9&quot;</span><span>)
 </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
         
         <h3 id="running-tensor-operations-on-the-gpu" class="section">Running tensor operations on the GPU<a class="anchor-link right" href="#running-tensor-operations-on-the-gpu"><i class="icofont-laika">&#xef71;</i></a></h3>
