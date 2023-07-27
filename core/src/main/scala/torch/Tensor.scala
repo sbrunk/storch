@@ -365,11 +365,19 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def ge(other: ScalaType): Tensor[Bool] = Tensor(native.ge(toScalar(other)))
 
+  def ge(other: Tensor[?]): Tensor[Bool] = Tensor(native.ge(other.native))
+
   def >=(other: ScalaType): Tensor[Bool] = ge(other)
+
+  def >=(other: Tensor[?]): Tensor[Bool] = ge(other)
 
   def gt(other: ScalaType): Tensor[Bool] = Tensor(native.gt(toScalar(other)))
 
+  def gt(other: Tensor[?]): Tensor[Bool] = Tensor(native.gt(other.native))
+
   def >(other: ScalaType): Tensor[Bool] = gt(other)
+
+  def >(other: Tensor[?]): Tensor[Bool] = gt(other)
 
   def isContiguous: Boolean = native.is_contiguous()
 
@@ -421,16 +429,36 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def le(other: ScalaType): Tensor[Bool] = Tensor(native.le(toScalar(other)))
 
+  def le(other: Tensor[?]): Tensor[Bool] =  Tensor(native.le(other.native))
+
   def <=(other: ScalaType): Tensor[Bool] = le(other)
+
+  def <=(other: Tensor[?]): Tensor[Bool] = le(other)
 
   def lt(other: ScalaType): Tensor[Bool] = Tensor(native.lt(toScalar(other)))
 
+  def lt(other: Tensor[?]): Tensor[Bool] = Tensor(native.lt(other.native))
+
   def <(other: ScalaType): Tensor[Bool] = lt(other)
+
+  def <(other: Tensor[?]): Tensor[Bool] = lt(other)
 
   def matmul[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] =
     Tensor[Promoted[D, D2]](native.matmul(u.native))
 
   def `@`[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] = matmul(u)
+
+  def masked_fill_(mask: Tensor[Bool], value: Double): Unit =
+    native.masked_fill_(mask.native, value.toScalar)
+
+  def masked_fill_(mask: Tensor[Bool], value: Tensor[?]): Unit =
+    native.masked_fill_(mask.native, value.native)
+
+  def masked_fill(mask: Tensor[Bool], value: Double): Tensor[D] =
+    Tensor(native.masked_fill(mask.native, value.toScalar))
+
+  def masked_fill(mask: Tensor[Bool], value: Tensor[?]): Tensor[D] =
+    Tensor(native.masked_fill(mask.native, value.native))
 
   /** Returns the maximum value of all elements of this tensor. */
   def max(): Tensor[D] = Tensor(native.max())
