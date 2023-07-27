@@ -20,8 +20,8 @@ import torch.nn.modules.Default
 import RopeScaling.Type
 
 case class RopeScaling(
-  tpe: RopeScaling.Type,
-  factor: Float
+    tpe: RopeScaling.Type,
+    factor: Float
 ) {
   assert(factor > 1f, s"rope_scaling`'s factor field must be an float > 1, got $factor")
 }
@@ -34,32 +34,77 @@ case class LlamaConfig(
     vocab_size: Int = 32000,
     hidden_size: Int = 4096,
     intermediate_size: Int = 11008,
+    num_hidden_layers: Int = 32,
     num_attention_heads: Int = 32,
     num_key_value_heads: Int,
+    hidden_act: String = "silu", // TODO
     max_position_embeddings: Int = 2048,
-    initializer_range: Float=0.02,
-    rms_norm_eps: Float=1e-6,
-    use_cache: Boolean=true,
-    pad_token_id: Int=0,
-    bos_token_id: Int=1,
-    eos_token_id: Int=2,
-    hidden_act: Any, // TODO
-    pretraining_tp: Int,
-    tie_word_embeddings: Boolean=false,
-    rope_scaling: Option[RopeScaling]=None,
+    initializer_range: Float = 0.02,
+    rms_norm_eps: Float = 1e-6,
+    use_cache: Boolean = true,
+    pad_token_id: Int = 0,
+    bos_token_id: Int = 1,
+    eos_token_id: Int = 2,
+    pretraining_tp: Int = 1,
+    tie_word_embeddings: Boolean = false,
+    rope_scaling: Option[RopeScaling] = None
 )
 
 object Llama {
-  case class ModelArgs(
-      dim: Int = 512,
-      nLayers: Int = 8,
-      nHeads: Int = 8,
-      vocabSize: Int = -1,
-      multipleOf: Int = 256,
-      normEps: Float = 1e-5,
-      maxBatchSize: Int = 32,
-      maxseq_len: Int = 2048
-  )
+
+  // Copied from transformers.models.bart.modeling_bart._make_causal_mask
+  /**
+      Make causal mask used for bi-directional self-attention.
+    */
+  def _make_causal_mask[D <: FloatNN](
+      input_ids_shape: Seq[Int], dtype: D, device: Device, past_key_values_length: Int = 0) =
+    val Seq(bsz, tgt_len) = input_ids_shape
+    var mask =
+      val mask = torch.full(Seq(tgt_len, tgt_len), torch.finfo(dtype).min, device=device)
+      val mask_cond = torch.arange(end=mask.size(-1), device=device)
+      mask.masked_fill_(mask_cond < (mask_cond + 1).view(mask.size(-1), 1), 0)
+      mask.to(dtype)
+    if past_key_values_length > 0 then
+      mask = torch.cat(Seq(torch.zeros(Seq(tgt_len, past_key_values_length), dtype = dtype, device=device), mask), dim = -1)
+    mask(None, None, ::, ::).expand(bsz, 1, tgt_len, tgt_len + past_key_values_length)
+
+
+  // Copied from transformers.models.bart.modeling_bart._expand_mask
+  /** 
+      Expands attention_mask from `[bsz, seq_len]` to `[bsz, 1, tgt_seq_len, src_seq_len]`.
+    */
+  def _expand_mask[D <: FloatNN](mask: Tensor[Bool], dtype: D, tgt_len: Option[Int] = None) =
+      val Seq(bsz, src_len) = mask.size
+      val _tgt_len: Int = tgt_len.getOrElse(src_len)
+      val expanded_mask = mask(::, None, None, ::).expand(bsz, 1, _tgt_len, src_len).to(dtype)
+      val inverted_mask = 1.0 - expanded_mask
+      inverted_mask.masked_fill(inverted_mask.to(torch.bool), torch.finfo(dtype).min)
+
+  /** LlamaRMSNorm is equivalent to T5LayerNorm */
+  class LlamaRMSNorm(hidden_size: Int, eps: Float=1e-6) extends nn.Module {
+    val weight = register(torch.ones(hidden_size))
+    val variance_epsilon = eps
+
+    def forward(hidden_states: Tensor[Int64]) =
+      val input_dtype = hidden_states.dtype
+      var hidden_states_fp32 = hidden_states.to(torch.float32)
+      val variance = hidden_states_fp32.pow(2).mean(-1, keepdim=true)
+      hidden_states_fp32 = hidden_states_fp32 * torch.rsqrt(variance + variance_epsilon)
+      weight * hidden_states_fp32.to(input_dtype)
+  }
+
+  // case class ModelArgs(
+  //     dim: Int = 512,
+  //     nLayers: Int = 8,
+  //     nHeads: Int = 8,
+  //     vocabSize: Int = -1,
+  //     multipleOf: Int = 256,
+  //     normEps: Float = 1e-5,
+  //     maxBatchSize: Int = 32,
+  //     maxseq_len: Int = 2048
+  // )
+
+
 
   class RMSNorm[D <: DType](val dim: Int, val eps: Float = 1e-6) extends nn.Module {
     val weight = register(torch.ones(dim))
@@ -173,12 +218,15 @@ object Llama {
       k: Tensor[D],
       cos: Tensor[D],
       sin: Tensor[D],
-      position_ids: Option[Tensor[Int64]] // TODO check whether position_ids are really an Option here
+      position_ids: Option[
+        Tensor[Int64]
+      ] // TODO check whether position_ids are really an Option here
   ) =
     // The first two dimensions of cos and sin are always 1, so we can `squeeze` them.
     var _cos = cos.squeeze(1).squeeze(0) // [seq_len, dim]
     var _sin = sin.squeeze(1).squeeze(0) // [seq_len, dim]
-    _cos = cos(position_ids.getOrElse(None)).unsqueeze(1) // [bs, 1, seq_len, dim]  // TODO should we add index/apply with Option?
+    _cos = cos(position_ids.getOrElse(None))
+      .unsqueeze(1) // [bs, 1, seq_len, dim]  // TODO should we add index/apply with Option?
     _sin = sin(position_ids.getOrElse(None)).unsqueeze(1) // [bs, 1, seq_len, dim]
     val q_embed = (q * cos) + (rotate_half(q) * sin)
     val k_embed = (k * cos) + (rotate_half(k) * sin)
@@ -248,132 +296,381 @@ object Llama {
     val max_position_embeddings = config.max_position_embeddings
 
     if (head_dim * num_heads) != hidden_size then
-        throw new IllegalArgumentException(
-            s"hidden_size must be divisible by num_heads (got `hidden_size`: $hidden_size" +
-            s" and `num_heads`: $num_heads)."
-        )
-    val q_proj = nn.Linear(hidden_size, num_heads * head_dim, hasBias=false)
-    val k_proj = nn.Linear(hidden_size, num_key_value_heads * head_dim, hasBias=false)
-    val v_proj = nn.Linear(hidden_size, num_key_value_heads * head_dim, hasBias=false)
-    val o_proj = nn.Linear(num_heads * head_dim, hidden_size, hasBias=false)
+      throw new IllegalArgumentException(
+        s"hidden_size must be divisible by num_heads (got `hidden_size`: $hidden_size" +
+          s" and `num_heads`: $num_heads)."
+      )
+    val q_proj = nn.Linear(hidden_size, num_heads * head_dim, hasBias = false)
+    val k_proj = nn.Linear(hidden_size, num_key_value_heads * head_dim, hasBias = false)
+    val v_proj = nn.Linear(hidden_size, num_key_value_heads * head_dim, hasBias = false)
+    val o_proj = nn.Linear(num_heads * head_dim, hidden_size, hasBias = false)
 
     // _init_rope
     val rotary_emb = {
       config.rope_scaling match
-        case None => LlamaRotaryEmbedding(head_dim, max_position_embeddings=max_position_embeddings)
+        case None =>
+          LlamaRotaryEmbedding(head_dim, max_position_embeddings = max_position_embeddings)
         case Some(rope_scaling) =>
-            val scaling_type = rope_scaling.tpe
-            val scaling_factor = rope_scaling.factor
-            scaling_type match
-              case Type.Linear => LlamaLinearScalingRotaryEmbedding(
-                    head_dim, max_position_embeddings=max_position_embeddings, scaling_factor=scaling_factor
+          val scaling_type = rope_scaling.tpe
+          val scaling_factor = rope_scaling.factor
+          scaling_type match
+            case Type.Linear =>
+              LlamaLinearScalingRotaryEmbedding(
+                head_dim,
+                max_position_embeddings = max_position_embeddings,
+                scaling_factor = scaling_factor
               )
-              case RopeScaling.Type.Dynamic => LlamaDynamicNTKScalingRotaryEmbedding(
-                    head_dim, max_position_embeddings=max_position_embeddings, scaling_factor=scaling_factor
+            case RopeScaling.Type.Dynamic =>
+              LlamaDynamicNTKScalingRotaryEmbedding(
+                head_dim,
+                max_position_embeddings = max_position_embeddings,
+                scaling_factor = scaling_factor
               )
     }
 
     private def _shape[D <: DType](tensor: Tensor[D], seq_len: Int, bsz: Int) =
-        tensor.view(bsz, seq_len, num_heads, head_dim).transpose(1, 2).contiguous()
+      tensor.view(bsz, seq_len, num_heads, head_dim).transpose(1, 2).contiguous()
 
-    def forward(
+    def apply(
         hidden_states: Tensor[D],
-        attention_mask: Option[Tensor[Int64]] = None,
+        attention_mask: Option[Tensor[D]] = None,
         position_ids: Option[Tensor[Int64]] = None,
         past_key_value: Option[Tensor[D]] = None,
         output_attentions: Boolean = false,
-        use_cache: Boolean = false,
+        use_cache: Boolean = false
     ): (Tensor[?], Option[Tensor[D]], Option[(Tensor[D], Tensor[D])]) = {
-        val Seq(bsz, q_len, _) = hidden_states.size
+      val Seq(bsz, q_len, _) = hidden_states.size
 
-        var (query_states, key_states, value_states) = 
-          if pretraining_tp > 1 then
-            val key_value_slicing = (this.num_key_value_heads * this.head_dim) / this.pretraining_tp
-            val query_slices = this.q_proj.weight.split((this.num_heads * this.head_dim) / this.pretraining_tp, dim=0)
-            val key_slices = this.k_proj.weight.split(key_value_slicing, dim=0)
-            val value_slices = this.v_proj.weight.split(key_value_slicing, dim=0)
+      var (query_states, key_states, value_states) =
+        if pretraining_tp > 1 then
+          val key_value_slicing = (this.num_key_value_heads * this.head_dim) / this.pretraining_tp
+          val query_slices = this.q_proj.weight
+            .split((this.num_heads * this.head_dim) / this.pretraining_tp, dim = 0)
+          val key_slices = this.k_proj.weight.split(key_value_slicing, dim = 0)
+          val value_slices = this.v_proj.weight.split(key_value_slicing, dim = 0)
 
+          val query_states =
             val query_states =
-              val query_states = for i <- 0 until this.pretraining_tp yield F.linear(hidden_states, query_slices(i))
-              torch.cat(query_states, dim = -1)
+              for i <- 0 until this.pretraining_tp yield F.linear(hidden_states, query_slices(i))
+            torch.cat(query_states, dim = -1)
 
+          val key_states =
             val key_states =
-              val key_states = for i <- 0 until this.pretraining_tp yield F.linear(hidden_states, key_slices(i))
-              torch.cat(key_states, dim = -1)
+              for i <- 0 until this.pretraining_tp yield F.linear(hidden_states, key_slices(i))
+            torch.cat(key_states, dim = -1)
 
+          val value_states =
             val value_states =
-              val value_states = for i <- 0 until this.pretraining_tp yield F.linear(hidden_states, value_slices(i))
-              torch.cat(value_states, dim = -1)
-            
-            (query_states, key_states, value_states)
-          else
-            val query_states = this.q_proj(hidden_states)
-            val key_states = this.k_proj(hidden_states)
-            val value_states = this.v_proj(hidden_states)
-            (query_states, key_states, value_states)
+              for i <- 0 until this.pretraining_tp yield F.linear(hidden_states, value_slices(i))
+            torch.cat(value_states, dim = -1)
 
-        query_states = query_states.view(bsz, q_len, this.num_heads, this.head_dim).transpose(1, 2)
-        key_states = key_states.view(bsz, q_len, this.num_key_value_heads, this.head_dim).transpose(1, 2)
-        value_states = value_states.view(bsz, q_len, this.num_key_value_heads, this.head_dim).transpose(1, 2)
+          (query_states, key_states, value_states)
+        else
+          val query_states = this.q_proj(hidden_states)
+          val key_states = this.k_proj(hidden_states)
+          val value_states = this.v_proj(hidden_states)
+          (query_states, key_states, value_states)
 
-        var kv_seq_len = key_states.shape(-2)
-        for past_key_value <- past_key_value do kv_seq_len += past_key_value(0).shape(-2)
-        val (cos, sin) = this.rotary_emb(value_states, seq_len=Some(kv_seq_len))
+      query_states = query_states.view(bsz, q_len, this.num_heads, this.head_dim).transpose(1, 2)
+      key_states =
+        key_states.view(bsz, q_len, this.num_key_value_heads, this.head_dim).transpose(1, 2)
+      value_states =
+        value_states.view(bsz, q_len, this.num_key_value_heads, this.head_dim).transpose(1, 2)
 
-        // TODO is there a nicer way to do this?
-        val rotary_pos_emb = apply_rotary_pos_emb(query_states, key_states, cos, sin, position_ids)
-        query_states = rotary_pos_emb._1
-        key_states = rotary_pos_emb._2
+      var kv_seq_len = key_states.shape(-2)
+      for past_key_value <- past_key_value do kv_seq_len += past_key_value(0).shape(-2)
+      val (cos, sin) = this.rotary_emb(value_states, seq_len = Some(kv_seq_len))
 
-        for past_key_value <- past_key_value
-        do
-          // reuse k, v, self_attention
-          key_states = torch.cat(Seq(past_key_value(0), key_states), dim=2)
-          value_states = torch.cat(Seq(past_key_value(1), value_states), dim=2)
+      // TODO is there a nicer way to do this?
+      val rotary_pos_emb = apply_rotary_pos_emb(query_states, key_states, cos, sin, position_ids)
+      query_states = rotary_pos_emb._1
+      key_states = rotary_pos_emb._2
 
-        val new_key_value = if use_cache then Some(key_states, value_states) else None
+      for past_key_value <- past_key_value
+      do
+        // reuse k, v, self_attention
+        key_states = torch.cat(Seq(past_key_value(0), key_states), dim = 2)
+        value_states = torch.cat(Seq(past_key_value(1), value_states), dim = 2)
 
-        // repeat k/v heads if n_kv_heads < n_heads
-        key_states = repeat_kv(key_states, this.num_key_value_groups)
-        value_states = repeat_kv(value_states, this.num_key_value_groups)
+      val new_key_value = if use_cache then Some(key_states, value_states) else None
 
-        var attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / Tensor(head_dim).sqrt
+      // repeat k/v heads if n_kv_heads < n_heads
+      key_states = repeat_kv(key_states, this.num_key_value_groups)
+      value_states = repeat_kv(value_states, this.num_key_value_groups)
 
-        if attn_weights.size != Seq(bsz, this.num_heads, q_len, kv_seq_len) then
-          throw new IllegalArgumentException(
-            s"Attention weights should be of size ${(bsz, this.num_heads, q_len, kv_seq_len)}, but is" +
+      var attn_weights =
+        torch.matmul(query_states, key_states.transpose(2, 3)) / Tensor(head_dim).sqrt
+
+      if attn_weights.size != Seq(bsz, this.num_heads, q_len, kv_seq_len) then
+        throw new IllegalArgumentException(
+          s"Attention weights should be of size ${(bsz, this.num_heads, q_len, kv_seq_len)}, but is" +
             s" ${attn_weights.size}"
+        )
+
+      for attention_mask <- attention_mask do
+        if attention_mask.size != Seq(bsz, 1, q_len, kv_seq_len) then
+          throw new IllegalArgumentException(
+            s"Attention mask should be of size ${(bsz, 1, q_len, kv_seq_len)}, but is ${attention_mask.size}"
           )
+        attn_weights = attn_weights + attention_mask
+
+      // upcast attention to fp32
+      attn_weights =
+        nn.functional.softmax(attn_weights, dim = -1)(dtype = torch.float32).to(query_states.dtype)
+      var attn_output = torch.matmul(attn_weights, value_states)
+
+      if attn_output.size != Seq(bsz, this.num_heads, q_len, this.head_dim) then
+        throw new IllegalArgumentException(
+          s"`attn_output` should be of size ${(bsz, this.num_heads, q_len, this.head_dim)}, but is" +
+            s" ${attn_output.size}"
+        )
+
+      attn_output = attn_output.transpose(1, 2).contiguous()
+      attn_output = attn_output.reshape(bsz, q_len, this.hidden_size)
+
+      if this.pretraining_tp > 1 then
+        val attn_outputs = attn_output.split(this.hidden_size / this.pretraining_tp, dim = 2)
+        val o_proj_slices =
+          this.o_proj.weight.split(this.hidden_size / this.pretraining_tp, dim = 1)
+        // TODO can we implement sum for seqs of tensors via Numeric?
+        attn_output = (for i <- 0 until this.pretraining_tp
+        yield F.linear(attn_outputs(i), o_proj_slices(i))).reduce(_ + _)
+      else attn_output = this.o_proj(attn_output)
+
+      (attn_output, Option.when(output_attentions)(attn_weights), new_key_value)
+    }
+  }
+
+class LlamaDecoderLayer(config: LlamaConfig) extends nn.Module {
+  val hidden_size = config.hidden_size
+  val self_attn = LlamaAttention(config=config)
+  val mlp = LlamaMLP(config)
+  val input_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
+  val post_attention_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
+
+  /**
+    *
+    * @param hidden_states input to the layer of shape `(batch, seq_len, embed_dim)`
+    * @param attention_mask  attention mask of size
+                `(batch, 1, tgt_len, src_len)` where padding elements are indicated by very large negative values.
+    * @param position_ids 
+    * @param past_key_value cached past key and value projection states
+    * @param output_attentions Whether or not to return the attentions tensors of all attention layers. See `attentions` under
+                returned tensors for more detail.
+    * @param use_cache If set to `True`, `past_key_values` key value states are returned and can be used to speed up decoding
+                (see `past_key_values`).
+    */
+    def forward(
+        hidden_states: Tensor[Float32],
+        attention_mask: Option[Tensor[Float32]] = None,
+        position_ids: Option[Tensor[Int64]] = None,
+        past_key_value: Option[Tensor[Float32]] = None,
+        output_attentions: Boolean = false,
+        use_cache: Boolean = false,
+    ): (Tensor[Float32], Option[(Tensor[Float32], Tensor[Float32])]) =
+
+        val residual = hidden_states
+
+        val hidden_states = input_layernorm(hidden_states)
+
+        // Self Attention
+        val (new_hidden_states, self_attn_weights, present_key_value) = self_attn(
+            hidden_states=hidden_states,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_value=past_key_value,
+            output_attentions=output_attentions,
+            use_cache=use_cache,
+        )
+        new_hidden_states = residual + hidden_states
+
+        // Fully Connected
+        residual = hidden_states
+        new_hidden_states = self.post_attention_layernorm(hidden_states)
+        new_hidden_states = self.mlp(hidden_states)
+        new_hidden_states = residual + hidden_states
+
+        outputs = (hidden_states,)
+
+        if output_attentions then
+            outputs += (self_attn_weights,)
+
+        if use_cache then
+            outputs += (present_key_value,)
+
+      outputs
+    }
+
+  /**  The bare LLaMA Model outputting raw hidden-states without any specific head on top.
+   * 
+   *   Transformer decoder consisting of *config.num_hidden_layers* layers. Each layer is a [`LlamaDecoderLayer`]
+   */
+  class LlamaModel(config: LlamaConfig) extends nn.Module /* extends LlamaPreTrainedModel */ {
+    val padding_idx = config.pad_token_id
+    val vocab_size = config.vocab_size
+
+    class Embedding extends nn.Module
+    val embed_tokens = Embedding //nn.Embedding(config.vocab_size, config.hidden_size, padding_idx)
+    val layers = nn.ModuleList(for _ <- 0 until config.num_hidden_layers yield LlamaDecoderLayer(config))
+    val norm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
+
+    // self.gradient_checkpointing = false TODO
+    // Initialize weights and apply final processing
+    // self.post_init() TODO
+
+    def get_input_embeddings = embed_tokens
+
+    def set_input_embeddings(value) = embed_tokens = value
+
+    // Copied from transformers.models.bart.modeling_bart.BartDecoder._prepare_decoder_attention_mask
+    def _prepare_decoder_attention_mask(attention_mask: Tensor[Int64], input_shape, inputs_embeds, past_key_values_length) =
+        // create causal mask
+        // [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
+        // var combined_attention_mask = None
+        val combined_attention_mask =
+          if input_shape(-1) > 1 then
+            val combined_attention_mask = make_causal_mask(
+              input_shape,
+              inputs_embeds.dtype,
+              device=inputs_embeds.device,
+              past_key_values_length=past_key_values_length,
+            )
 
         for attention_mask <- attention_mask do
-          if attention_mask.size != Seq(bsz, 1, q_len, kv_seq_len) then
-            throw new IllegalArgumentException(
-                s"Attention mask should be of size ${(bsz, 1, q_len, kv_seq_len)}, but is ${attention_mask.size}"
+          //  [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
+          val expanded_attn_mask = _expand_mask(attention_mask, inputs_embeds.dtype, tgt_len=input_shape[-1]).to(
+              inputs_embeds.device
+          )
+          val combined_attention_mask = (
+            if combined_attention_mask is None expanded_attn_mask else expanded_attn_mask + combined_attention_mask
+          )
+
+        combined_attention_mask
+
+    def forward(
+        input_ids: Tensor[Long], // = None,
+        attention_mask: Option[Tensor[D]] = None,
+        position_ids: Option[Tensor[Long]] = None,
+        past_key_values: Option[List[FloatTensor]] = None,
+        inputs_embeds: Option[FloatTensor] = None,
+        use_cache: Option[Boolean] = None,
+        output_attentions: Option[Boolean] = None,
+        output_hidden_states: Option[Boolean] = None,
+        return_dict: Option[Boolean] = None,
+    ): Union[Tuple, BaseModelOutputWithPast] =
+        output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
+        output_hidden_states = (
+            output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
+        )
+        use_cache = use_cache if use_cache is not None else self.config.use_cache
+
+        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+
+        # retrieve input_ids and inputs_embeds
+        if input_ids is not None and inputs_embeds is not None:
+            raise ValueError("You cannot specify both decoder_input_ids and decoder_inputs_embeds at the same time")
+        elif input_ids is not None:
+            batch_size, seq_length = input_ids.shape
+        elif inputs_embeds is not None:
+            batch_size, seq_length, _ = inputs_embeds.shape
+        else:
+            raise ValueError("You have to specify either decoder_input_ids or decoder_inputs_embeds")
+
+        seq_length_with_past = seq_length
+        past_key_values_length = 0
+
+        if past_key_values is not None:
+            past_key_values_length = past_key_values[0][0].shape[2]
+            seq_length_with_past = seq_length_with_past + past_key_values_length
+
+        if position_ids is None:
+            device = input_ids.device if input_ids is not None else inputs_embeds.device
+            position_ids = torch.arange(
+                past_key_values_length, seq_length + past_key_values_length, dtype=torch.long, device=device
             )
-          attn_weights = attn_weights + attention_mask
+            position_ids = position_ids.unsqueeze(0).view(-1, seq_length)
+        else:
+            position_ids = position_ids.view(-1, seq_length).long()
 
-        // upcast attention to fp32
-        attn_weights = nn.functional.softmax(attn_weights, dim = -1)(dtype=torch.float32).to(query_states.dtype)
-        var attn_output = torch.matmul(attn_weights, value_states)
-
-        if attn_output.size != Seq(bsz, this.num_heads, q_len, this.head_dim) then
-            throw new IllegalArgumentException(
-              s"`attn_output` should be of size ${(bsz, this.num_heads, q_len, this.head_dim)}, but is" +
-              s" ${attn_output.size}"
+        if inputs_embeds is None:
+            inputs_embeds = self.embed_tokens(input_ids)
+        # embed positions
+        if attention_mask is None:
+            attention_mask = torch.ones(
+                (batch_size, seq_length_with_past), dtype=torch.bool, device=inputs_embeds.device
             )
+        attention_mask = self._prepare_decoder_attention_mask(
+            attention_mask, (batch_size, seq_length), inputs_embeds, past_key_values_length
+        )
 
-        attn_output = attn_output.transpose(1, 2).contiguous()
-        attn_output = attn_output.reshape(bsz, q_len, this.hidden_size)
+        hidden_states = inputs_embeds
 
-        if this.pretraining_tp > 1 then
-            val attn_outputs = attn_output.split(this.hidden_size / this.pretraining_tp, dim = 2)
-            val o_proj_slices = this.o_proj.weight.split(this.hidden_size / this.pretraining_tp, dim = 1)
-            // TODO can we implement sum for seqs of tensors via Numeric?
-            attn_output = (for i <- 0 until this.pretraining_tp yield F.linear(attn_outputs(i), o_proj_slices(i))).reduce(_ + _)
-        else
-            attn_output = this.o_proj(attn_output)
+        if self.gradient_checkpointing and self.training:
+            if use_cache:
+                logger.warning_once(
+                    "`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=false`..."
+                )
+                use_cache = false
 
-        (attn_output, Option.when(output_attentions)(attn_weights), new_key_value)
-    }
+        # decoder layers
+        all_hidden_states = () if output_hidden_states else None
+        all_self_attns = () if output_attentions else None
+        next_decoder_cache = () if use_cache else None
+
+        for idx, decoder_layer in enumerate(self.layers):
+            if output_hidden_states:
+                all_hidden_states += (hidden_states,)
+
+            past_key_value = past_key_values[idx] if past_key_values is not None else None
+
+            if self.gradient_checkpointing and self.training:
+
+                def create_custom_forward(module):
+                    def custom_forward(*inputs):
+                        # None for past_key_value
+                        return module(*inputs, output_attentions, None)
+
+                    return custom_forward
+
+                layer_outputs = torch.utils.checkpoint.checkpoint(
+                    create_custom_forward(decoder_layer),
+                    hidden_states,
+                    attention_mask,
+                    position_ids,
+                    None,
+                )
+            else:
+                layer_outputs = decoder_layer(
+                    hidden_states,
+                    attention_mask=attention_mask,
+                    position_ids=position_ids,
+                    past_key_value=past_key_value,
+                    output_attentions=output_attentions,
+                    use_cache=use_cache,
+                )
+
+            hidden_states = layer_outputs[0]
+
+            if use_cache:
+                next_decoder_cache += (layer_outputs[2 if output_attentions else 1],)
+
+            if output_attentions:
+                all_self_attns += (layer_outputs[1],)
+
+        hidden_states = self.norm(hidden_states)
+
+        # add hidden states from the last decoder layer
+        if output_hidden_states:
+            all_hidden_states += (hidden_states,)
+
+        next_cache = next_decoder_cache if use_cache else None
+        if not return_dict:
+            return tuple(v for v in [hidden_states, next_cache, all_hidden_states, all_self_attns] if v is not None)
+        return BaseModelOutputWithPast(
+            last_hidden_state=hidden_states,
+            past_key_values=next_cache,
+            hidden_states=all_hidden_states,
+            attentions=all_self_attns,
+        )
 }
 }
