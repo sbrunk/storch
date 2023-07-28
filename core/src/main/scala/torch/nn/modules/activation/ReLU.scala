@@ -34,11 +34,6 @@ final class ReLU[D <: DType: Default](inplace: Boolean = false) extends TensorMo
 
   override protected[torch] val nativeModule: ReLUImpl = ReLUImpl()
 
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
-
   def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
 
   override def toString = getClass().getSimpleName()

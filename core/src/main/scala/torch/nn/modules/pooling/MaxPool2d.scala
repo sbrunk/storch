@@ -44,12 +44,7 @@ final class MaxPool2d[ParamType <: BFloat16 | Float32 | Float64: Default](
   options.ceil_mode().put(ceilMode)
 
   override private[torch] val nativeModule: MaxPool2dImpl = MaxPool2dImpl(options)
-  nativeModule.asModule.to(paramType.toScalarType, false)
-
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
+  nativeModule.to(paramType.toScalarType, false)
 
   override def toString(): String =
     s"MaxPool2d(kernelSize=$kernelSize, stride=$stride, padding=$padding, dilation=$dilation, ceilMode=$ceilMode)"

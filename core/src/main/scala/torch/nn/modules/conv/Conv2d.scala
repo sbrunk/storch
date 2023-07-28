@@ -59,12 +59,7 @@ final class Conv2d[ParamType <: FloatNN | ComplexNN: Default](
   options.padding_mode().put(paddingModeNative)
 
   override private[torch] val nativeModule: Conv2dImpl = Conv2dImpl(options)
-  nativeModule.asModule.to(paramType.toScalarType, false)
-
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
+  nativeModule.to(paramType.toScalarType, false)
 
   def apply(t: Tensor[ParamType]): Tensor[ParamType] = Tensor(nativeModule.forward(t.native))
 

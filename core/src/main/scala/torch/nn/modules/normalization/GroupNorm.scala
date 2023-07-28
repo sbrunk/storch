@@ -48,11 +48,6 @@ final class GroupNorm[ParamType <: DType](
 
   override private[torch] val nativeModule: GroupNormImpl = GroupNormImpl(options)
 
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
-
   val weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)
   val bias: Tensor[ParamType] = Tensor[ParamType](nativeModule.bias)
 

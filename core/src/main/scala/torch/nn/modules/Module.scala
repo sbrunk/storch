@@ -75,15 +75,10 @@ abstract class Module {
     clone._nativeModule = _nativeModule.clone(null)
     clone.asInstanceOf[this.type]
 
-  protected[torch] def registerWithParent[T <: pytorch.Module](parent: T)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
-
   def register[M <: Module](child: M)(using name: sourcecode.Name) =
     // println(s"registering ${name.value}:$child")
     childModules = childModules.updated(name.value, child)
-    child.registerWithParent(this.nativeModule)
+    nativeModule.register_module(name.value, child.nativeModule)
     child
 
   def register[D <: DType](t: Tensor[D], requiresGrad: Boolean = true)(using
@@ -100,7 +95,7 @@ abstract class Module {
 
   def to(device: Device): this.type =
     // val nativeCopy = nativeModule.clone()
-    nativeModule.asModule.to(device.toNative, false)
+    nativeModule.to(device.toNative, false)
     // copy
     // val clone: this.type = copy()
     // clone.nativeModule = nativeCopy
