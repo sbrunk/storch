@@ -26,7 +26,7 @@ import sourcecode.Name
 import torch.Tensor
 import torch.internal.NativeConverters.toNative
 import torch.nn.modules.conv.Conv2d.PaddingMode
-import torch.nn.modules.{HasParams, TensorModule}
+import torch.nn.modules.{HasParams}
 
 /** Applies a 2D convolution over an input signal composed of several input planes.
   *

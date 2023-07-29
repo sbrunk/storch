@@ -22,7 +22,7 @@ package linear
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{LinearImpl, LinearOptions}
 import torch.Tensor
-import torch.nn.modules.{HasParams, TensorModule}
+import torch.nn.modules.{HasParams}
 
 /** Applies a linear transformation to the incoming data: $y = xA^T + b$
   *
@@ -53,7 +53,7 @@ final class Linear[ParamType <: FloatNN: Default](
     bias: Boolean = true
     // dtype: ParamType = defaultDType[ParamType]
 ) extends HasParams[ParamType]
-    with (TensorModule[ParamType]):
+    with TensorModule[ParamType]:
   private val options = new LinearOptions(inFeatures, outFeatures)
   options.bias().put(bias)
   override private[torch] val nativeModule: LinearImpl = new LinearImpl(options)

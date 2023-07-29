@@ -24,7 +24,7 @@ import org.bytedeco.pytorch
 import sourcecode.Name
 import org.bytedeco.pytorch.BatchNorm2dImpl
 import org.bytedeco.pytorch.BatchNormOptions
-import torch.nn.modules.{HasParams, HasWeight, TensorModule}
+import torch.nn.modules.{HasParams, HasWeight}
 
 
 // format: off

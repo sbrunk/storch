@@ -70,11 +70,6 @@ abstract class Module {
   def namedModules: SeqMap[String, Module] =
     namedChildren.flatMap((name, module) => module.namedModules)
 
-  def copy(): this.type =
-    val clone = super.clone().asInstanceOf[Module]
-    clone._nativeModule = _nativeModule.clone(null)
-    clone.asInstanceOf[this.type]
-
   def register[M <: Module](child: M)(using name: sourcecode.Name) =
     // println(s"registering ${name.value}:$child")
     childModules = childModules.updated(name.value, child)
@@ -94,16 +89,7 @@ abstract class Module {
   def train(on: Boolean = true): Unit = nativeModule.train(on)
 
   def to(device: Device): this.type =
-    // val nativeCopy = nativeModule.clone()
     nativeModule.to(device.toNative, false)
-    // copy
-    // val clone: this.type = copy()
-    // clone.nativeModule = nativeCopy
-    this
-
-  def to(dtype: DType, nonBlocking: Boolean = false): this.type =
-    val nativeCopy = nativeModule.clone(null)
-    nativeCopy.asModule.to(dtype.toScalarType, false)
     this
 
   def save(outputArchive: OutputArchive) = nativeModule.save(outputArchive)
@@ -123,20 +109,11 @@ abstract class Module {
     doSummarize(0)
 }
 
-/** Default tensor type for module parameters.
-  *
-  * Defaults to float32 but can be overriden by providing a given
-  */
-trait Default[+D <: DType]:
-  def dtype: D
-object Default:
-  given f32: Default[Float32] = new Default[Float32] { def dtype = float32 }
-
 trait HasParams[ParamType <: FloatNN | ComplexNN: Default] extends Module:
   override def parameters(recurse: Boolean): Seq[Tensor[ParamType]] =
     nativeModule.parameters(recurse).get().toSeq.map(Tensor.apply[ParamType])
   override def parameters: Seq[Tensor[ParamType]] = parameters(recurse = true)
-  transparent inline def paramType = deriveDType[ParamType]
+  transparent inline def paramType: DType = summon[Default[ParamType]].dtype
 
 trait HasWeight[ParamType <: FloatNN | ComplexNN]:
   def weight: Tensor[ParamType]

@@ -21,7 +21,6 @@ package normalization
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{GroupNormImpl, GroupNormOptions}
-import torch.nn.modules.TensorModule
 import torch.{DType, Tensor}
 
 /** Applies Group Normalization over a mini-batch of inputs
@@ -36,12 +35,13 @@ import torch.{DType, Tensor}
   *   a boolean value that when set to `true`, this module has learnable per-channel affine
   *   parameters initialized to ones (for weights) and zeros (for biases)
   */
-final class GroupNorm[ParamType <: DType](
+final class GroupNorm[ParamType <: FloatNN | ComplexNN: Default](
     numGroups: Int,
     numChannels: Int,
     eps: Double = 1e-05,
     affine: Boolean = true
-) extends TensorModule[ParamType]:
+) extends HasWeight[ParamType]
+    with TensorModule[ParamType]:
   private val options: GroupNormOptions = GroupNormOptions(numGroups, numChannels)
   options.eps().put(eps)
   options.affine().put(affine)
