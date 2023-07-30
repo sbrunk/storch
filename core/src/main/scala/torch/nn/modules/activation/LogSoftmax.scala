@@ -29,12 +29,7 @@ import torch.{DType, Tensor}
   *
   * TODO LaTeX
   */
-final class LogSoftmax(dim: Int) extends Module:
+final class LogSoftmax[D <: DType: Default](dim: Int) extends TensorModule[D]:
   override val nativeModule: LogSoftmaxImpl = LogSoftmaxImpl(dim)
 
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
-
-  def apply[D <: DType](t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))

@@ -28,14 +28,9 @@ import torch.{DType, Tensor}
   *
   * TODO LaTeX
   */
-final class Tanh[D <: DType: Default]() extends TensorModule[D]:
+final class Tanh[D <: DType: Default] extends TensorModule[D]:
 
   override protected[torch] val nativeModule: TanhImpl = new TanhImpl()
-
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
 
   def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
 

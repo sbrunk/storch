@@ -118,12 +118,7 @@ final class BatchNorm1d[ParamType <: FloatNN | ComplexNN: Default](
   options.track_running_stats().put(trackRunningStats)
 
   override private[torch] val nativeModule: BatchNorm1dImpl = BatchNorm1dImpl(options)
-  nativeModule.asModule.to(paramType.toScalarType)
-
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
+  nativeModule.to(paramType.toScalarType, false)
 
   // TODO weight, bias etc. are undefined if affine = false. We need to take that into account
   val weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)

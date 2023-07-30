@@ -25,14 +25,12 @@ import scala.util.Random
 final class ModuleList[D <: DType](override val modules: TensorModule[D]*)
     extends Module
     with Seq[TensorModule[D]]:
-  // with TensorModule[D]:
   modules.zipWithIndex.foreach((module, index) =>
     this.register(module)(using Name(index.toString()))
   )
 
   override def iterator: Iterator[TensorModule[D]] = modules.iterator
 
-  // def apply(v1: Int | torch.Tensor[D]): torch.nn.modules.TensorModule[D] & torch.Tensor[D] = ???
   def apply(i: Int): torch.nn.modules.TensorModule[D] = modules(i)
 
   override def length: Int = modules.length

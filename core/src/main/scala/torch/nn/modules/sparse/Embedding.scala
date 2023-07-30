@@ -75,12 +75,7 @@ final class Embedding[ParamType <: FloatNN | ComplexNN: Default](
   options.sparse().put(sparse)
 
   override val nativeModule: EmbeddingImpl = EmbeddingImpl(options)
-  nativeModule.asModule.to(paramType.toScalarType)
-
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
+  nativeModule.to(paramType.toScalarType, false)
 
   val weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)
 
