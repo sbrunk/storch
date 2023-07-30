@@ -202,7 +202,7 @@
 </span><span class="keyword">val</span><span> </span><span class="identifier">logits</span><span> = </span><span class="identifier">model</span><span>(</span><span class="type-name">X</span><span>)
 </span><span class="comment">// logits: Tensor[Float32] = tensor dtype=float32, shape=[1, 10], device=CPU 
 // [[0.1353, 0.1562, 0.0768, ..., 0.0369, 0.0401, 0.0638]]
-</span><span class="keyword">val</span><span> </span><span class="identifier">predProbab</span><span> = </span><span class="identifier">nn</span><span>.</span><span class="type-name">Softmax</span><span>(</span><span class="identifier">dim</span><span>=</span><span class="number-literal">1</span><span>)(</span><span class="identifier">logits</span><span>)
+</span><span class="keyword">val</span><span> </span><span class="identifier">predProbab</span><span> = </span><span class="identifier">nn</span><span>.</span><span class="type-name">Softmax</span><span>(</span><span class="identifier">dim</span><span>=</span><span class="number-literal">1</span><span>).</span><span class="identifier">apply</span><span>(</span><span class="identifier">logits</span><span>)
 </span><span class="comment">// predProbab: Tensor[Float32] = tensor dtype=float32, shape=[1, 10], device=CPU 
 // [[0.1103, 0.1126, 0.1040, ..., 0.1000, 0.1003, 0.1027]]
 </span><span class="keyword">val</span><span> </span><span class="identifier">yPred</span><span> = </span><span class="identifier">predProbab</span><span>.</span><span class="identifier">argmax</span><span>(</span><span class="number-literal">1</span><span>)
@@ -342,7 +342,7 @@
         [0, 1] representing the model&#39;s predicted probabilities for each class. <code>dim</code> parameter indicates the dimension along
         which the values must sum to 1.</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">softmax</span><span> = </span><span class="identifier">nn</span><span>.</span><span class="type-name">Softmax</span><span>(</span><span class="identifier">dim</span><span>=</span><span class="number-literal">1</span><span>)
-</span><span class="comment">// softmax: Softmax = Softmax
+</span><span class="comment">// softmax: Softmax[Float32] = TensorModule
 </span><span class="keyword">val</span><span> </span><span class="identifier">predProbab</span><span> = </span><span class="identifier">softmax</span><span>(</span><span class="identifier">logits</span><span>)
 </span><span class="comment">// predProbab: Tensor[Float32] = tensor dtype=float32, shape=[3, 10], device=CPU 
 // [[0.1152, 0.0730, 0.1015, ..., 0.1316, 0.0709, 0.0834],
