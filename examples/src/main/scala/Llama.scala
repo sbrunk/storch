@@ -81,11 +81,11 @@ object Llama {
       inverted_mask.masked_fill(inverted_mask.to(torch.bool), torch.finfo(dtype).min)
 
   /** LlamaRMSNorm is equivalent to T5LayerNorm */
-  class LlamaRMSNorm(hidden_size: Int, eps: Float=1e-6) extends nn.Module {
+  class LlamaRMSNorm[D <: FloatNN: Default](hidden_size: Int, eps: Float=1e-6) extends nn.Module {
     val weight = register(torch.ones(hidden_size))
     val variance_epsilon = eps
 
-    def forward(hidden_states: Tensor[Int64]) =
+    def apply(hidden_states: Tensor[D]): Tensor[Promoted[Float32, D]] =
       val input_dtype = hidden_states.dtype
       var hidden_states_fp32 = hidden_states.to(torch.float32)
       val variance = hidden_states_fp32.pow(2).mean(-1, keepdim=true)
@@ -441,37 +441,37 @@ object Llama {
     }
   }
 
-class LlamaDecoderLayer(config: LlamaConfig) extends nn.Module {
-  val hidden_size = config.hidden_size
-  val self_attn = LlamaAttention(config=config)
-  val mlp = LlamaMLP(config)
-  val input_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
-  val post_attention_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
+  class LlamaDecoderLayer[D <: FloatNN: Default](config: LlamaConfig) extends nn.Module {
+    val hidden_size = config.hidden_size
+    val self_attn = LlamaAttention(config=config)
+    val mlp = LlamaMLP(config)
+    val input_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
+    val post_attention_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
 
-  /**
-    *
-    * @param hidden_states input to the layer of shape `(batch, seq_len, embed_dim)`
-    * @param attention_mask  attention mask of size
-                `(batch, 1, tgt_len, src_len)` where padding elements are indicated by very large negative values.
-    * @param position_ids 
-    * @param past_key_value cached past key and value projection states
-    * @param output_attentions Whether or not to return the attentions tensors of all attention layers. See `attentions` under
-                returned tensors for more detail.
-    * @param use_cache If set to `True`, `past_key_values` key value states are returned and can be used to speed up decoding
-                (see `past_key_values`).
-    */
-    def forward(
-        hidden_states: Tensor[Float32],
-        attention_mask: Option[Tensor[Float32]] = None,
-        position_ids: Option[Tensor[Int64]] = None,
-        past_key_value: Option[Tensor[Float32]] = None,
-        output_attentions: Boolean = false,
-        use_cache: Boolean = false,
-    ): (Tensor[Float32], Option[(Tensor[Float32], Tensor[Float32])]) =
+    /**
+      *
+      * @param hidden_states input to the layer of shape `(batch, seq_len, embed_dim)`
+      * @param attention_mask  attention mask of size
+                  `(batch, 1, tgt_len, src_len)` where padding elements are indicated by very large negative values.
+      * @param position_ids 
+      * @param past_key_value cached past key and value projection states
+      * @param output_attentions Whether or not to return the attentions tensors of all attention layers. See `attentions` under
+                  returned tensors for more detail.
+      * @param use_cache If set to `True`, `past_key_values` key value states are returned and can be used to speed up decoding
+                  (see `past_key_values`).
+      */
+      def apply(
+          hidden_states: Tensor[D],
+          attention_mask: Option[Tensor[D]] = None,
+          position_ids: Option[Tensor[Int64]] = None,
+          past_key_value: Option[Tensor[D]] = None,
+          output_attentions: Boolean = false,
+          use_cache: Boolean = false,
+      ): (Tensor[Float32], Option[(Tensor[Float32], Tensor[Float32])]) =
 
-        val residual = hidden_states
+        var residual = hidden_states
 
-        val hidden_states = input_layernorm(hidden_states)
+        var new_hidden_states = input_layernorm(hidden_states)
 
         // Self Attention
         val (new_hidden_states, self_attn_weights, present_key_value) = self_attn(
@@ -486,11 +486,11 @@ class LlamaDecoderLayer(config: LlamaConfig) extends nn.Module {
 
         // Fully Connected
         residual = hidden_states
-        new_hidden_states = self.post_attention_layernorm(hidden_states)
-        new_hidden_states = self.mlp(hidden_states)
+        new_hidden_states = this.post_attention_layernorm(hidden_states)
+        new_hidden_states = this.mlp(hidden_states)
         new_hidden_states = residual + hidden_states
 
-        outputs = (hidden_states,)
+        val outputs = (hidden_states,)
 
         if output_attentions then
             outputs += (self_attn_weights,)
@@ -498,7 +498,7 @@ class LlamaDecoderLayer(config: LlamaConfig) extends nn.Module {
         if use_cache then
             outputs += (present_key_value,)
 
-      outputs
+        outputs
     }
 
   /**  The bare LLaMA Model outputting raw hidden-states without any specific head on top.
@@ -514,9 +514,9 @@ class LlamaDecoderLayer(config: LlamaConfig) extends nn.Module {
     val layers = nn.ModuleList(for _ <- 0 until config.num_hidden_layers yield LlamaDecoderLayer(config))
     val norm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
 
-    // self.gradient_checkpointing = false TODO
+    // this.gradient_checkpointing = false TODO
     // Initialize weights and apply final processing
-    // self.post_init() TODO
+    // this.post_init() TODO
 
     def get_input_embeddings = embed_tokens
 
@@ -558,13 +558,13 @@ class LlamaDecoderLayer(config: LlamaConfig) extends nn.Module {
         output_hidden_states: Option[Boolean] = None,
         return_dict: Option[Boolean] = None,
     ): Union[Tuple, BaseModelOutputWithPast] =
-        output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
+        output_attentions = output_attentions if output_attentions is not None else this.config.output_attentions
         output_hidden_states = (
-            output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
+            output_hidden_states if output_hidden_states is not None else this.config.output_hidden_states
         )
-        use_cache = use_cache if use_cache is not None else self.config.use_cache
+        use_cache = use_cache if use_cache is not None else this.config.use_cache
 
-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+        return_dict = return_dict if return_dict is not None else this.config.use_return_dict
 
         # retrieve input_ids and inputs_embeds
         if input_ids is not None and inputs_embeds is not None:
@@ -593,19 +593,19 @@ class LlamaDecoderLayer(config: LlamaConfig) extends nn.Module {
             position_ids = position_ids.view(-1, seq_length).long()
 
         if inputs_embeds is None:
-            inputs_embeds = self.embed_tokens(input_ids)
+            inputs_embeds = this.embed_tokens(input_ids)
         # embed positions
         if attention_mask is None:
             attention_mask = torch.ones(
                 (batch_size, seq_length_with_past), dtype=torch.bool, device=inputs_embeds.device
             )
-        attention_mask = self._prepare_decoder_attention_mask(
+        attention_mask = this._prepare_decoder_attention_mask(
             attention_mask, (batch_size, seq_length), inputs_embeds, past_key_values_length
         )
 
         hidden_states = inputs_embeds
 
-        if self.gradient_checkpointing and self.training:
+        if this.gradient_checkpointing and this.training:
             if use_cache:
                 logger.warning_once(
                     "`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=false`..."
@@ -617,13 +617,13 @@ class LlamaDecoderLayer(config: LlamaConfig) extends nn.Module {
         all_self_attns = () if output_attentions else None
         next_decoder_cache = () if use_cache else None
 
-        for idx, decoder_layer in enumerate(self.layers):
+        for idx, decoder_layer in enumerate(this.layers):
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
 
             past_key_value = past_key_values[idx] if past_key_values is not None else None
 
-            if self.gradient_checkpointing and self.training:
+            if this.gradient_checkpointing and this.training:
 
                 def create_custom_forward(module):
                     def custom_forward(*inputs):
@@ -657,7 +657,7 @@ class LlamaDecoderLayer(config: LlamaConfig) extends nn.Module {
             if output_attentions:
                 all_self_attns += (layer_outputs[1],)
 
-        hidden_states = self.norm(hidden_states)
+        hidden_states = this.norm(hidden_states)
 
         # add hidden states from the last decoder layer
         if output_hidden_states:
