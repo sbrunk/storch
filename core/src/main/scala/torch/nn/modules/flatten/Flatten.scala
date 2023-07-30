@@ -59,11 +59,6 @@ final class Flatten[D <: DType: Default](startDim: Int = 1, endDim: Int = -1)
 
   override val nativeModule: FlattenImpl = FlattenImpl(options)
 
-  override def registerWithParent[T <: pytorch.Module](parent: T)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
-
   def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
 
   override def toString = getClass().getSimpleName()

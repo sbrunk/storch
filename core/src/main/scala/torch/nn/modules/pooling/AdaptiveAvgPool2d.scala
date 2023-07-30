@@ -32,7 +32,7 @@ import org.bytedeco.pytorch.LongOptional
   * The output is of size H x W, for any input size. The number of output features is equal to the
   * number of input planes.
   */
-final class AdaptiveAvgPool2d(
+final class AdaptiveAvgPool2d[D <: BFloat16 | Float32 | Float64: Default](
     outputSize: Int | Option[Int] | (Option[Int], Option[Int]) | (Int, Int)
 ) extends Module {
 
@@ -45,16 +45,11 @@ final class AdaptiveAvgPool2d(
     case x: Option[Int] =>
       new LongOptionalVector(x.toOptional, x.toOptional)
 
-  override private[torch] val nativeModule: AdaptiveAvgPool2dImpl = AdaptiveAvgPool2dImpl(
+  override protected[torch] val nativeModule: AdaptiveAvgPool2dImpl = AdaptiveAvgPool2dImpl(
     nativeOutputSize.get(0)
   )
 
-  override def registerWithParent[T <: pytorch.Module](parent: T)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
-
-  def apply[D <: BFloat16 | Float32 | Float64](t: Tensor[D]): Tensor[D] = Tensor(
+  def apply(t: Tensor[D]): Tensor[D] = Tensor(
     nativeModule.forward(t.native)
   )
 }

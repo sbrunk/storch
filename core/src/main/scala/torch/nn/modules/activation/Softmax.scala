@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package torch.nn.modules.activation
+package torch
+package nn
+package modules
+package activation
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.SoftmaxImpl
@@ -28,12 +31,7 @@ import torch.{DType, Tensor}
   *
   * When the input Tensor is a sparse tensor then the unspecifed values are treated as ``-inf``.
   */
-final class Softmax(dim: Int) extends Module:
+final class Softmax[D <: DType: Default](dim: Int) extends TensorModule[D]:
   override val nativeModule: SoftmaxImpl = SoftmaxImpl(dim)
 
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
-
-  def apply[D <: DType](t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))

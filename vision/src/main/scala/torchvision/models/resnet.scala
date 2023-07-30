@@ -17,7 +17,18 @@
 package torchvision
 package models
 
-import torch.{BFloat16, ComplexNN, DType, Float32, Float32Tensor, Float64, FloatNN, Tensor, nn}
+import torch.{
+  BFloat16,
+  ComplexNN,
+  DType,
+  Default,
+  Float32,
+  Float32Tensor,
+  Float64,
+  FloatNN,
+  Tensor,
+  nn
+}
 import torch.nn.init.{Mode, NonLinearity, constant_, kaimingNormal_}
 
 import scala.collection.mutable
@@ -28,12 +39,13 @@ import sourcecode.Name
 import torch.nn.modules.activation.ReLU
 import torch.nn.modules.conv.Conv2d
 import torch.nn.modules.pooling.{AdaptiveAvgPool2d, MaxPool2d}
-import torch.nn.modules.{Default, HasWeight, Module, TensorModule}
+import torch.nn.modules.{HasWeight, Module}
 import torchvision.transforms.*
 
 import scala.util.Using
 import com.sksamuel.scrimage.ImmutableImage
 import torch.Int32
+import torch.nn.modules.TensorModule
 
 /** ResNet architecture implementations
   *

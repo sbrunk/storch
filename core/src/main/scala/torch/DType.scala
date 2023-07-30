@@ -209,6 +209,38 @@ private object Derive:
   val derive: Derive = Derive()
 export Derive.derive
 
+/** Default tensor type.
+  *
+  * Defaults to float32 but can be overriden by providing providing the DType explicitly, or by
+  * overriding the default in the current scope through an import:
+  *
+  * Example:
+  * ```scala sc
+  * import torch.*
+  *
+  * // Default:
+  * nn.Linear(10, 10) // Linear[Float32]
+  *
+  * // Override explicitly:
+  * nn.Linear[BFloat16](10, 10) // Linear[BFloat16]
+  *
+  * // Override default:
+  * import Default.float64
+  * nn.Linear(10, 10) // Linear[Float64]
+  * ```
+  */
+trait Default[+D <: DType]:
+  def dtype: D
+trait LowPriorityDefaults:
+  given float16: Default[Float16] = new Default[Float16] { def dtype = torch.float16 }
+  given bfloat16: Default[BFloat16] = new Default[BFloat16] { def dtype = torch.bfloat16 }
+  given float64: Default[Float64] = new Default[Float64] { def dtype = torch.float64 }
+  given complex32: Default[Complex32] = new Default[Complex32] { def dtype = torch.complex32 }
+  given complex64: Default[Complex64] = new Default[Complex64] { def dtype = torch.complex64 }
+  given complex128: Default[Complex128] = new Default[Complex128] { def dtype = torch.complex128 }
+object Default extends LowPriorityDefaults:
+  given float32: Default[Float32] = new Default[Float32] { def dtype = torch.float32 }
+
 /** DType combinations * */
 type FloatNN = Float16 | Float32 | Float64 | BFloat16
 
@@ -452,4 +484,3 @@ transparent inline def deriveDType[T <: DType]: DType =
     case _: Float16    => float16
     case _: Undefined  => undefined
     case _: NumOptions => numoptions
-    case _             => float32

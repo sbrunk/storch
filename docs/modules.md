@@ -13,7 +13,7 @@ import torch.*
 import torch.nn
 import torch.nn.functional as F
 
-class LeNet[D <: BFloat16 | Float32: nn.Default] extends nn.Module:
+class LeNet[D <: BFloat16 | Float32: Default] extends nn.Module:
   val conv1 = register(nn.Conv2d(1, 6, 5))
   val pool = register(nn.MaxPool2d((2, 2)))
   val conv2 = register(nn.Conv2d(6, 16, 5))

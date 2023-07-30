@@ -23,19 +23,18 @@ import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{MaxPool2dImpl, MaxPool2dOptions}
 import torch.internal.NativeConverters.toNative
-import torch.nn.modules.{HasParams, TensorModule}
+import torch.nn.modules.{HasParams}
 import torch.{BFloat16, Float32, Float64, Tensor}
 
 /** Applies a 2D max pooling over an input signal composed of several input planes. */
-final class MaxPool2d[ParamType <: BFloat16 | Float32 | Float64: Default](
+final class MaxPool2d[D <: BFloat16 | Float32 | Float64: Default](
     kernelSize: Int | (Int, Int),
     stride: Option[Int | (Int, Int)] = None,
     padding: Int | (Int, Int) = 0,
     dilation: Int | (Int, Int) = 1,
     // returnIndices: Boolean = false,
     ceilMode: Boolean = false
-) extends HasParams[ParamType]
-    with TensorModule[ParamType]:
+) extends TensorModule[D]:
 
   private val options: MaxPool2dOptions = MaxPool2dOptions(toNative(kernelSize))
   stride.foreach(s => options.stride().put(toNative(s)))
@@ -44,15 +43,9 @@ final class MaxPool2d[ParamType <: BFloat16 | Float32 | Float64: Default](
   options.ceil_mode().put(ceilMode)
 
   override private[torch] val nativeModule: MaxPool2dImpl = MaxPool2dImpl(options)
-  nativeModule.asModule.to(paramType.toScalarType, false)
-
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
 
   override def toString(): String =
     s"MaxPool2d(kernelSize=$kernelSize, stride=$stride, padding=$padding, dilation=$dilation, ceilMode=$ceilMode)"
 
-  def apply(t: Tensor[ParamType]): Tensor[ParamType] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
   // TODO forward_with_indices

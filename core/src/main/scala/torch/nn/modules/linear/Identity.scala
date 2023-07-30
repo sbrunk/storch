@@ -28,12 +28,7 @@ import torch.{DType, Tensor}
   *
   * @group nn_linear
   */
-final class Identity(args: Any*) extends Module:
+final class Identity[D <: DType: Default](args: Any*) extends TensorModule[D]:
   override val nativeModule: IdentityImpl = IdentityImpl()
 
-  override def registerWithParent[M <: pytorch.Module](parent: M)(using
-      name: sourcecode.Name
-  ): Unit =
-    parent.register_module(name.value, nativeModule)
-
-  def apply[D <: DType](t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
