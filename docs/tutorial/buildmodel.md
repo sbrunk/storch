@@ -78,7 +78,7 @@ We get the prediction probabilities by passing it through an instance of the ``n
 ```scala mdoc
 val X = torch.rand(Seq(1, 28, 28), device=device)
 val logits = model(X)
-val predProbab = nn.Softmax(dim=1)(logits)
+val predProbab = nn.Softmax(dim=1).apply(logits)
 val yPred = predProbab.argmax(1)
 println(s"Predicted class: $yPred")
 ```

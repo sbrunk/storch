@@ -25,7 +25,6 @@ package torch
 package object nn {
 
   export modules.Module
-  export modules.Default
 
   export modules.activation.Softmax
   export modules.activation.LogSoftmax

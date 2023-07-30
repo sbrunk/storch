@@ -16,18 +16,16 @@
 
 //> using scala "3.3"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-ab8d84c-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-795485b-SNAPSHOT"
 // replace with pytorch-platform-gpu if you have a CUDA capable GPU
 //> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9"
 // enable for CUDA support
-////> using lib "org.bytedeco:cuda-platform:12.1-8.9-1.5.9"
 ////> using lib "org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.9"
 
 import torch.*
 import torch.nn.functional as F
 import torch.optim.Adam
 import org.bytedeco.pytorch.OutputArchive
-import torch.nn.modules.Default
 import torchvision.datasets.MNIST
 import scala.util.Random
 import java.nio.file.Paths
@@ -35,9 +33,11 @@ import torch.Device.CUDA
 import scala.util.Using
 import org.bytedeco.javacpp.PointerScope
 import torch.Device.CPU
+import torch.nn.modules.HasParams
 
-// define model architecture
-class LeNet[D <: BFloat16 | Float32: Default] extends nn.Module {
+// Define the model architecture
+class LeNet[D <: BFloat16 | Float32: Default] extends HasParams[D] {
+
   val conv1 = register(nn.Conv2d(1, 6, 5))
   val pool = register(nn.MaxPool2d((2, 2)))
   val conv2 = register(nn.Conv2d(6, 16, 5))
