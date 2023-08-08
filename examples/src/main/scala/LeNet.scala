@@ -15,12 +15,13 @@
  */
 
 //> using scala "3.3"
+//> using repository "sonatype:snapshots"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-795485b-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-131ba89-SNAPSHOT"
 // replace with pytorch-platform-gpu if you have a CUDA capable GPU
-//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9"
+//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.10-SNAPSHOT"
 // enable for CUDA support
-////> using lib "org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.9"
+////> using lib "org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.10-SNAPSHOT"
 
 import torch.*
 import torch.nn.functional as F
