@@ -17,7 +17,7 @@
 //> using scala "3.3"
 //> using repository "sonatype:snapshots"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-131ba89-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-bbdc238-SNAPSHOT"
 //> using lib "me.tongfei:progressbar:0.9.5"
 //> using lib "com.github.alexarchambault::case-app:2.1.0-M24"
 //> using lib "org.scala-lang.modules::scala-parallel-collections:1.0.4"
@@ -306,7 +306,7 @@ case class PredictOptions(
     @HelpMessage(
       "Path to to the serialized model created by running 'train'. Tries the latest model in 'checkpoints' if not set."
     )
-    modelDir: Option[String]
+    modelDir: Option[String] = None
 )
 
 object Commands:

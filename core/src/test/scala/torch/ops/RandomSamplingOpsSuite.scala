@@ -33,9 +33,19 @@ class RandomSamplingOpsSuite extends TensorCheckSuite {
     val randintMean = randintTensor.mean
     val expectedMean = Tensor(high / 2).to(dtype = float32)
 
-    println(randintMean)
-    println(expectedMean)
     assert(allclose(randintMean, expectedMean, atol = 1e-2))
+
+    val g1 = torch.Generator()
+    g1.manualSeed(0)
+    val t1 = torch.randint(high = 100, Seq(2, 2), generator = g1)
+    val t2 = torch.randint(high = 100, Seq(2, 2), generator = g1)
+    assertNotEquals(t1, t2)
+
+    val g2 = torch.Generator()
+    g2.manualSeed(0)
+    val t3 = torch.randint(high = 100, Seq(2, 2), generator = g2)
+    assertEquals(t1, t3)
+
   }
 
   test("randn.unit-test") {

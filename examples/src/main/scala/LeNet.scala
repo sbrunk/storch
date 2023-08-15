@@ -17,7 +17,7 @@
 //> using scala "3.3"
 //> using repository "sonatype:snapshots"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-131ba89-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-bbdc238-SNAPSHOT"
 // replace with pytorch-platform-gpu if you have a CUDA capable GPU
 //> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.10-SNAPSHOT"
 // enable for CUDA support
@@ -40,15 +40,14 @@ import torch.nn.modules.HasParams
 class LeNet[D <: BFloat16 | Float32: Default] extends HasParams[D] {
 
   val conv1 = register(nn.Conv2d(1, 6, 5))
-  val pool = register(nn.MaxPool2d((2, 2)))
   val conv2 = register(nn.Conv2d(6, 16, 5))
   val fc1 = register(nn.Linear(16 * 4 * 4, 120))
   val fc2 = register(nn.Linear(120, 84))
   val fc3 = register(nn.Linear(84, 10))
 
   def apply(i: Tensor[D]): Tensor[D] =
-    var x = pool(F.relu(conv1(i)))
-    x = pool(F.relu(conv2(x)))
+    var x = F.maxPool2d(F.relu(conv1(i)), (2, 2))
+    x = F.maxPool2d(F.relu(conv2(x)), 2)
     x = x.view(-1, 16 * 4 * 4) // all dimensions except the batch dimension
     x = F.relu(fc1(x))
     x = F.relu(fc2(x))
