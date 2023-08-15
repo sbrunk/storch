@@ -124,6 +124,8 @@ private[torch] trait RandomSamplingOps {
     *   One above the highest integer to be drawn from the distribution.
     * @param size
     *   a tuple defining the shape of the output tensor.
+    * @param generator
+    *   a pseudorandom number generator for sampling
     * @param dtype
     *   the desired data type of returned tensor.
     * @param layout
@@ -139,19 +141,18 @@ private[torch] trait RandomSamplingOps {
       low: Long = 0,
       high: Long,
       size: Seq[Int],
+      generator: Option[Generator] | Generator = None,
       dtype: D = int64,
       layout: Layout = Strided,
       device: Device = CPU,
       requiresGrad: Boolean = false
   ): Tensor[D] =
-    // TODO Handle Optional Generators properly
-    val generator = new org.bytedeco.pytorch.GeneratorOptional()
     Tensor(
       torchNative.torch_randint(
         low,
         high,
         size.toArray.map(_.toLong),
-        generator,
+        generator.toOptional,
         NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
       )
     )

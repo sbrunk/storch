@@ -35,6 +35,7 @@ import org.bytedeco.pytorch.GenericDictIterator
 import spire.math.Complex
 import spire.math.UByte
 import scala.annotation.targetName
+import org.bytedeco.pytorch.GeneratorOptional
 
 private[torch] object NativeConverters:
 
@@ -87,6 +88,12 @@ private[torch] object NativeConverters:
       case x: Double  => pytorch.Scalar(x)
       case x @ Complex(r: Float, i: Float)   => Tensor(Seq(x)).to(dtype = complex64).native.item()
       case x @ Complex(r: Double, i: Double) => Tensor(Seq(x)).to(dtype = complex128).native.item()
+
+  extension (g: Option[Generator] | Generator)
+    def toOptional = g match
+      case g: Generator => new pytorch.GeneratorOptional(g.native)
+      case None         => new pytorch.GeneratorOptional()
+      case Some(g)      => new pytorch.GeneratorOptional(g.native)
 
   def tensorOptions(
       dtype: DType,
