@@ -74,6 +74,20 @@ class TensorSuite extends TensorCheckSuite {
     assertEquals(tensor(---, -1), Tensor(Seq(3, 7, 11, 15)))
   }
 
+  test("update/setter") {
+    val tensor = torch.arange(0, 16).reshape(4, 4)
+    tensor(Seq(0)) = 20
+    assertEquals(tensor(0), torch.full(Seq(4), 20))
+
+    val updated = Tensor[Int](30)
+    tensor(Seq(1, 0)) = Tensor[Int](30)
+    assertEquals(tensor(1, 0), updated)
+
+    // copy column 1 to column 0
+    tensor(Seq(torch.Slice(), 1)) = tensor(torch.Slice(), 0)
+    assertEquals(tensor(torch.Slice(), 1), tensor(torch.Slice(), 0))
+  }
+
   test("Tensor creation properly handling buffers") {
     val value = 100L
     val data = Seq.fill(10000)(value)
