@@ -302,26 +302,6 @@ private[torch] trait ReductionOps {
     torchNative.logsumexp(input.native, dim.toArray, keepdim)
   )
 
-  /** Returns the mean value of all elements in the `input` tensor.
-    *
-    * @group reduction_ops
-    */
-  def mean[D <: FloatNN | ComplexNN](
-      input: Tensor[D]
-  ): Tensor[D] = Tensor(torchNative.mean(input.native))
-
-  /** Returns the mean value of all elements in the `input` tensor.
-    *
-    * @group reduction_ops
-    *
-    * @param dtype
-    *   ${reduceops_dtype}
-    */
-  def mean[D <: FloatNN | ComplexNN](
-      input: Tensor[?],
-      dtype: D
-  ): Tensor[D] = Tensor(torchNative.mean(input.native, new ScalarTypeOptional(dtype.toScalarType)))
-
   /** Returns the mean value of each row of the `input` tensor in the given dimension `dim`. If
     * `dim` is a list of dimensions, reduce over all of them.
     *
@@ -336,7 +316,7 @@ private[torch] trait ReductionOps {
     * @param dtype
     *   ${reduceops_dtype}
     */
-  def mean[D <: DType, D2 <: DType | Derive](
+  def mean[D <: FloatNN | ComplexNN, D2 <: FloatNN | ComplexNN | Derive](
       input: Tensor[D],
       dim: Int | Seq[Int] = Seq.empty,
       keepdim: Boolean = false,
