@@ -42,11 +42,10 @@ private[torch] trait RandomSamplingOps {
   def multinomial[D <: FloatNN](
       input: Tensor[D],
       numSamples: Long,
-      replacement: Boolean = false
+      replacement: Boolean = false,
+      generator: Option[Generator] | Generator = None
   ): Tensor[Int64] =
-    // TODO Handle Optional Generators properly
-    val generator = new org.bytedeco.pytorch.GeneratorOptional()
-    Tensor(torchNative.multinomial(input.native, numSamples, replacement, generator))
+    Tensor(torchNative.multinomial(input.native, numSamples, replacement, generator.toOptional))
 
 // TODO normal Returns a tensor of random numbers drawn from separate normal distributions whose mean and standard deviation are given.
 // TODO poisson Returns a tensor of the same size as input with each element sampled from a Poisson distribution with rate parameter given by the corresponding element in input i.e.,
