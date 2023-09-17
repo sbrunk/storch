@@ -213,11 +213,11 @@ object ImageClassifier extends CommandsEntryPoint:
           loss.backward()
           // add a few sanity checks
           assert(
-            model.parameters.forall(t => !t.isnan.any.item),
+            model.parameters.forall(p => !p.isnan.any.item),
             "Parameters containing nan values"
           )
           assert(
-            model.parameters.forall(t => !t.grad.isnan.any.item),
+            model.parameters.forall(p => !p.grad.exists(g => g.isnan.any.item)),
             "Gradients containing nan values"
           )
           optimizer.step()

@@ -314,7 +314,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     * time a call to backward() computes gradients for this Tensor. The attribute will then contain
     * the gradients computed and future calls to backward() will accumulate (add) gradients into it.
     */
-  def grad: Tensor[D | Undefined] = Tensor(native.grad())
+  def grad: Option[Tensor[D]] =
+    val nativeGrad = native.grad()
+    Option.when(nativeGrad.defined())(Tensor(nativeGrad))
 
   def ge(other: ScalaType): Tensor[Bool] = Tensor(native.ge(toScalar(other)))
 

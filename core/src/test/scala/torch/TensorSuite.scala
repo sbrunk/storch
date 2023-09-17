@@ -58,10 +58,13 @@ class TensorSuite extends TensorCheckSuite {
     val t = torch.ones(Seq(3)) * 2
     t.requiresGrad = true
     val sum = t.sum
-    assertEquals(t.grad.dtype, undefined)
+    assert(t.grad.isEmpty)
     sum.backward()
-    assertEquals(t.grad.dtype, float32)
-    assert(t.grad.equal(torch.ones(Seq(3))))
+    assert(t.grad.isDefined)
+    t.grad.map { grad =>
+      assertEquals(grad.dtype, float32)
+      assert(grad.equal(torch.ones(Seq(3))))
+    }
   }
 
   test("indexing") {
