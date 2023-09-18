@@ -71,22 +71,22 @@ class EmbeddingSuite extends munit.FunSuite {
       ).unsqueeze(0)
       assert(torch.allclose(output, expectedOutput, atol = 1e-4))
     }
-    // {
-    //   torch.manualSeed(0)
-    //   //  example of changing `pad` vector
-    //   val paddingIdx = 0
-    //   val embedding = nn.Embedding(3, 3, paddingIdx = Some(paddingIdx))
-    //   noGrad {
-    //     embedding.weight(Seq(paddingIdx)) = torch.ones(3)
-    //   }
-    //   val expectedOutput = Tensor(
-    //     Seq(
-    //       Seq(1f, 1f, 1f),
-    //       Seq(0.5684f, -1.0845f, -1.3986f),
-    //       Seq(0.4033f, 0.8380f, -0.7193f)
-    //     )
-    //   )
-    //   assert(torch.allclose(embedding.weight, expectedOutput, atol = 1e-4))
-    // }
+    {
+      torch.manualSeed(0)
+      //  example of changing `pad` vector
+      val paddingIdx = 0
+      val embedding = nn.Embedding(3, 3, paddingIdx = Some(paddingIdx))
+      noGrad {
+        embedding.weight(Seq(paddingIdx)) = torch.ones(3)
+      }
+      val expectedOutput = Tensor(
+        Seq(
+          Seq(1f, 1f, 1f),
+          Seq(0.5684f, -1.0845f, -1.3986f),
+          Seq(0.4033f, 0.8380f, -0.7193f)
+        )
+      )
+      assert(torch.allclose(embedding.weight, expectedOutput, atol = 1e-4))
+    }
   }
 }
