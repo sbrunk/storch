@@ -17,7 +17,6 @@
 package torch
 package nn
 package modules
-package pooling
 
 class AdapativeAvgPool2dSuite extends munit.FunSuite {
   test("AdapativeAvgPool2d output shapes") {

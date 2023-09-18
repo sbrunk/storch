@@ -17,7 +17,6 @@
 package torch
 package nn
 package modules
-package activation
 
 class ActivationSuite extends munit.FunSuite {
   test("LogSoftmax") {
@@ -35,6 +34,9 @@ class ActivationSuite extends munit.FunSuite {
     assert(torch.allclose(output, expectedOutput, atol = 1e-4))
   }
 
+  // TODO ReLU
+  // TODO Softmax
+
   test("Tanh") {
     torch.manualSeed(0)
     val m = nn.Tanh()
@@ -43,84 +45,6 @@ class ActivationSuite extends munit.FunSuite {
     assertEquals(output.shape, input.shape)
     val expectedOutput = Tensor(Seq(0.9123f, -0.2853f))
     assert(torch.allclose(output, expectedOutput, atol = 1e-4))
-  }
-
-  test("BatchNorm1d") {
-    torch.manualSeed(0)
-    val m = nn.BatchNorm1d(numFeatures = 3)
-    val input = torch.randn(Seq(3, 3))
-    val output = m(input)
-    assertEquals(output.shape, input.shape)
-    val expectedOutput = Tensor(
-      Seq(
-        Seq(1.4014f, -0.1438f, -1.2519f),
-        Seq(-0.5362f, -1.1465f, 0.0564f),
-        Seq(-0.8651f, 1.2903f, 1.1956f)
-      )
-    )
-    assert(torch.allclose(output, expectedOutput, atol = 1e-4))
-  }
-
-  test("BatchNorm2d") {
-    torch.manualSeed(0)
-    val m = nn.BatchNorm2d(numFeatures = 3)
-    val input = torch.randn(Seq(3, 3, 1, 1))
-    val output = m(input)
-    assertEquals(output.shape, input.shape)
-    val expectedOutput = Tensor(
-      Seq(
-        Seq(1.4014f, -0.1438f, -1.2519f),
-        Seq(-0.5362f, -1.1465f, 0.0564f),
-        Seq(-0.8651f, 1.2903f, 1.1956f)
-      )
-    )
-    assert(torch.allclose(output.squeeze, expectedOutput, atol = 1e-4))
-  }
-
-  test("LayerNorm") {
-    {
-      torch.manualSeed(0)
-      val (batch, sentenceLength, embeddingDim) = (2, 2, 3)
-      val embedding = torch.randn(Seq(batch, sentenceLength, embeddingDim))
-      val layerNorm = nn.LayerNorm(embeddingDim)
-      val output = layerNorm(embedding)
-      assertEquals(output.shape, embedding.shape)
-      val expectedOutput = Tensor(
-        Seq(
-          Seq(
-            Seq(1.2191f, 0.0112f, -1.2303f),
-            Seq(1.3985f, -0.5172f, -0.8813f)
-          ),
-          Seq(
-            Seq(0.3495f, 1.0120f, -1.3615f),
-            Seq(-0.3948f, -0.9786f, 1.3734f)
-          )
-        )
-      )
-      assert(torch.allclose(output, expectedOutput, atol = 1e-4))
-    }
-    {
-      torch.manualSeed(0)
-      val (n, c, h, w) = (1, 2, 2, 2)
-      val input = torch.randn(Seq(n, c, h, w))
-      // Normalize over the last three dimensions (i.e. the channel and spatial dimensions)
-      val layerNorm = nn.LayerNorm(Seq(c, h, w))
-      val output = layerNorm(input)
-      assertEquals(output.shape, (Seq(n, c, h, w)))
-      val expectedOutput = Tensor(
-        Seq(
-          Seq(
-            Seq(1.4715f, -0.0785f),
-            Seq(-1.6714f, 0.6497f)
-          ),
-          Seq(
-            Seq(-0.7469f, -1.0122f),
-            Seq(0.5103f, 0.8775f)
-          )
-        )
-      ).unsqueeze(0)
-      assert(torch.allclose(output, expectedOutput, atol = 1e-4))
-    }
   }
 
   test("Embedding") {
@@ -174,6 +98,7 @@ class ActivationSuite extends munit.FunSuite {
       ).unsqueeze(0)
       assert(torch.allclose(output, expectedOutput, atol = 1e-4))
     }
+    // TODO enable once we have merged tensor setters
     // {
     //   torch.manualSeed(0)
     //   //  example of changing `pad` vector

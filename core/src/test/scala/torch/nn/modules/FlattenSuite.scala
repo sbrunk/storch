@@ -17,12 +17,17 @@
 package torch
 package nn
 package modules
-package linear
 
-class LinearSuite extends munit.FunSuite {
-  test("Linear shape") {
-    val linear = Linear(20, 30)
-    val input = randn(Seq(128, 20))
-    assertEquals(linear(input).shape, Seq(128, 30))
+class FlattenSuite extends munit.FunSuite {
+  test("Flatten") {
+    val input = torch.randn(Seq(32, 1, 5, 5))
+    val m1 = nn.Flatten()
+    val o1 = m1(input)
+    assertEquals(o1.shape, Seq(32, 25))
+    assert(input.reshape(32, 25).equal(o1))
+    val m2 = nn.Flatten(0, 2)
+    val o2 = m2(input)
+    assertEquals(o2.shape, Seq(160, 5))
+    assert(input.reshape(160, 5).equal(o2))
   }
 }
