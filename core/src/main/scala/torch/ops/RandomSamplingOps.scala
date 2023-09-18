@@ -39,15 +39,13 @@ private[torch] trait RandomSamplingOps {
 // TODO bernoulli Draws binary random numbers (0 or 1) from a Bernoulli distribution.
 
   /* Returns a tensor where each row contains `numSamples` indices sampled from the multinomial probability distribution located in the corresponding row of tensor `input`. */
-// TODO Demote Float to Int
   def multinomial[D <: FloatNN](
       input: Tensor[D],
       numSamples: Long,
-      replacement: Boolean = false
-  ): Tensor[D] =
-    // TODO Handle Optional Generators properly
-    val generator = new org.bytedeco.pytorch.GeneratorOptional()
-    Tensor(torchNative.multinomial(input.native, numSamples, replacement, generator))
+      replacement: Boolean = false,
+      generator: Option[Generator] | Generator = None
+  ): Tensor[Int64] =
+    Tensor(torchNative.multinomial(input.native, numSamples, replacement, generator.toOptional))
 
 // TODO normal Returns a tensor of random numbers drawn from separate normal distributions whose mean and standard deviation are given.
 // TODO poisson Returns a tensor of the same size as input with each element sampled from a Poisson distribution with rate parameter given by the corresponding element in input i.e.,
@@ -113,14 +111,48 @@ private[torch] trait RandomSamplingOps {
   ): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
     xLike(input, dtype, layout, device, requiresGrad, memoryFormat, torchNative.torch_rand_like)
 
-  /** Returns a tensor filled with random integers generated uniformly between low (inclusive) and
-    * high (exclusive).
+  /** Returns a tensor filled with random integers generated uniformly between `low` (inclusive) and
+    * `high` (exclusive).
+    *
+    * The shape of the tensor is defined by the variable argument `size`.
+    *
+    * @param low
+    *   Lowest integer to be drawn from the distribution. Default: 0.
+    * @param high
+    *   One above the highest integer to be drawn from the distribution.
+    * @param size
+    *   a tuple defining the shape of the output tensor.
+    * @param generator
+    *   a pseudorandom number generator for sampling
+    * @param dtype
+    *   the desired data type of returned tensor.
+    * @param layout
+    *   the desired layout of returned Tensor.
+    * @param device
+    *   the desired device of returned tensor.
+    * @param requiresGrad
+    *   If autograd should record operations on the returned tensor.
+    * @tparam T
+    *   the dtype of the created tensor.
     */
-  def randint(low: Long, high: Int, size: Seq[Int]) =
-    // TODO Handle Optional Generators properly
-    val generator = new org.bytedeco.pytorch.GeneratorOptional()
+  def randint[D <: DType](
+      low: Long = 0,
+      high: Long,
+      size: Seq[Int],
+      generator: Option[Generator] | Generator = None,
+      dtype: D = int64,
+      layout: Layout = Strided,
+      device: Device = CPU,
+      requiresGrad: Boolean = false
+  ): Tensor[D] =
     Tensor(
-      torchNative.torch_randint(low, high, size.toArray.map(_.toLong), generator)
+      torchNative.torch_randint(
+        low,
+        high,
+        size.toArray.map(_.toLong),
+        generator.toOptional,
+        NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
+      )
     )
 
 // TODO randint_like Returns a tensor with the same shape as Tensor input filled with random integers generated uniformly between low (inclusive) and high (exclusive).

@@ -116,14 +116,14 @@ class ReductionOpsSuite extends TensorCheckSuite {
   // TODO unit test logsumexp
 
   testUnaryOp(
-    op = mean,
+    op = mean(_),
     opName = "mean",
     inputTensor = Tensor(Seq(0.2294, -0.5481, 1.3288)),
     expectedTensor = Tensor(0.3367)
   )
 
   test("mean with nan") {
-    assert(mean(Tensor(Seq(Float.NaN, 1, 2))).isnan.item)
+    assert(mean(Tensor[Float](Seq(Float.NaN, 1, 2))).isnan.item)
   }
 
   testUnaryOp(

@@ -15,15 +15,16 @@
  */
 
 //> using scala "3.3"
+//> using repository "sonatype:snapshots"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-795485b-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-bbdc238-SNAPSHOT"
 //> using lib "me.tongfei:progressbar:0.9.5"
 //> using lib "com.github.alexarchambault::case-app:2.1.0-M24"
 //> using lib "org.scala-lang.modules::scala-parallel-collections:1.0.4"
 // replace with pytorch-platform-gpu if you have a CUDA capable GPU
-//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.9"
+//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.10-SNAPSHOT"
 // enable for CUDA support
-////> using lib "org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.9"
+////> using lib "org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.10-SNAPSHOT"
 
 import Commands.*
 import ImageClassifier.{Prediction, predict, train}
@@ -212,11 +213,11 @@ object ImageClassifier extends CommandsEntryPoint:
           loss.backward()
           // add a few sanity checks
           assert(
-            model.parameters.forall(t => !t.isnan.any.item),
+            model.parameters.forall(p => !p.isnan.any.item),
             "Parameters containing nan values"
           )
           assert(
-            model.parameters.forall(t => !t.grad.isnan.any.item),
+            model.parameters.forall(p => !p.grad.exists(g => g.isnan.any.item)),
             "Gradients containing nan values"
           )
           optimizer.step()
@@ -305,7 +306,7 @@ case class PredictOptions(
     @HelpMessage(
       "Path to to the serialized model created by running 'train'. Tries the latest model in 'checkpoints' if not set."
     )
-    modelDir: Option[String]
+    modelDir: Option[String] = None
 )
 
 object Commands:

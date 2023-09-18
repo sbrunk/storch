@@ -58,10 +58,13 @@ class TensorSuite extends TensorCheckSuite {
     val t = torch.ones(Seq(3)) * 2
     t.requiresGrad = true
     val sum = t.sum
-    assertEquals(t.grad.dtype, undefined)
+    assert(t.grad.isEmpty)
     sum.backward()
-    assertEquals(t.grad.dtype, float32)
-    assert(t.grad.equal(torch.ones(Seq(3))))
+    assert(t.grad.isDefined)
+    t.grad.map { grad =>
+      assertEquals(grad.dtype, float32)
+      assert(grad.equal(torch.ones(Seq(3))))
+    }
   }
 
   test("indexing") {
@@ -72,6 +75,20 @@ class TensorSuite extends TensorCheckSuite {
     assertEquals(tensor(torch.Slice(), 0), Tensor(Seq(0, 4, 8, 12)))
     // last column
     assertEquals(tensor(---, -1), Tensor(Seq(3, 7, 11, 15)))
+  }
+
+  test("update/setter") {
+    val tensor = torch.arange(0, 16).reshape(4, 4)
+    tensor(Seq(0)) = 20
+    assertEquals(tensor(0), torch.full(Seq(4), 20))
+
+    val updated = Tensor[Int](30)
+    tensor(Seq(1, 0)) = Tensor[Int](30)
+    assertEquals(tensor(1, 0), updated)
+
+    // copy column 1 to column 0
+    tensor(Seq(torch.Slice(), 1)) = tensor(torch.Slice(), 0)
+    assertEquals(tensor(torch.Slice(), 1), tensor(torch.Slice(), 0))
   }
 
   test("Tensor creation properly handling buffers") {

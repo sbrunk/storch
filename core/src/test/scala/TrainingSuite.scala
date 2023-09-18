@@ -55,10 +55,14 @@ class TraininSuite extends munit.FunSuite {
         val loss = lossFn(pred, y)
         loss.backward()
         noGrad {
-          weight -= weight.grad * learningRate
-          bias -= bias.grad * learningRate
-          weight.grad.zero()
-          bias.grad.zero()
+          weight.grad.foreach { grad =>
+            weight -= grad * learningRate
+            grad.zero()
+          }
+          bias.grad.foreach { grad =>
+            weight -= grad * learningRate
+            grad.zero()
+          }
         }
         loss
       }.last

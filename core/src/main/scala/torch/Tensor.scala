@@ -314,7 +314,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     * time a call to backward() computes gradients for this Tensor. The attribute will then contain
     * the gradients computed and future calls to backward() will accumulate (add) gradients into it.
     */
-  def grad: Tensor[D | Undefined] = Tensor(native.grad())
+  def grad: Option[Tensor[D]] =
+    val nativeGrad = native.grad()
+    Option.when(nativeGrad.defined())(Tensor(nativeGrad))
 
   def ge(other: ScalaType): Tensor[Bool] = Tensor(native.ge(toScalar(other)))
 
@@ -523,10 +525,10 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def zero(): Unit = native.zero_()
 
-  def index[T <: Boolean | Long: ClassTag](
+  private def nativeIndices[T <: Boolean | Long: ClassTag](
       indices: (Slice | Int | Long | Tensor[Bool] | Tensor[UInt8] | Tensor[Int64] | Seq[T] |
         None.type | Ellipsis)*
-  ): Tensor[D] =
+  ): TensorIndexArrayRef =
     def toSymInt(maybeLong: Option[Long]) = maybeLong.map(l => SymIntOptional(SymInt(l))).orNull
     // see https://pytorch.org/cppdocs/notes/tensor_indexing.html
     val nativeIndices: Seq[pytorch.TensorIndex] =
@@ -546,8 +548,34 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
         case s: Seq[T] @unchecked => new pytorch.TensorIndex(Tensor[T](s).native)
         case e: Ellipsis          => new pytorch.TensorIndex(new EllipsisIndexType)
         // TODO index with single boolean. Needs investigation why it is not mapped.
-    val ref = new pytorch.TensorIndexArrayRef(new pytorch.TensorIndexVector(nativeIndices.toArray*))
-    Tensor(native.index(ref))
+    new pytorch.TensorIndexArrayRef(new pytorch.TensorIndexVector(nativeIndices.toArray*))
+
+  def index[T <: Boolean | Long: ClassTag](
+      indices: (Slice | Int | Long | Tensor[Bool] | Tensor[UInt8] | Tensor[Int64] | Seq[T] |
+        None.type | Ellipsis)*
+  ): Tensor[D] =
+    Tensor(native.index(nativeIndices(indices*)))
+
+  /** Set tensor value(s) at indices
+    *
+    * @example
+    *   ```scala sc
+    *   val t = torch.zeros(Seq(2, 2))
+    *   // set first row to ones
+    *   t(Seq(0)) = 1
+    *   ```
+    */
+  def update[T <: Boolean | Long: ClassTag](
+      indices: Seq[
+        Slice | Int | Long | Tensor[Bool] | Tensor[UInt8] | Tensor[Int64] | Seq[T] | None.type |
+          Ellipsis
+      ],
+      values: Tensor[D] | ScalaType
+  ): this.type =
+    values match
+      case t: Tensor[D]            => native.index_put_(nativeIndices(indices*), t.native)
+      case s: ScalaType @unchecked => native.index_put_(nativeIndices(indices*), s.toScalar)
+    this
 
   def requiresGrad: Boolean = native.requires_grad()
 
