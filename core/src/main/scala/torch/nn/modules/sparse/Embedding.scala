@@ -77,7 +77,8 @@ final class Embedding[ParamType <: FloatNN | ComplexNN: Default](
   override val nativeModule: EmbeddingImpl = EmbeddingImpl(options)
   nativeModule.to(paramType.toScalarType, false)
 
-  val weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)
+  def weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)
+  def weight_=(w: Tensor[ParamType]): Unit = nativeModule.weight(w.native)
 
   def apply(t: Tensor[Int64]): Tensor[ParamType] = Tensor(nativeModule.forward(t.native))
 

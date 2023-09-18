@@ -28,6 +28,15 @@ import torch.{DType, Tensor}
   * formulation can be simplified as:
   *
   * TODO LaTeX
+  *
+  * Example:
+  *
+  * ```scala sc
+  * import torch.*
+  * val m = nn.LogSoftmax(dim = 1)
+  * val input = torch.randn(Seq(2, 3))
+  * val output = m(input)
+  * ```
   */
 final class LogSoftmax[D <: DType: Default](dim: Int) extends TensorModule[D]:
   override val nativeModule: LogSoftmaxImpl = LogSoftmaxImpl(dim)

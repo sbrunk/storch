@@ -32,12 +32,12 @@ final class LayerNorm[ParamType <: DType: Default](
     eps: Double = 1e-05,
     elementwiseAffine: Boolean = true
 ) extends TensorModule[ParamType]:
-  private val options: LayerNormOptions = normalizedShape match {
-    case normalizedShape: Seq[Int] =>
-      LayerNormOptions(LongVector(normalizedShape.map(_.toLong)*))
-    case normalizedShape: Int =>
-      LayerNormOptions(LongVector(normalizedShape.toLong))
-  }
+  private val options: LayerNormOptions =
+    val shape = normalizedShape match
+      case normalizedShape: Seq[Int] => normalizedShape.toArray.map(_.toLong)
+      case normalizedShape: Int      => Array(normalizedShape.toLong)
+    LayerNormOptions(LongVector(shape*))
+
   options.eps().put(eps)
   options.elementwise_affine().put(elementwiseAffine)
 

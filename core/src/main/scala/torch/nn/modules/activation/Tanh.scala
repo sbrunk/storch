@@ -27,6 +27,15 @@ import torch.{DType, Tensor}
 /** Applies the Hyperbolic Tangent (Tanh) function element-wise. Tanh is defined as::
   *
   * TODO LaTeX
+  *
+  * Example:
+  *
+  * ```scala sc
+  * import torch.*
+  * val m = nn.Tanh()
+  * val input = torch.randn(Seq(2))
+  * val output = m(input)
+  * ```
   */
 final class Tanh[D <: DType: Default] extends TensorModule[D]:
 
