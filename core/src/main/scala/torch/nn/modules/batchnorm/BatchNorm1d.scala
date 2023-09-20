@@ -22,12 +22,12 @@ package batchnorm
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
 import sourcecode.Name
-import org.bytedeco.pytorch.BatchNorm2dImpl
+import org.bytedeco.pytorch.BatchNorm1dImpl
 import org.bytedeco.pytorch.BatchNormOptions
-import torch.nn.modules.{HasParams, HasWeight}
+import torch.nn.modules.{HasParams, HasWeight, TensorModule}
 
-/** Applies Batch Normalization over a 4D input as described in the paper [Batch Normalization:
-  * Accelerating Deep Network Training by Reducing Internal Covariate
+/** Applies Batch Normalization over a 2D or 3D input as described in the paper [Batch
+  * Normalization: Accelerating Deep Network Training by Reducing Internal Covariate
   * Shift](https://arxiv.org/abs/1502.03167) .
   *
   * $$y = \frac{x - \mathrm{E}[x]}{\sqrt{\mathrm{Var}[x] + \epsilon}} * \gamma + \beta$$
@@ -50,10 +50,10 @@ import torch.nn.modules.{HasParams, HasWeight}
   * ```scala sc
   * import torch.nn
   * // With Learnable Parameters
-  * var m = nn.BatchNorm2d(numFeatures = 100)
+  * var m = nn.BatchNorm1d(numFeatures = 100)
   * // Without Learnable Parameters
-  * m = nn.BatchNorm2d(100, affine = false)
-  * val input = torch.randn(Seq(20, 100, 35, 45))
+  * m = nn.BatchNorm1d(100, affine = false)
+  * val input = torch.randn(Seq(20, 100))
   * val output = m(input)
   * ```
   *
@@ -63,8 +63,10 @@ import torch.nn.modules.{HasParams, HasWeight}
   *   $\hat{x}_\text{new} = (1 - \text{momentum}) \times \hat{x} + \text{momentum} \times x_t$,
   *   where $\hat{x}$ is the estimated statistic and $x_t$ is the new observed value.
   *
-  * Because the Batch Normalization is done over the C dimension, computing statistics on (N, H, W)
-  * slices, it’s common terminology to call this Spatial Batch Normalization.
+  * Because the Batch Normalization is done over the [C] dimension, computing statistics on [(N, L)]
+  * slices, it\'s common terminology to call this Temporal Batch Normalization.
+  *
+  * Args:
   *
   * @param numFeatures
   *   number of features or channels $C$ of the input
@@ -84,14 +86,15 @@ import torch.nn.modules.{HasParams, HasWeight}
   *
   * Shape:
   *
-  *   - Input: $(N, C, H, W)$
-  *   - Output: $(N, C, H, W)$ (same shape as input)
+  *   - Input: $(N, C)$ or $(N, C, L)$, where $N$ is the batch size, $C$ is the number of features
+  *     or channels, and $L$ is the sequence length
+  *   - Output: $(N, C)$ or $(N, C, L)$ (same shape as input)
   *
   * @group nn_conv
   *
   * TODO use dtype
   */
-final class BatchNorm2d[ParamType <: FloatNN | ComplexNN: Default](
+final class BatchNorm1d[ParamType <: FloatNN | ComplexNN: Default](
     numFeatures: Int,
     eps: Double = 1e-05,
     momentum: Double = 0.1,
@@ -107,7 +110,7 @@ final class BatchNorm2d[ParamType <: FloatNN | ComplexNN: Default](
   options.affine().put(affine)
   options.track_running_stats().put(trackRunningStats)
 
-  override private[torch] val nativeModule: BatchNorm2dImpl = BatchNorm2dImpl(options)
+  override private[torch] val nativeModule: BatchNorm1dImpl = BatchNorm1dImpl(options)
   nativeModule.to(paramType.toScalarType, false)
 
   // TODO weight, bias etc. are undefined if affine = false. We need to take that into account

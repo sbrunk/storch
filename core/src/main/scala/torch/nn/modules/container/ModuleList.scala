@@ -17,18 +17,22 @@
 package torch
 package nn
 package modules
-package flatten
+package container
 
-class FlattenSuite extends munit.FunSuite {
-  test("Flatten") {
-    val input = torch.randn(Seq(32, 1, 5, 5))
-    val m1 = nn.Flatten()
-    val o1 = m1(input)
-    assertEquals(o1.shape, Seq(32, 25))
-    assert(input.reshape(32, 25).equal(o1))
-    val m2 = nn.Flatten(0, 2)
-    val o2 = m2(input)
-    assertEquals(o2.shape, Seq(160, 5))
-    assert(input.reshape(160, 5).equal(o2))
-  }
-}
+import sourcecode.Name
+import scala.util.Random
+
+final class ModuleList[D <: DType](override val modules: TensorModule[D]*)
+    extends Module
+    with Seq[TensorModule[D]]:
+  modules.zipWithIndex.foreach((module, index) =>
+    this.register(module)(using Name(index.toString()))
+  )
+
+  override def iterator: Iterator[TensorModule[D]] = modules.iterator
+
+  def apply(i: Int): torch.nn.modules.TensorModule[D] = modules(i)
+
+  override def length: Int = modules.length
+
+  override def toString = getClass().getSimpleName()

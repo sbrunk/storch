@@ -29,7 +29,7 @@ import org.bytedeco.pytorch.{
 }
 
 import scala.reflect.Typeable
-import org.bytedeco.javacpp.LongPointer
+import org.bytedeco.javacpp.{LongPointer, DoublePointer}
 import org.bytedeco.pytorch.GenericDict
 import org.bytedeco.pytorch.GenericDictIterator
 import spire.math.Complex
@@ -75,6 +75,9 @@ private[torch] object NativeConverters:
       case x: Int    => LongPointer(Array(x.toLong, x.toLong)*)
       case (h, w)    => LongPointer(Array(h.toLong, w.toLong)*)
       case (t, h, w) => LongPointer(Array(t.toLong, h.toLong, w.toLong)*)
+
+  given doubleToDoublePointer: Conversion[Double, DoublePointer] = (input: Double) =>
+    DoublePointer(Array(input)*)
 
   extension (x: ScalaType)
     def toScalar: pytorch.Scalar = x match
