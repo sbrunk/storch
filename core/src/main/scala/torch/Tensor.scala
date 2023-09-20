@@ -521,6 +521,15 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def prod[D <: DType](dtype: D = this.dtype) = Tensor(native.prod())
 
+  /** Repeats this tensor along the specified dimensions.
+    *
+    * Unlike [[expand]], this function copies the tensor’s data.
+    *
+    * @param sizes
+    *   The number of times to repeat this tensor along each dimension
+    */
+  def repeat(sizes: Int*): Tensor[D] = Tensor(native.repeat(sizes.map(_.toLong)*))
+
   def reshape(shape: Int*): Tensor[D] = Tensor(native.reshape(shape.map(_.toLong)*))
 
   def shape: Seq[Int] = size

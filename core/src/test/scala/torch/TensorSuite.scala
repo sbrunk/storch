@@ -104,4 +104,16 @@ class TensorSuite extends TensorCheckSuite {
       }
     )
   }
+
+  test("repeat") {
+    val x = torch.Tensor(Seq(1, 2, 3))
+    val repeated = x.repeat(4, 2)
+
+    val repeatCols = torch.cat(Seq(x, x))
+    val repeatRows = torch.stack(Seq.fill(4)(repeatCols))
+
+    assert(repeated equal repeatRows)
+
+    assertEquals(x.repeat(4, 2, 1).size, Seq(4, 2, 3))
+  }
 }
