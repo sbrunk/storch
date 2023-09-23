@@ -748,6 +748,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def toSeq: Seq[DTypeToScala[D]] = ArraySeq.unsafeWrapArray(toArray)
 
+  /** Returns the sum of the elements of the diagonal of the input 2-D matrix. */
+  def trace: Tensor[D] = Tensor(native.trace)
+
   /** Returns a summary of the contents of this tensor.
     *
     * @param maxEntries
