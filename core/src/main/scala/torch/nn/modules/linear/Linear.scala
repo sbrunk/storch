@@ -50,18 +50,24 @@ import torch.nn.modules.{HasParams}
 final class Linear[ParamType <: FloatNN: Default](
     inFeatures: Long,
     outFeatures: Long,
-    bias: Boolean = true
+    hasBias: Boolean = true
     // dtype: ParamType = defaultDType[ParamType]
 ) extends HasParams[ParamType]
     with TensorModule[ParamType]:
   private val options = new LinearOptions(inFeatures, outFeatures)
-  options.bias().put(bias)
+  options.bias().put(hasBias)
   override private[torch] val nativeModule: LinearImpl = new LinearImpl(options)
   nativeModule.to(paramType.toScalarType, false)
+
+  def weight = Tensor[ParamType](nativeModule.weight())
+  def weight_=(t: Tensor[ParamType]): Unit = nativeModule.weight(t.native)
+
+  def bias = Tensor[ParamType](nativeModule.bias())
+  def bias_=(t: Tensor[ParamType]): Unit = nativeModule.bias(t.native)
 
   def apply(input: Tensor[ParamType]): Tensor[ParamType] = Tensor(
     nativeModule.forward(input.native)
   )
 
   override def toString =
-    s"${getClass.getSimpleName}(inFeatures=$inFeatures, outFeatures=$outFeatures, bias=$bias)"
+    s"${getClass.getSimpleName}(inFeatures=$inFeatures, outFeatures=$outFeatures, bias=$hasBias)"

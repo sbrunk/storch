@@ -421,11 +421,14 @@ type NumericPromoted[D <: DType] <: DType = D match
   case _    => D
 
 /** Promoted type for tensor operations that always output floats (e.g. `sin`) */
-type FloatPromoted[D <: DType] <: FloatNN = D match
-  case Float16  => Float16
-  case BFloat16 => BFloat16
-  case Float64  => Float64
-  case _        => Float32
+type FloatPromoted[D <: DType] <: FloatNN | ComplexNN = D match
+  case Float16    => Float16
+  case BFloat16   => BFloat16
+  case Float64    => Float64
+  case Complex32  => Complex32
+  case Complex64  => Complex64
+  case Complex128 => Complex128
+  case _          => Float32
 
 /** Demoted type for complex to real type extractions (e.g. `imag`, `real`) */
 type ComplexToReal[D <: DType] <: DType = D match

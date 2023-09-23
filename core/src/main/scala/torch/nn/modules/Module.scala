@@ -82,6 +82,10 @@ abstract class Module {
     nativeModule.register_parameter(name.value, t.native, requiresGrad)
     t
 
+  /** Adds a buffer to the module. */
+  def registerBuffer[D <: DType](name: String, tensor: Tensor[D]): Tensor[D] =
+    Tensor(nativeModule.register_buffer(name, tensor.native))
+
   def eval(): Unit = nativeModule.eval()
 
   def isTraining: Boolean = nativeModule.is_training
