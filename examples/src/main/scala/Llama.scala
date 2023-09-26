@@ -16,7 +16,6 @@
 
 import torch.*
 import torch.nn.functional as F
-import torch.nn.modules.Default
 import RopeScaling.Type
 
 case class RopeScaling(
@@ -29,6 +28,11 @@ case class RopeScaling(
 object RopeScaling:
   enum Type:
     case Linear, Dynamic
+
+case class PretrainedConfig(
+  output_hidden_states: Boolean = false,
+  output_attentions: Boolean = false
+)
 
 case class LlamaConfig(
     vocab_size: Int = 32000,
@@ -47,8 +51,11 @@ case class LlamaConfig(
     eos_token_id: Int = 2,
     pretraining_tp: Int = 1,
     tie_word_embeddings: Boolean = false,
-    rope_scaling: Option[RopeScaling] = None
-)
+    rope_scaling: Option[RopeScaling] = None,
+    pretrainedCondig: PretrainedConfig = PretrainedConfig()
+) {
+  export pretrainedCondig.*
+}
 
 object Llama {
 
@@ -309,7 +316,7 @@ object Llama {
     val rotary_emb = {
       config.rope_scaling match
         case None =>
-          LlamaRotaryEmbedding(head_dim, max_position_embeddings = max_position_embeddings)
+          LlamaRotaryEmbedding(head_dim, max_position_embeddings = this.max_position_embeddings)
         case Some(rope_scaling) =>
           val scaling_type = rope_scaling.tpe
           val scaling_factor = rope_scaling.factor
@@ -471,10 +478,10 @@ object Llama {
 
         var residual = hidden_states
 
-        var new_hidden_states = input_layernorm(hidden_states)
+        val _hidden_states = input_layernorm(hidden_states)
 
         // Self Attention
-        val (new_hidden_states, self_attn_weights, present_key_value) = self_attn(
+        var (new_hidden_states, self_attn_weights, present_key_value) = self_attn(
             hidden_states=hidden_states,
             attention_mask=attention_mask,
             position_ids=position_ids,
@@ -505,12 +512,11 @@ object Llama {
    * 
    *   Transformer decoder consisting of *config.num_hidden_layers* layers. Each layer is a [`LlamaDecoderLayer`]
    */
-  class LlamaModel(config: LlamaConfig) extends nn.Module /* extends LlamaPreTrainedModel */ {
+  class LlamaModel[ParamType <: FloatNN | ComplexNN: Default](config: LlamaConfig) extends nn.Module /* extends LlamaPreTrainedModel */ {
     val padding_idx = config.pad_token_id
     val vocab_size = config.vocab_size
 
-    class Embedding extends nn.Module
-    val embed_tokens = Embedding //nn.Embedding(config.vocab_size, config.hidden_size, padding_idx)
+    var embed_tokens = nn.Embedding(config.vocab_size, config.hidden_size, Some(padding_idx))
     val layers = nn.ModuleList(for _ <- 0 until config.num_hidden_layers yield LlamaDecoderLayer(config))
     val norm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
 
@@ -520,7 +526,7 @@ object Llama {
 
     def get_input_embeddings = embed_tokens
 
-    def set_input_embeddings(value) = embed_tokens = value
+    def set_input_embeddings(value: nn.Embedding[ParamType]) = embed_tokens = value
 
     // Copied from transformers.models.bart.modeling_bart.BartDecoder._prepare_decoder_attention_mask
     def _prepare_decoder_attention_mask(attention_mask: Tensor[Int64], input_shape, inputs_embeds, past_key_values_length) =
@@ -542,60 +548,59 @@ object Llama {
               inputs_embeds.device
           )
           val combined_attention_mask = (
-            if combined_attention_mask is None expanded_attn_mask else expanded_attn_mask + combined_attention_mask
+            if combined_attention_mask is None then expanded_attn_mask else expanded_attn_mask + combined_attention_mask
           )
 
         combined_attention_mask
 
     def forward(
-        input_ids: Tensor[Long], // = None,
-        attention_mask: Option[Tensor[D]] = None,
-        position_ids: Option[Tensor[Long]] = None,
-        past_key_values: Option[List[FloatTensor]] = None,
-        inputs_embeds: Option[FloatTensor] = None,
+        input_ids: Option[Tensor[Int64]], // = None,
+        attention_mask: Option[Tensor[Float32]] = None,
+        position_ids: Option[Tensor[Int64]] = None,
+        past_key_values: Option[List[Tensor[Float32]]] = None,
+        inputs_embeds: Option[Tensor[Float32]] = None,
         use_cache: Option[Boolean] = None,
         output_attentions: Option[Boolean] = None,
         output_hidden_states: Option[Boolean] = None,
-        return_dict: Option[Boolean] = None,
-    ): Union[Tuple, BaseModelOutputWithPast] =
-        output_attentions = output_attentions if output_attentions is not None else this.config.output_attentions
-        output_hidden_states = (
-            output_hidden_states if output_hidden_states is not None else this.config.output_hidden_states
+    ): BaseModelOutputWithPast =
+        val _output_attentions = output_attentions.getOrElse(this.config.output_attentions)
+        val _output_hidden_states = (
+            output_hidden_states.getOrElse(this.config.output_hidden_states)
         )
-        use_cache = use_cache if use_cache is not None else this.config.use_cache
+        val _use_cache = use_cache.getOrElse(this.config.use_cache)
 
-        return_dict = return_dict if return_dict is not None else this.config.use_return_dict
+      // retrieve input_ids and inputs_embeds
 
-        # retrieve input_ids and inputs_embeds
-        if input_ids is not None and inputs_embeds is not None:
-            raise ValueError("You cannot specify both decoder_input_ids and decoder_inputs_embeds at the same time")
-        elif input_ids is not None:
-            batch_size, seq_length = input_ids.shape
-        elif inputs_embeds is not None:
-            batch_size, seq_length, _ = inputs_embeds.shape
-        else:
-            raise ValueError("You have to specify either decoder_input_ids or decoder_inputs_embeds")
+        //val Seq(batch_size, seq_length) 
+        val x = (input_ids, inputs_embeds) match {
+          case (Some(_), Some(_)) => throw new IllegalArgumentException("You cannot specify both decoder_input_ids and decoder_inputs_embeds at the same time")
+          case (Some(input_ids), _) => input_ids.shape
+          case (_, Some(inputs_embeds)) => inputs_embeds.shape
+          case _ => throw new IllegalArgumentException("You have to specify either decoder_input_ids or decoder_inputs_embeds")
+        }
 
-        seq_length_with_past = seq_length
-        past_key_values_length = 0
 
-        if past_key_values is not None:
+        var seq_length_with_past = seq_length
+        var past_key_values_length = 0
+
+        past_key_values.foreach {past_key_values =>
             past_key_values_length = past_key_values[0][0].shape[2]
             seq_length_with_past = seq_length_with_past + past_key_values_length
+        }
 
-        if position_ids is None:
+        if position_ids is None then
             device = input_ids.device if input_ids is not None else inputs_embeds.device
             position_ids = torch.arange(
                 past_key_values_length, seq_length + past_key_values_length, dtype=torch.long, device=device
             )
             position_ids = position_ids.unsqueeze(0).view(-1, seq_length)
-        else:
+        else
             position_ids = position_ids.view(-1, seq_length).long()
 
-        if inputs_embeds is None:
+        if inputs_embeds is None then
             inputs_embeds = this.embed_tokens(input_ids)
         # embed positions
-        if attention_mask is None:
+        if attention_mask is None then
             attention_mask = torch.ones(
                 (batch_size, seq_length_with_past), dtype=torch.bool, device=inputs_embeds.device
             )
@@ -605,29 +610,29 @@ object Llama {
 
         hidden_states = inputs_embeds
 
-        if this.gradient_checkpointing and this.training:
-            if use_cache:
+        if this.gradient_checkpointing and this.training then
+            if use_cache then
                 logger.warning_once(
                     "`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=false`..."
                 )
                 use_cache = false
 
-        # decoder layers
+        // decoder layers
         all_hidden_states = () if output_hidden_states else None
         all_self_attns = () if output_attentions else None
         next_decoder_cache = () if use_cache else None
 
-        for idx, decoder_layer in enumerate(this.layers):
+        for idx, decoder_layer in enumerate(this.layers)
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
 
             past_key_value = past_key_values[idx] if past_key_values is not None else None
 
-            if this.gradient_checkpointing and this.training:
+            if this.gradient_checkpointing && this.training then
 
-                def create_custom_forward(module):
-                    def custom_forward(*inputs):
-                        # None for past_key_value
+                def create_custom_forward(module) =
+                    def custom_forward(*inputs) =
+                        // None for past_key_value
                         return module(*inputs, output_attentions, None)
 
                     return custom_forward
@@ -639,7 +644,7 @@ object Llama {
                     position_ids,
                     None,
                 )
-            else:
+            else
                 layer_outputs = decoder_layer(
                     hidden_states,
                     attention_mask=attention_mask,
@@ -651,22 +656,20 @@ object Llama {
 
             hidden_states = layer_outputs[0]
 
-            if use_cache:
+            if use_cache then
                 next_decoder_cache += (layer_outputs[2 if output_attentions else 1],)
 
-            if output_attentions:
+            if output_attentions then
                 all_self_attns += (layer_outputs[1],)
 
         hidden_states = this.norm(hidden_states)
 
-        # add hidden states from the last decoder layer
-        if output_hidden_states:
+        // add hidden states from the last decoder layer
+        if output_hidden_states then
             all_hidden_states += (hidden_states,)
 
-        next_cache = next_decoder_cache if use_cache else None
-        if not return_dict:
-            return tuple(v for v in [hidden_states, next_cache, all_hidden_states, all_self_attns] if v is not None)
-        return BaseModelOutputWithPast(
+        next_cache = if use_cache then next_decoder_cache else None
+        BaseModelOutputWithPast(
             last_hidden_state=hidden_states,
             past_key_values=next_cache,
             hidden_states=all_hidden_states,
