@@ -103,6 +103,16 @@ lazy val vision = project
   )
   .dependsOn(core)
 
+lazy val transformers = project
+  .in(file("transformers"))
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      // TODO tokenizers
+    )
+  )
+  .dependsOn(core)
+
 lazy val examples = project
   .in(file("examples"))
   .enablePlugins(NoPublishPlugin)
@@ -139,7 +149,7 @@ lazy val docs = project
 lazy val root = project
   .enablePlugins(NoPublishPlugin)
   .in(file("."))
-  .aggregate(core, vision, examples, docs)
+  .aggregate(core, vision, transformers, examples, docs)
   .settings(
     javaCppVersion := (ThisBuild / javaCppVersion).value
   )

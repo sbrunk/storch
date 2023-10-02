@@ -80,11 +80,11 @@ object Llama {
   /** 
       Expands attention_mask from `[bsz, seq_len]` to `[bsz, 1, tgt_seq_len, src_seq_len]`.
     */
-  def _expand_mask[D <: FloatNN](mask: Tensor[Bool], dtype: D, tgt_len: Option[Int] = None) =
+  def _expand_mask[D <: FloatNN](mask: Tensor[Int64], dtype: D, tgt_len: Option[Int] = None) =
       val Seq(bsz, src_len) = mask.size
       val _tgt_len: Int = tgt_len.getOrElse(src_len)
       val expanded_mask = mask(::, None, None, ::).expand(bsz, 1, _tgt_len, src_len).to(dtype)
-      val inverted_mask = 1.0 - expanded_mask
+      val inverted_mask = 1.0f - expanded_mask
       inverted_mask.masked_fill(inverted_mask.to(torch.bool), torch.finfo(dtype).min)
 
   /** LlamaRMSNorm is equivalent to T5LayerNorm */
@@ -474,7 +474,7 @@ object Llama {
           past_key_value: Option[Tensor[D]] = None,
           output_attentions: Boolean = false,
           use_cache: Boolean = false,
-      ): (Tensor[Float32], Option[(Tensor[Float32], Tensor[Float32])]) =
+      ): (Tensor[D], Option[Tensor[D]], Option[(Tensor[D], Tensor[D])]) =
 
         var residual = hidden_states
 
@@ -497,27 +497,23 @@ object Llama {
         new_hidden_states = this.mlp(hidden_states)
         new_hidden_states = residual + hidden_states
 
-        val outputs = (hidden_states,)
-
-        if output_attentions then
-            outputs += (self_attn_weights,)
-
-        if use_cache then
-            outputs += (present_key_value,)
-
-        outputs
+        (
+          hidden_states,
+          if output_attentions then self_attn_weights else None,
+          if use_cache then present_key_value else None,
+        )
     }
 
   /**  The bare LLaMA Model outputting raw hidden-states without any specific head on top.
    * 
    *   Transformer decoder consisting of *config.num_hidden_layers* layers. Each layer is a [`LlamaDecoderLayer`]
    */
-  class LlamaModel[ParamType <: FloatNN | ComplexNN: Default](config: LlamaConfig) extends nn.Module /* extends LlamaPreTrainedModel */ {
+  class LlamaModel[D <: FloatNN: Default](config: LlamaConfig) extends nn.Module /* extends LlamaPreTrainedModel */ {
     val padding_idx = config.pad_token_id
     val vocab_size = config.vocab_size
 
     var embed_tokens = nn.Embedding(config.vocab_size, config.hidden_size, Some(padding_idx))
-    val layers = nn.ModuleList(for _ <- 0 until config.num_hidden_layers yield LlamaDecoderLayer(config))
+    val layers = nn.ModuleList(Seq.fill(config.num_hidden_layers)(LlamaDecoderLayer(config))*)
     val norm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
 
     // this.gradient_checkpointing = false TODO
@@ -526,53 +522,52 @@ object Llama {
 
     def get_input_embeddings = embed_tokens
 
-    def set_input_embeddings(value: nn.Embedding[ParamType]) = embed_tokens = value
+    def set_input_embeddings(value: nn.Embedding[D]) = embed_tokens = value
 
     // Copied from transformers.models.bart.modeling_bart.BartDecoder._prepare_decoder_attention_mask
-    def _prepare_decoder_attention_mask(attention_mask: Tensor[Int64], input_shape, inputs_embeds, past_key_values_length) =
-        // create causal mask
-        // [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
-        // var combined_attention_mask = None
-        val combined_attention_mask =
-          if input_shape(-1) > 1 then
-            val combined_attention_mask = make_causal_mask(
-              input_shape,
-              inputs_embeds.dtype,
-              device=inputs_embeds.device,
-              past_key_values_length=past_key_values_length,
-            )
+    def _prepare_decoder_attention_mask(attention_mask: Option[Tensor[Int64]], input_shape: Seq[Int], inputs_embeds: Tensor[D], past_key_values_length: Int) = {
+      // create causal mask
+      // [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
+      // var combined_attention_mask = None
+      var combined_attention_mask =
+        Option.when(input_shape(-1) > 1)(
+          _make_causal_mask(
+            input_shape,
+            inputs_embeds.dtype,
+            device=inputs_embeds.device,
+            past_key_values_length=past_key_values_length,
+          ))
 
-        for attention_mask <- attention_mask do
-          //  [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
-          val expanded_attn_mask = _expand_mask(attention_mask, inputs_embeds.dtype, tgt_len=input_shape[-1]).to(
-              inputs_embeds.device
-          )
-          val combined_attention_mask = (
-            if combined_attention_mask is None then expanded_attn_mask else expanded_attn_mask + combined_attention_mask
-          )
+      combined_attention_mask = for attention_mask <- attention_mask yield
+        //  [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
+        val expanded_attn_mask = _expand_mask(attention_mask, inputs_embeds.dtype, tgt_len=Some(input_shape(-1))).to(
+            inputs_embeds.device
+        )
+        combined_attention_mask match
+          case Some(combined_attention_mask) => expanded_attn_mask + combined_attention_mask
+          case None => expanded_attn_mask
 
-        combined_attention_mask
+      combined_attention_mask
+    }
 
     def forward(
         input_ids: Option[Tensor[Int64]], // = None,
         attention_mask: Option[Tensor[Float32]] = None,
-        position_ids: Option[Tensor[Int64]] = None,
-        past_key_values: Option[List[Tensor[Float32]]] = None,
+    //     position_ids: Option[Tensor[Int64]] = None,
+    //     past_key_values: Option[List[Tensor[Float32]]] = None,
         inputs_embeds: Option[Tensor[Float32]] = None,
-        use_cache: Option[Boolean] = None,
-        output_attentions: Option[Boolean] = None,
-        output_hidden_states: Option[Boolean] = None,
+    //     use_cache: Option[Boolean] = None,
+    //     output_attentions: Option[Boolean] = None,
+    //     output_hidden_states: Option[Boolean] = None,
     ): BaseModelOutputWithPast =
-        val _output_attentions = output_attentions.getOrElse(this.config.output_attentions)
-        val _output_hidden_states = (
-            output_hidden_states.getOrElse(this.config.output_hidden_states)
-        )
-        val _use_cache = use_cache.getOrElse(this.config.use_cache)
+    //     val _output_attentions = output_attentions.getOrElse(this.config.output_attentions)
+    //     val _output_hidden_states = (
+    //         output_hidden_states.getOrElse(this.config.output_hidden_states)
+    //     )
+    //     val _use_cache = use_cache.getOrElse(this.config.use_cache)
 
-      // retrieve input_ids and inputs_embeds
-
-        //val Seq(batch_size, seq_length) 
-        val x = (input_ids, inputs_embeds) match {
+        // retrieve input_ids and inputs_embeds
+        val Seq(batch_size, seq_length) = (input_ids, inputs_embeds) match {
           case (Some(_), Some(_)) => throw new IllegalArgumentException("You cannot specify both decoder_input_ids and decoder_inputs_embeds at the same time")
           case (Some(input_ids), _) => input_ids.shape
           case (_, Some(inputs_embeds)) => inputs_embeds.shape
@@ -583,97 +578,98 @@ object Llama {
         var seq_length_with_past = seq_length
         var past_key_values_length = 0
 
-        past_key_values.foreach {past_key_values =>
-            past_key_values_length = past_key_values[0][0].shape[2]
-            seq_length_with_past = seq_length_with_past + past_key_values_length
-        }
+    //     past_key_values.foreach {past_key_values =>
+    //         past_key_values_length = past_key_values.head.index(0).shape(2)
+    //         seq_length_with_past = seq_length_with_past + past_key_values_length
+    //     }
 
-        if position_ids is None then
-            device = input_ids.device if input_ids is not None else inputs_embeds.device
-            position_ids = torch.arange(
-                past_key_values_length, seq_length + past_key_values_length, dtype=torch.long, device=device
+    //     val _position_ids = position_ids match {
+    //       case None =>
+    //         val device = input_ids.map(_.device).getOrElse(inputs_embeds.device)
+    //         val _position_ids = torch.arange(
+    //             past_key_values_length, seq_length + past_key_values_length, dtype=torch.int64, device=device
+    //         )
+    //         position_ids.unsqueeze(0).view(-1, seq_length)
+    //       case Some(position_ids) =>
+    //         position_ids.view(-1, seq_length).long()
+    //     }
+
+        val _input_embeds = inputs_embeds.getOrElse(this.embed_tokens(input_ids.get)) // TODO option
+        // embed positions
+        var _attention_mask = attention_mask.getOrElse (
+          torch.ones(
+                (batch_size, seq_length_with_past), dtype=torch.bool, device=inputs_embeds.get.device // TODO option
             )
-            position_ids = position_ids.unsqueeze(0).view(-1, seq_length)
-        else
-            position_ids = position_ids.view(-1, seq_length).long()
+          )
+    //     _attention_mask = this._prepare_decoder_attention_mask(
+    //         _attention_mask, (batch_size, seq_length), inputs_embeds, past_key_values_length
+    //     )
 
-        if inputs_embeds is None then
-            inputs_embeds = this.embed_tokens(input_ids)
-        # embed positions
-        if attention_mask is None then
-            attention_mask = torch.ones(
-                (batch_size, seq_length_with_past), dtype=torch.bool, device=inputs_embeds.device
-            )
-        attention_mask = this._prepare_decoder_attention_mask(
-            attention_mask, (batch_size, seq_length), inputs_embeds, past_key_values_length
-        )
+    //     var hidden_states = inputs_embeds
 
-        hidden_states = inputs_embeds
-
-        if this.gradient_checkpointing and this.training then
-            if use_cache then
-                logger.warning_once(
-                    "`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=false`..."
-                )
-                use_cache = false
+    //     val _use_cache = if this.gradient_checkpointing and this.training then
+    //       // if use_cache.exists then
+    //         // logger.warning_once(
+    //         //     "`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=false`..."
+    //         // )
+    //       false
 
         // decoder layers
-        all_hidden_states = () if output_hidden_states else None
-        all_self_attns = () if output_attentions else None
-        next_decoder_cache = () if use_cache else None
+        // val all_hidden_states = () if output_hidden_states else None
+        // val all_self_attns = () if output_attentions else None
+        // val next_decoder_cache = () if use_cache else None
 
-        for idx, decoder_layer in enumerate(this.layers)
-            if output_hidden_states:
-                all_hidden_states += (hidden_states,)
+        // for (idx, decoder_layer) <- this.layers.zipWithIndex do
+        //     if output_hidden_states then
+        //         all_hidden_states += (hidden_states,)
 
-            past_key_value = past_key_values[idx] if past_key_values is not None else None
+        //     past_key_value = past_key_values(idx) if past_key_values is not None else None
 
-            if this.gradient_checkpointing && this.training then
+        //     if this.gradient_checkpointing && this.training then
 
-                def create_custom_forward(module) =
-                    def custom_forward(*inputs) =
-                        // None for past_key_value
-                        return module(*inputs, output_attentions, None)
+        //         def create_custom_forward(module) =
+        //             def custom_forward(*inputs) = module(*inputs, output_attentions, None) // None for past_key_value
+        //           custom_forward
 
-                    return custom_forward
+        //         layer_outputs = torch.utils.checkpoint.checkpoint(
+        //             create_custom_forward(decoder_layer),
+        //             hidden_states,
+        //             attention_mask,
+        //             _position_ids,
+        //             None,
+        //         )
+        //     else
+        //         layer_outputs = decoder_layer(
+        //             hidden_states,
+        //             attention_mask=attention_mask,
+        //             position_ids=_position_ids,
+        //             past_key_value=past_key_value,
+        //             output_attentions=output_attentions,
+        //             use_cache=use_cache,
+        //         )
 
-                layer_outputs = torch.utils.checkpoint.checkpoint(
-                    create_custom_forward(decoder_layer),
-                    hidden_states,
-                    attention_mask,
-                    position_ids,
-                    None,
-                )
-            else
-                layer_outputs = decoder_layer(
-                    hidden_states,
-                    attention_mask=attention_mask,
-                    position_ids=position_ids,
-                    past_key_value=past_key_value,
-                    output_attentions=output_attentions,
-                    use_cache=use_cache,
-                )
+        //     hidden_states = layer_outputs(0)
 
-            hidden_states = layer_outputs[0]
+        //     if _use_cache then
+        //       next_decoder_cache += (layer_outputs[2 if output_attentions else 1],)
 
-            if use_cache then
-                next_decoder_cache += (layer_outputs[2 if output_attentions else 1],)
+        //     if output_attentions then
+        //       all_self_attns += (layer_outputs[1],)
 
-            if output_attentions then
-                all_self_attns += (layer_outputs[1],)
+        // hidden_states = this.norm(hidden_states)
 
-        hidden_states = this.norm(hidden_states)
+        // // add hidden states from the last decoder layer
+        // if output_hidden_states then
+        //     all_hidden_states += (hidden_states,)
 
-        // add hidden states from the last decoder layer
-        if output_hidden_states then
-            all_hidden_states += (hidden_states,)
-
-        next_cache = if use_cache then next_decoder_cache else None
-        BaseModelOutputWithPast(
-            last_hidden_state=hidden_states,
-            past_key_values=next_cache,
-            hidden_states=all_hidden_states,
-            attentions=all_self_attns,
-        )
-}
+        // next_cache = if use_cache then next_decoder_cache else None
+        ???
+        // BaseModelOutputWithPast(
+        //     last_hidden_state=hidden_states,
+        //     past_key_values=next_cache,
+        //     hidden_states=all_hidden_states,
+        //     attentions=all_self_attns,
+        // )
+    ???
+  }
 }
