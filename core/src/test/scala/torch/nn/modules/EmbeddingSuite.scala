@@ -49,7 +49,7 @@ class EmbeddingSuite extends munit.FunSuite {
       torch.manualSeed(0)
       // example with padding_idx
       val embedding = nn.Embedding(5, 3, paddingIdx = Some(0))
-      embedding.weight = Tensor[Float](
+      embedding.weight = Tensor(
         Seq(
           Seq(0f, 0f, 0f),
           Seq(0.5684f, -1.0845f, -1.3986f),

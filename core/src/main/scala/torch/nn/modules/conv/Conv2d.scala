@@ -21,12 +21,10 @@ package conv
 
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.*
+import org.bytedeco.pytorch.{Conv2dImpl, Conv2dOptions, kZeros, kReflect, kReplicate, kCircular}
 import sourcecode.Name
-import torch.Tensor
-import torch.internal.NativeConverters.toNative
+import torch.internal.NativeConverters.{fromNative, toNative}
 import torch.nn.modules.conv.Conv2d.PaddingMode
-import torch.nn.modules.{HasParams}
 
 /** Applies a 2D convolution over an input signal composed of several input planes.
   *
@@ -61,9 +59,9 @@ final class Conv2d[ParamType <: FloatNN | ComplexNN: Default](
   override private[torch] val nativeModule: Conv2dImpl = Conv2dImpl(options)
   nativeModule.to(paramType.toScalarType, false)
 
-  def apply(t: Tensor[ParamType]): Tensor[ParamType] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[ParamType]): Tensor[ParamType] = fromNative(nativeModule.forward(t.native))
 
-  val weight = Tensor[ParamType](nativeModule.weight)
+  def weight: Tensor[ParamType] = fromNative(nativeModule.weight)
 
   override def toString =
     s"Conv2d($inChannels, $outChannels, kernelSize=$kernelSize, stride=$stride, padding=$padding, bias=$bias)"

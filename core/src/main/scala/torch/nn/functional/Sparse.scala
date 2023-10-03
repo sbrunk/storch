@@ -19,6 +19,7 @@ package nn
 package functional
 
 import org.bytedeco.pytorch.global.torch as torchNative
+import torch.internal.NativeConverters.fromNative
 
 private[torch] trait Sparse {
 
@@ -29,5 +30,5 @@ private[torch] trait Sparse {
     * @group nn_sparse
     */
   def oneHot(input: Tensor[Int64], numClasses: Long = -1): Tensor[Int64] =
-    Tensor(torchNative.one_hot(input.native, numClasses))
+    fromNative(torchNative.one_hot(input.native, numClasses))
 }

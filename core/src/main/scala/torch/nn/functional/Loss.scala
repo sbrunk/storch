@@ -20,10 +20,9 @@ package functional
 
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.TensorOptional
+import org.bytedeco.pytorch.{BCEWithLogitsLossOptions, TensorOptional}
 import org.bytedeco.pytorch.global.torch as torchNative
-import torch.internal.NativeConverters.toOptional
-import org.bytedeco.pytorch.BCEWithLogitsLossOptions
+import torch.internal.NativeConverters.{fromNative, toOptional}
 
 // Loss functions
 private[torch] trait Loss {
@@ -41,7 +40,7 @@ private[torch] trait Loss {
       input: Tensor[I],
       target: Tensor[O]
   ): Tensor[O] =
-    Tensor(
+    fromNative(
       torchNative.binary_cross_entropy_with_logits(
         input.native,
         target.native,

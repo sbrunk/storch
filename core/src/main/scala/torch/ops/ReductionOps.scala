@@ -68,7 +68,7 @@ private[torch] trait ReductionOps {
       input: Tensor[D],
       dim: Int | Option[Int] = None,
       keepdim: Boolean = false
-  ): Tensor[Int64] = Tensor(
+  ): Tensor[Int64] = fromNative(
     torchNative.argmax(input.native, dim.toOptional, keepdim)
   )
 
@@ -97,7 +97,7 @@ private[torch] trait ReductionOps {
       input: Tensor[D],
       dim: Int | Option[Int] = None,
       keepdim: Boolean = false
-  ): Tensor[Int64] = Tensor(
+  ): Tensor[Int64] = fromNative(
     torchNative.argmin(input.native, dim.toOptional, keepdim)
   )
 
@@ -118,7 +118,7 @@ private[torch] trait ReductionOps {
       dim: Int | Seq[Int],
       keepdim: Boolean = false
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.amax(input.native, dim.toArray, keepdim)
     )
 
@@ -139,7 +139,7 @@ private[torch] trait ReductionOps {
       dim: Int | Seq[Int],
       keepdim: Boolean = false
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.amin(input.native, dim.toArray, keepdim)
     )
 
@@ -160,13 +160,13 @@ private[torch] trait ReductionOps {
       keepdim: Boolean = false
   ): (Tensor[D], Tensor[D]) =
     val native = torchNative.aminmax(input.native, dim.toOptional, keepdim)
-    (Tensor(native.get0()), Tensor(native.get1()))
+    (fromNative(native.get0()), fromNative(native.get1()))
 
   /** Tests if all elements of this tensor evaluate to `true`.
     *
     * @group reduction_ops
     */
-  def all[D <: DType](input: Tensor[D]): Tensor[Bool] = Tensor(torchNative.all(input.native))
+  def all[D <: DType](input: Tensor[D]): Tensor[Bool] = fromNative(torchNative.all(input.native))
 
   /** For each row of `input` in the given dimension `dim`, returns `true` if all elements in the
     * row evaluate to `true` and `false` otherwise.
@@ -180,15 +180,16 @@ private[torch] trait ReductionOps {
     * @param keepdim
     *   whether the output tensor has `dim` retained or not.
     */
-  def all[D <: DType](input: Tensor[D], dim: Int, keepdim: Boolean = false): Tensor[Bool] = Tensor(
-    torchNative.all(input.native, dim, keepdim)
-  )
+  def all[D <: DType](input: Tensor[D], dim: Int, keepdim: Boolean = false): Tensor[Bool] =
+    fromNative(
+      torchNative.all(input.native, dim, keepdim)
+    )
 
   /** Tests if any elements of this tensor evaluate to `true`.
     *
     * @group reduction_ops
     */
-  def any[D <: DType](input: Tensor[D]): Tensor[Bool] = Tensor(torchNative.any(input.native))
+  def any[D <: DType](input: Tensor[D]): Tensor[Bool] = fromNative(torchNative.any(input.native))
 
   /** For each row of `input` in the given dimension `dim`, returns `true` if any element in the row
     * evaluates to `true` and `false` otherwise.
@@ -202,15 +203,16 @@ private[torch] trait ReductionOps {
     * @param keepdim
     *   whether the output tensor has `dim` retained or not.
     */
-  def any[D <: DType](input: Tensor[D], dim: Int, keepdim: Boolean = false): Tensor[Bool] = Tensor(
-    torchNative.any(input.native, dim, keepdim)
-  )
+  def any[D <: DType](input: Tensor[D], dim: Int, keepdim: Boolean = false): Tensor[Bool] =
+    fromNative(
+      torchNative.any(input.native, dim, keepdim)
+    )
 
   /** Returns the maximum value of all elements in the `input` tensor.
     *
     * @group reduction_ops
     */
-  def max[D <: RealNN](input: Tensor[D]): Tensor[Int64] = Tensor(input.native.max())
+  def max[D <: RealNN](input: Tensor[D]): Tensor[Int64] = fromNative(input.native.max())
 
   /** Returns a [[TensorTuple]] `(values, indices)` where `values` is the maximum value of each row
     * of the `input` tensor in the given dimension `dim`. And `indices` is the index location of
@@ -231,13 +233,16 @@ private[torch] trait ReductionOps {
     */
   def max[D <: RealNN](input: Tensor[D], dim: Int, keepdim: Boolean = false): TensorTuple[D] =
     val nativeTuple = torchNative.max(input.native, dim, keepdim)
-    TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
+    TensorTuple(
+      values = fromNative[D](nativeTuple.get0),
+      indices = new Int64Tensor(nativeTuple.get1)
+    )
 
   /** Returns the maximum value of all elements in the `input` tensor.
     *
     * @group reduction_ops
     */
-  def min[D <: RealNN](input: Tensor[D]): Tensor[Int64] = Tensor(input.native.min())
+  def min[D <: RealNN](input: Tensor[D]): Tensor[Int64] = fromNative(input.native.min())
 
   /** Returns a [[TensorTuple]] `(values, indices)` where `values` is the minimum value of each row
     * of the `input` tensor in the given dimension `dim`. And `indices` is the index location of
@@ -258,7 +263,10 @@ private[torch] trait ReductionOps {
     */
   def min[D <: RealNN](input: Tensor[D], dim: Int, keepdim: Boolean = false): TensorTuple[D] =
     val nativeTuple = torchNative.min(input.native, dim, keepdim)
-    TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
+    TensorTuple(
+      values = fromNative[D](nativeTuple.get0),
+      indices = new Int64Tensor(nativeTuple.get1)
+    )
 
   /** Returns the p-norm of (`input` - `other`)
     *
@@ -276,7 +284,7 @@ private[torch] trait ReductionOps {
   )(using
       AtLeastOneFloat[D, D2]
   ): Tensor[Promoted[FloatPromoted[ComplexToReal[D]], FloatPromoted[ComplexToReal[D2]]]] =
-    Tensor(torchNative.dist(input.native, other.native, toScalar(p)))
+    fromNative(torchNative.dist(input.native, other.native, toScalar(p)))
 
   /** Returns the log of summed exponentials of each row of the `input` tensor in the given
     * dimension `dim`. The computation is numerically stabilized.
@@ -298,7 +306,7 @@ private[torch] trait ReductionOps {
       input: Tensor[D],
       dim: Int | Seq[Int] = Seq.empty,
       keepdim: Boolean = false
-  ): Tensor[D] = Tensor(
+  ): Tensor[D] = fromNative(
     torchNative.logsumexp(input.native, dim.toArray, keepdim)
   )
 
@@ -326,7 +334,7 @@ private[torch] trait ReductionOps {
     val derivedDType = dtype match
       case _: Derive => input.dtype
       case d: DType  => d
-    Tensor(
+    fromNative(
       torchNative.mean(
         input.native,
         dim.toArray,
@@ -363,7 +371,7 @@ private[torch] trait ReductionOps {
     val derivedDType = dtype match
       case _: Derive => input.dtype
       case d: DType  => d
-    Tensor(
+    fromNative(
       torchNative.nanmean(
         input.native,
         dim.toArray,
@@ -387,7 +395,7 @@ private[torch] trait ReductionOps {
       */
   def median[D <: NumericRealNN](
       input: Tensor[D]
-  ): Tensor[D] = Tensor(torchNative.median(input.native))
+  ): Tensor[D] = fromNative(torchNative.median(input.native))
 
   /** Returns a [[TensorTuple]] `(values, indices)` where `values` contains the median of each row
     * of `input` in the dimension `dim`, and `indices` contains the index of the median values found
@@ -424,7 +432,10 @@ private[torch] trait ReductionOps {
       keepdim: Boolean = false
   ): TensorTuple[D] =
     val nativeTuple = torchNative.median(input.native, dim, keepdim)
-    TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
+    TensorTuple(
+      values = fromNative[D](nativeTuple.get0),
+      indices = new Int64Tensor(nativeTuple.get1)
+    )
 
     /** Returns the median of the values in `input`, ignoring `NaN` values.
       *
@@ -437,7 +448,7 @@ private[torch] trait ReductionOps {
       */
   def nanmedian[D <: NumericRealNN](
       input: Tensor[D]
-  ): Tensor[D] = Tensor(torchNative.nanmedian(input.native))
+  ): Tensor[D] = fromNative(torchNative.nanmedian(input.native))
 
   /** Returns a [[TensorTuple]] ``(values, indices)`` where ``values`` contains the median of each
     * row of `input` in the dimension `dim`, ignoring ``NaN`` values, and ``indices`` contains the
@@ -464,7 +475,10 @@ private[torch] trait ReductionOps {
       keepdim: Boolean = false
   ): TensorTuple[D] =
     val nativeTuple = torchNative.nanmedian(input.native, dim, keepdim)
-    TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
+    TensorTuple(
+      values = fromNative[D](nativeTuple.get0),
+      indices = new Int64Tensor(nativeTuple.get1)
+    )
 
   /** Returns a [[TensorTuple]] `(values, indices)` where `values` is the mode value of each row of
     * the `input` tensor in the given dimension `dim`,
@@ -491,7 +505,10 @@ private[torch] trait ReductionOps {
       keepdim: Boolean = false
   ): TensorTuple[D] =
     val nativeTuple = torchNative.mode(input.native, dim, keepdim)
-    TensorTuple(values = Tensor[D](nativeTuple.get0), indices = new Int64Tensor(nativeTuple.get1))
+    TensorTuple(
+      values = fromNative[D](nativeTuple.get0),
+      indices = new Int64Tensor(nativeTuple.get1)
+    )
 
   /** Returns the sum of each row of the `input` tensor in the given dimension `dim`, treating Not a
     * Numbers (NaNs) as zero. If `dim` is a list of dimensions, reduce over all of them.
@@ -517,7 +534,7 @@ private[torch] trait ReductionOps {
     val derivedDType = dtype match
       case _: Derive => input.dtype
       case d: DType  => d
-    Tensor(
+    fromNative(
       torchNative.nansum(
         input.native,
         dim.toArray,
@@ -532,7 +549,7 @@ private[torch] trait ReductionOps {
     */
   def prod[D <: DType, D2 <: DType | Derive](
       input: Tensor[D]
-  ): Tensor[D] = Tensor(torchNative.prod(input.native))
+  ): Tensor[D] = fromNative(torchNative.prod(input.native))
 
   /** Returns the product of all elements in the `input` tensor.
     *
@@ -544,7 +561,9 @@ private[torch] trait ReductionOps {
   def prod[D <: DType](
       input: Tensor[?],
       dtype: D
-  ): Tensor[D] = Tensor(torchNative.prod(input.native, new ScalarTypeOptional(dtype.toScalarType)))
+  ): Tensor[D] = fromNative(
+    torchNative.prod(input.native, new ScalarTypeOptional(dtype.toScalarType))
+  )
 
   /** Returns the product of each row of the `input` tensor in the given dimension `dim`.
     *
@@ -569,7 +588,7 @@ private[torch] trait ReductionOps {
     val derivedDType = dtype match
       case _: Derive => input.dtype
       case d: DType  => d
-    Tensor(
+    fromNative(
       torchNative.prod(
         input.native,
         dim,
@@ -619,7 +638,7 @@ private[torch] trait ReductionOps {
 //     keepdim: Boolean = false,
 
 // ): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
-//   Tensor(
+//   fromNative(
 //     torchNative.quantile(
 //       input.native,
 //       q,
@@ -660,7 +679,7 @@ private[torch] trait ReductionOps {
       keepdim: Boolean = false,
       correction: Int = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.std(
         input.native,
         dim.toArray,
@@ -706,7 +725,7 @@ private[torch] trait ReductionOps {
         correction.toOptional,
         keepdim
       )
-    (Tensor[D](nativeTuple.get0), Tensor[D](nativeTuple.get1))
+    (fromNative[D](nativeTuple.get0), fromNative[D](nativeTuple.get1))
 
   /** Returns the sum of all elements in the `input` tensor.
     *
@@ -714,7 +733,7 @@ private[torch] trait ReductionOps {
     */
   def sum[D <: DType, D2 <: DType | Derive](
       input: Tensor[D]
-  ): Tensor[D] = Tensor(torchNative.sum(input.native))
+  ): Tensor[D] = fromNative(torchNative.sum(input.native))
 
   /** Returns the sum of all elements in the `input` tensor.
     *
@@ -726,7 +745,9 @@ private[torch] trait ReductionOps {
   def sum[D <: DType](
       input: Tensor[?],
       dtype: D
-  ): Tensor[D] = Tensor(torchNative.sum(input.native, new ScalarTypeOptional(dtype.toScalarType)))
+  ): Tensor[D] = fromNative(
+    torchNative.sum(input.native, new ScalarTypeOptional(dtype.toScalarType))
+  )
 
   /** Returns the sum of each row of the `input` tensor in the given dimension `dim`.
     *
@@ -753,7 +774,7 @@ private[torch] trait ReductionOps {
     val derivedDType = dtype match
       case _: Derive => input.dtype
       case d: DType  => d
-    Tensor(
+    fromNative(
       torchNative.sum(
         input.native,
         dim.toArray,
@@ -773,7 +794,7 @@ private[torch] trait ReductionOps {
     // TODO var
     /* TODO Calculates the variance over the dimensions specified by dim. */
     // def variance[D <: DType](input: Tensor[D], dim: Seq[Int] = Nil, correction: Option[Int] = None, keepdim: Boolean = false) =
-    //  Tensor(torchNative.`var`(input.native, dim.toArray.map(_.toLong), toOptional(correction), keepdim))
+    //  fromNative(torchNative.`var`(input.native, dim.toArray.map(_.toLong), toOptional(correction), keepdim))
 
   /** Calculates the variance over the dimensions specified by `dim`. `dim` can be a single
     * dimension, list of dimensions, or `None` to reduce over all dimensions.
@@ -803,7 +824,7 @@ private[torch] trait ReductionOps {
       keepdim: Boolean = false,
       correction: Int = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.`var`(
         input.native,
         dim.toArray,
@@ -849,7 +870,7 @@ private[torch] trait ReductionOps {
         correction.toOptional,
         keepdim
       )
-    (Tensor[D](nativeTuple.get0), Tensor[D](nativeTuple.get1))
+    (fromNative[D](nativeTuple.get0), fromNative[D](nativeTuple.get1))
 
   /** Counts the number of non-zero values in the tensor `input` along the given `dim`. If no dim is
     * specified then all non-zeros in the tensor are counted.
@@ -864,7 +885,7 @@ private[torch] trait ReductionOps {
       dim: Int | Seq[Int] = Seq.empty
   ): Tensor[Int64] =
     val nativeDim = dim.toArray
-    Tensor(
+    fromNative(
       if nativeDim.isEmpty then torchNative.count_nonzero(input.native)
       else torchNative.count_nonzero(input.native, nativeDim: _*)
     )

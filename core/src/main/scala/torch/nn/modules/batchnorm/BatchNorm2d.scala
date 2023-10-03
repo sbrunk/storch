@@ -20,11 +20,10 @@ package modules
 package batchnorm
 
 import org.bytedeco.javacpp.LongPointer
+import org.bytedeco.pytorch.{BatchNorm2dImpl, BatchNormOptions}
 import org.bytedeco.pytorch
 import sourcecode.Name
-import org.bytedeco.pytorch.BatchNorm2dImpl
-import org.bytedeco.pytorch.BatchNormOptions
-import torch.nn.modules.{HasParams, HasWeight}
+import torch.internal.NativeConverters.fromNative
 
 /** Applies Batch Normalization over a 4D input as described in the paper [Batch Normalization:
   * Accelerating Deep Network Training by Reducing Internal Covariate
@@ -111,10 +110,10 @@ final class BatchNorm2d[ParamType <: FloatNN | ComplexNN: Default](
   nativeModule.to(paramType.toScalarType, false)
 
   // TODO weight, bias etc. are undefined if affine = false. We need to take that into account
-  val weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)
-  val bias: Tensor[ParamType] = Tensor[ParamType](nativeModule.bias)
+  val weight: Tensor[ParamType] = fromNative[ParamType](nativeModule.weight)
+  val bias: Tensor[ParamType] = fromNative[ParamType](nativeModule.bias)
   // TODO running_mean, running_var, num_batches_tracked
 
-  def apply(t: Tensor[ParamType]): Tensor[ParamType] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[ParamType]): Tensor[ParamType] = fromNative(nativeModule.forward(t.native))
 
   override def toString(): String = s"${getClass().getSimpleName()}(numFeatures=$numFeatures)"

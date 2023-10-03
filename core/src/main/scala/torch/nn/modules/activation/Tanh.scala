@@ -19,10 +19,8 @@ package nn
 package modules
 package activation
 
-import org.bytedeco.pytorch
 import org.bytedeco.pytorch.TanhImpl
-import torch.nn.modules.Module
-import torch.{DType, Tensor}
+import torch.internal.NativeConverters.fromNative
 
 /** Applies the Hyperbolic Tangent (Tanh) function element-wise. Tanh is defined as::
   *
@@ -41,6 +39,6 @@ final class Tanh[D <: DType: Default] extends TensorModule[D]:
 
   override protected[torch] val nativeModule: TanhImpl = new TanhImpl()
 
-  def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[D]): Tensor[D] = fromNative(nativeModule.forward(t.native))
 
   override def toString = getClass().getSimpleName()

@@ -123,7 +123,7 @@ class ReductionOpsSuite extends TensorCheckSuite {
   )
 
   test("mean with nan") {
-    assert(mean(Tensor[Float](Seq(Float.NaN, 1, 2))).isnan.item)
+    assert(mean(Tensor(Seq(Float.NaN, 1, 2))).isnan.item)
   }
 
   testUnaryOp(
@@ -157,8 +157,8 @@ class ReductionOpsSuite extends TensorCheckSuite {
   test("mode") {
     torch.manualSeed(0)
     assertEquals(
-      torch.mode(Tensor[Int](Seq(6, 5, 1, 0, 2)), 0),
-      TensorTuple(Tensor(0), Tensor[Long](3L))
+      torch.mode(Tensor(Seq(6, 5, 1, 0, 2)), 0),
+      TensorTuple(Tensor(0), Tensor(3L))
     )
   }
 

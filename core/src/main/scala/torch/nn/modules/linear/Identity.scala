@@ -21,8 +21,7 @@ package linear
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.IdentityImpl
-import torch.nn.modules.Module
-import torch.{DType, Tensor}
+import torch.internal.NativeConverters.fromNative
 
 /** A placeholder identity operator that is argument-insensitive.
   *
@@ -31,4 +30,4 @@ import torch.{DType, Tensor}
 final class Identity[D <: DType: Default](args: Any*) extends TensorModule[D]:
   override val nativeModule: IdentityImpl = IdentityImpl()
 
-  def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[D]): Tensor[D] = fromNative(nativeModule.forward(t.native))

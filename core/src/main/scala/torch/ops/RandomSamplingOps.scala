@@ -45,7 +45,7 @@ private[torch] trait RandomSamplingOps {
       replacement: Boolean = false,
       generator: Option[Generator] | Generator = None
   ): Tensor[Int64] =
-    Tensor(torchNative.multinomial(input.native, numSamples, replacement, generator.toOptional))
+    fromNative(torchNative.multinomial(input.native, numSamples, replacement, generator.toOptional))
 
 // TODO normal Returns a tensor of random numbers drawn from separate normal distributions whose mean and standard deviation are given.
 // TODO poisson Returns a tensor of the same size as input with each element sampled from a Poisson distribution with rate parameter given by the corresponding element in input i.e.,
@@ -75,7 +75,7 @@ private[torch] trait RandomSamplingOps {
       device: Device = CPU,
       requiresGrad: Boolean = false
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.torch_rand(
         size.toArray.map(_.toLong),
         NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
@@ -145,7 +145,7 @@ private[torch] trait RandomSamplingOps {
       device: Device = CPU,
       requiresGrad: Boolean = false
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.torch_randint(
         low,
         high,
@@ -165,7 +165,7 @@ private[torch] trait RandomSamplingOps {
       device: Device = CPU,
       requiresGrad: Boolean = false
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.torch_randn(
         size.toArray.map(_.toLong),
         NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
@@ -186,7 +186,7 @@ private[torch] trait RandomSamplingOps {
       requiresGrad: Boolean = false,
       pinMemory: Boolean = false
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.torch_randperm(
         n,
         NativeConverters.tensorOptions(dtype, layout, device, requiresGrad, pinMemory)

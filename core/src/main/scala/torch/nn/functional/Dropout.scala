@@ -17,7 +17,9 @@
 package torch
 package nn
 package functional
+
 import org.bytedeco.pytorch.global.torch as torchNative
+import torch.internal.NativeConverters.fromNative
 
 private[torch] trait Dropout {
 
@@ -30,7 +32,7 @@ private[torch] trait Dropout {
     * @group nn_dropout
     */
   def dropout[D <: DType](input: Tensor[D], p: Double = 0.5, training: Boolean = true): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.dropout(input.native, p, training)
     )
 

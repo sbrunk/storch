@@ -122,8 +122,8 @@ private[torch] trait OtherOps {
     */
   def einsum[D <: DType](equation: String, operands: Tensor[D]*): Tensor[D] =
     // TODO the equation input is not yet working, see https://github.com/bytedeco/javacpp-presets/discussions/1390
-    Tensor(torchNative.einsum(BytePointer(equation), toArrayRef(operands)))
+    fromNative(torchNative.einsum(BytePointer(equation), toArrayRef(operands)))
 
   /** Returns the sum of the elements of the diagonal of the input 2-D matrix. */
-  def trace[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.trace(input.native))
+  def trace[D <: DType](input: Tensor[D]): Tensor[D] = fromNative(torchNative.trace(input.native))
 }

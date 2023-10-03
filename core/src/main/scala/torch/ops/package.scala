@@ -16,7 +16,7 @@
 
 package torch
 
-import internal.NativeConverters
+import internal.NativeConverters.{fromNative, tensorOptions}
 import org.bytedeco.pytorch.global.torch as torchNative
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{MemoryFormatOptional, TensorArrayRef, TensorVector}
@@ -45,10 +45,10 @@ package object ops {
     val derivedDevice = device match
       case _: Derive => input.device
       case d: Device => d
-    Tensor(
+    fromNative(
       nativeFn(
         input.native,
-        NativeConverters.tensorOptions(derivedDType, derivedLayout, derivedDevice, requiresGrad),
+        tensorOptions(derivedDType, derivedLayout, derivedDevice, requiresGrad),
         new MemoryFormatOptional(memoryFormat.toNative)
       )
     )

@@ -79,7 +79,7 @@ private[torch] trait Pooling {
     options.padding().put(toNative(padding))
     options.ceil_mode().put(ceilMode)
     options.count_include_pad().put(countIncludePad)
-    Tensor(torchNative.avg_pool1d(input.native, options))
+    fromNative(torchNative.avg_pool1d(input.native, options))
 
   /** Applies a 2D max pooling over an input signal composed of several input planes.
     *
@@ -104,7 +104,7 @@ private[torch] trait Pooling {
     divisor_override match
       case d: Int => options.divisor_override().put(d)
       case None   =>
-    Tensor(torchNative.avg_pool2d(input.native, options))
+    fromNative(torchNative.avg_pool2d(input.native, options))
 
   /** Applies a 3D max pooling over an input signal composed of several input planes.
     *
@@ -129,7 +129,7 @@ private[torch] trait Pooling {
     divisor_override match
       case d: Int => options.divisor_override().put(d)
       case None   =>
-    Tensor(torchNative.avg_pool3d(input.native, options))
+    fromNative(torchNative.avg_pool3d(input.native, options))
 
   private def maxPool1dOptions[D <: FloatNN | Complex32](
       kernelSize: Int | (Int, Int),
@@ -175,7 +175,7 @@ private[torch] trait Pooling {
   ): Tensor[D] =
     val options: MaxPool1dOptions =
       maxPool1dOptions(kernelSize, stride, padding, dilation, ceilMode)
-    Tensor(torchNative.max_pool1d(input.native, options))
+    fromNative(torchNative.max_pool1d(input.native, options))
 
   /** Applies a 1D max pooling over an input signal composed of several input planes.
     *
@@ -206,7 +206,7 @@ private[torch] trait Pooling {
     val options: MaxPool1dOptions =
       maxPool1dOptions(kernelSize, stride, padding, dilation, ceilMode)
     val native = torchNative.max_pool1d_with_indices(input.native, options)
-    TensorTuple(values = Tensor[D](native.get0()), indices = Tensor(native.get1))
+    TensorTuple(values = fromNative[D](native.get0()), indices = fromNative(native.get1))
 
   private def maxPool2dOptions[D <: FloatNN | Complex32](
       kernelSize: Int | (Int, Int),
@@ -255,7 +255,7 @@ private[torch] trait Pooling {
   ): Tensor[D] =
     val options: MaxPool2dOptions =
       maxPool2dOptions(kernelSize, stride, padding, dilation, ceilMode)
-    Tensor(torchNative.max_pool2d(input.native, options))
+    fromNative(torchNative.max_pool2d(input.native, options))
 
   /** Applies a 2D max pooling over an input signal composed of several input planes.
     *
@@ -288,7 +288,7 @@ private[torch] trait Pooling {
     val options: MaxPool2dOptions =
       maxPool2dOptions(kernelSize, stride, padding, dilation, ceilMode)
     val native = torchNative.max_pool2d_with_indices(input.native, options)
-    TensorTuple(values = Tensor[D](native.get0()), indices = Tensor(native.get1))
+    TensorTuple(values = fromNative[D](native.get0()), indices = fromNative(native.get1))
 
   private def maxPool3dOptions[D <: FloatNN | Complex32](
       kernelSize: Int | (Int, Int, Int),
@@ -321,7 +321,7 @@ private[torch] trait Pooling {
   ): Tensor[D] =
     val options: MaxPool3dOptions =
       maxPool3dOptions(kernelSize, stride, padding, dilation, ceilMode)
-    Tensor(torchNative.max_pool3d(input.native, options))
+    fromNative(torchNative.max_pool3d(input.native, options))
 
   /** Applies a 3D max pooling over an input signal composed of several input planes.
     *
@@ -338,7 +338,7 @@ private[torch] trait Pooling {
     val options: MaxPool3dOptions =
       maxPool3dOptions(kernelSize, stride, padding, dilation, ceilMode)
     val native = torchNative.max_pool3d_with_indices(input.native, options)
-    TensorTuple(values = Tensor[D](native.get0()), indices = Tensor(native.get1))
+    TensorTuple(values = fromNative[D](native.get0()), indices = fromNative(native.get1))
 
   // TODO max_unpool1d Computes a partial inverse of MaxPool1d.
   // TODO max_unpool2d Computes a partial inverse of MaxPool2d.

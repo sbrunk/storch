@@ -82,8 +82,8 @@ class TensorSuite extends TensorCheckSuite {
     tensor(Seq(0)) = 20
     assertEquals(tensor(0), torch.full(Seq(4), 20))
 
-    val updated = Tensor[Int](30)
-    tensor(Seq(1, 0)) = Tensor[Int](30)
+    val updated = Tensor(30)
+    tensor(Seq(1, 0)) = Tensor(30)
     assertEquals(tensor(1, 0), updated)
 
     // copy column 1 to column 0

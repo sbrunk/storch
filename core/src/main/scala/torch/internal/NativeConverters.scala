@@ -161,3 +161,5 @@ private[torch] object NativeConverters:
         increment = it => it.increment(),
         access = it => it.access()
       )
+
+  export Tensor.fromNative

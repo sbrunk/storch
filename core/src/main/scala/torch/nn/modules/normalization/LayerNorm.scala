@@ -22,7 +22,7 @@ package normalization
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{LayerNormImpl, LayerNormOptions, LongVector}
 import torch.nn.modules.TensorModule
-import torch.{DType, Tensor}
+import internal.NativeConverters.fromNative
 
 /** Applies Layer Normalization over a mini-batch of inputs as described in the paper Layer
   * Normalization // TODO Add docs
@@ -43,8 +43,8 @@ final class LayerNorm[ParamType <: DType: Default](
 
   override private[torch] val nativeModule: LayerNormImpl = LayerNormImpl(options)
 
-  val weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)
-  val bias: Tensor[ParamType] = Tensor[ParamType](nativeModule.bias)
+  val weight: Tensor[ParamType] = fromNative[ParamType](nativeModule.weight)
+  val bias: Tensor[ParamType] = fromNative[ParamType](nativeModule.bias)
 
   def apply(t: Tensor[ParamType]): Tensor[ParamType] =
-    Tensor[ParamType](nativeModule.forward(t.native))
+    fromNative[ParamType](nativeModule.forward(t.native))

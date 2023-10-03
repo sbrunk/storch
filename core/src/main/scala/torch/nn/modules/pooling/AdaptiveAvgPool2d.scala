@@ -23,7 +23,7 @@ import org.bytedeco.pytorch.AdaptiveAvgPool2dImpl
 import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
 
-import torch.internal.NativeConverters.{toNative, toOptional}
+import torch.internal.NativeConverters.{fromNative, toNative, toOptional}
 import org.bytedeco.pytorch.LongOptionalVector
 import org.bytedeco.pytorch.LongOptional
 
@@ -49,7 +49,7 @@ final class AdaptiveAvgPool2d[D <: BFloat16 | Float32 | Float64: Default](
     nativeOutputSize.get(0)
   )
 
-  def apply(t: Tensor[D]): Tensor[D] = Tensor(
+  def apply(t: Tensor[D]): Tensor[D] = fromNative(
     nativeModule.forward(t.native)
   )
 }
