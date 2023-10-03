@@ -38,7 +38,7 @@ private[torch] trait Convolution {
       dilation: Int = 1,
       groups: Int = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.conv1d(
         input.native,
         weight.native,
@@ -63,7 +63,7 @@ private[torch] trait Convolution {
       dilation: Int | (Int, Int) = 1,
       groups: Int = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.conv2d(
         input.native,
         weight.native,
@@ -88,7 +88,7 @@ private[torch] trait Convolution {
       dilation: Int = 1,
       groups: Int = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.conv3d(
         input.native,
         weight.native,
@@ -115,7 +115,7 @@ private[torch] trait Convolution {
       groups: Int = 1,
       dilation: Int | (Int, Int) = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.conv_transpose1d(
         input.native,
         weight.native,
@@ -143,7 +143,7 @@ private[torch] trait Convolution {
       groups: Int = 1,
       dilation: Int | (Int, Int) = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.conv_transpose2d(
         input.native,
         weight.native,
@@ -171,7 +171,7 @@ private[torch] trait Convolution {
       groups: Int = 1,
       dilation: Int | (Int, Int) = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.conv_transpose3d(
         input.native,
         weight.native,

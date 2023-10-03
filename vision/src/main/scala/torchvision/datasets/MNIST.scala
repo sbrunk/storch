@@ -27,6 +27,7 @@ import java.util.zip.GZIPInputStream
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+import torch.Tensor.fromNative
 
 trait MNISTBase(
     val mirrors: Seq[String],
@@ -67,7 +68,10 @@ trait MNISTBase(
   private val native = pytorch.MNIST(root.toString(), mode)
 
   private val ds =
-    TensorDataset(Tensor[Float32](native.images().clone()), Tensor[Int64](native.targets().clone()))
+    TensorDataset(
+      fromNative[Float32](native.images().clone()),
+      fromNative[Int64](native.targets().clone())
+    )
   export ds.{apply, length, features, targets}
 
   override def toString(): String = ds.toString()

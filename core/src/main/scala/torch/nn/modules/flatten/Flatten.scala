@@ -21,6 +21,7 @@ package flatten
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{FlattenImpl, FlattenOptions}
+import torch.internal.NativeConverters.fromNative
 
 // format: off
 /** Flattens a contiguous range of dims into a tensor. For use with [[nn.Sequential]].
@@ -59,6 +60,6 @@ final class Flatten[D <: DType: Default](startDim: Int = 1, endDim: Int = -1)
 
   override val nativeModule: FlattenImpl = FlattenImpl(options)
 
-  def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[D]): Tensor[D] = fromNative(nativeModule.forward(t.native))
 
   override def toString = getClass().getSimpleName()

@@ -22,7 +22,7 @@ import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.TensorOptional
 import org.bytedeco.pytorch.global.torch as torchNative
-import torch.internal.NativeConverters.toOptional
+import torch.internal.NativeConverters.{fromNative, toOptional}
 
 // Linear functions
 private[torch] trait Linear {
@@ -54,7 +54,7 @@ private[torch] trait Linear {
       weight: Tensor[D],
       bias: Tensor[D] | Option[Tensor[D]] = None
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.linear(input.native, weight.native, toOptional(bias))
     )
 
@@ -77,7 +77,7 @@ private[torch] trait Linear {
       input2: Tensor[D],
       weight: Tensor[D],
       bias: Tensor[D] | Option[Tensor[D]] = None
-  ): Tensor[D] = Tensor(
+  ): Tensor[D] = fromNative(
     torchNative.bilinear(input1.native, input2.native, weight.native, toOptional(bias))
   )
 

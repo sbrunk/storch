@@ -21,7 +21,7 @@ package modules
 import org.bytedeco.javacpp.CharPointer
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{Conv2dImpl, InputArchive, OutputArchive}
-import torch.{DType, Device, Tensor}
+import Tensor.fromNative
 
 import java.nio.CharBuffer
 import scala.collection.immutable.{ArraySeq, SeqMap, TreeSeqMap}
@@ -37,20 +37,20 @@ abstract class Module {
     val buffers = nativeModule.named_buffers(recurse)
     TreeSeqMap.from((0 until buffers.size().toInt).map { i =>
       val item = buffers.get(i)
-      (item.key().getString(), Tensor.apply[DType](item.access()))
+      (item.key().getString(), fromNative[DType](item.access()))
     })
 
   def namedParameters(recurse: Boolean = true): SeqMap[String, Tensor[?]] =
     val params = nativeModule.named_parameters(recurse)
     TreeSeqMap.from((0 until params.size().toInt).map { i =>
       val item = params.get(i)
-      (item.key().getString(), Tensor.apply[DType](item.access()))
+      (item.key().getString(), fromNative[DType](item.access()))
     })
 
   def parameters: Seq[Tensor[?]] = parameters(recurse = true)
 
   def parameters(recurse: Boolean): Seq[Tensor[?]] =
-    ArraySeq.unsafeWrapArray(nativeModule.parameters().get).map(Tensor.apply[DType])
+    ArraySeq.unsafeWrapArray(nativeModule.parameters().get).map(fromNative[DType])
 
   // TODO make strict a parameter
   // TODO improve error handling
@@ -84,7 +84,7 @@ abstract class Module {
 
   /** Adds a buffer to the module. */
   def registerBuffer[D <: DType](name: String, tensor: Tensor[D]): Tensor[D] =
-    Tensor(nativeModule.register_buffer(name, tensor.native))
+    fromNative(nativeModule.register_buffer(name, tensor.native))
 
   def eval(): Unit = nativeModule.eval()
 
@@ -115,7 +115,7 @@ abstract class Module {
 
 trait HasParams[ParamType <: FloatNN | ComplexNN: Default] extends Module:
   override def parameters(recurse: Boolean): Seq[Tensor[ParamType]] =
-    nativeModule.parameters(recurse).get().toSeq.map(Tensor.apply[ParamType])
+    nativeModule.parameters(recurse).get().toSeq.map(fromNative[ParamType])
   override def parameters: Seq[Tensor[ParamType]] = parameters(recurse = true)
   transparent inline def paramType: DType = summon[Default[ParamType]].dtype
 

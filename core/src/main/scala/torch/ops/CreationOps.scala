@@ -29,6 +29,7 @@ import org.bytedeco.pytorch.global.torch as torchNative
 
 import java.nio.file.{Files, Path}
 import scala.collection.immutable.{VectorMap, SeqMap}
+import Tensor.fromNative
 
 /** Creation Ops
   *
@@ -64,7 +65,7 @@ private[torch] trait CreationOps {
     val nativeSize = size match
       case s: Seq[Int] => s.map(_.toLong).toArray
       case s: Int      => Array(s.toLong)
-    Tensor(
+    fromNative(
       torchNative.torch_zeros(
         nativeSize,
         NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
@@ -100,7 +101,7 @@ private[torch] trait CreationOps {
     val nativeSize = size match
       case s: Seq[Int] => s.map(_.toLong).toArray
       case s: Int      => Array(s.toLong)
-    Tensor(
+    fromNative(
       torchNative.torch_ones(
         nativeSize,
         NativeConverters.tensorOptions(dtype, layout, device, requiresGrad)
@@ -151,7 +152,7 @@ private[torch] trait CreationOps {
     val derivedDType = dtype match
       case _: Derive => derivedArangeType(start, end, step)
       case t: DType  => t
-    Tensor(
+    fromNative(
       torchNative.torch_arange(
         toScalar(start),
         toScalar(end),
@@ -170,7 +171,7 @@ private[torch] trait CreationOps {
       device: Device = CPU,
       requiresGrad: Boolean = false
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.torch_linspace(
         new Scalar(start),
         new Scalar(end),
@@ -189,7 +190,7 @@ private[torch] trait CreationOps {
       layout: Layout = Strided,
       device: Device = CPU,
       requiresGrad: Boolean = false
-  ) = Tensor(
+  ) = fromNative(
     torchNative.torch_logspace(
       new Scalar(start),
       new Scalar(end),
@@ -223,10 +224,10 @@ private[torch] trait CreationOps {
       layout: Layout = Strided,
       device: Device = CPU,
       requiresGrad: Boolean = false
-  ): Tensor[D] = Tensor(
+  ): Tensor[D] = fromNative(
     torchNative.torch_eye(n, NativeConverters.tensorOptions(dtype, layout, device, requiresGrad))
   )
-// def empty(size: Long*): Tensor[D] = Tensor(torchNative.torch_empty(size*))
+// def empty(size: Long*): Tensor[D] = fromNative(torchNative.torch_empty(size*))
 
   /** Returns a tensor filled with uninitialized data.
     *
@@ -241,7 +242,7 @@ private[torch] trait CreationOps {
       pinMemory: Boolean = false,
       memoryFormat: MemoryFormat = Contiguous
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.torch_empty(
         size.toArray.map(_.toLong),
         NativeConverters
@@ -306,7 +307,7 @@ private[torch] trait CreationOps {
     val derivedDType = dtype match
       case _: Derive => scalaToDType(fillValue)
       case t: DType  => t
-    Tensor(
+    fromNative(
       torchNative.torch_full(
         size.toArray.map(_.toLong),
         toScalar(fillValue),
@@ -332,7 +333,7 @@ private[torch] trait CreationOps {
       nativeIt.increment()
     VectorMap.from(buffer.map { (key, value) =>
       // TODO better error handling
-      (key.toStringRef().getString(), Tensor[DType](value.toTensor().clone()))
+      (key.toStringRef().getString(), fromNative[DType](value.toTensor().clone()))
     })
 
   def pickleLoad(path: Path): Map[String, Tensor[DType]] =

@@ -21,7 +21,7 @@ package functional
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.global.torch as torchNative
 import org.bytedeco.javacpp.LongPointer
-import torch.internal.NativeConverters.toOptional
+import torch.internal.NativeConverters.{fromNative, toNative, toOptional}
 import org.bytedeco.pytorch.{ScalarTypeOptional, TensorOptional}
 
 private[torch] trait Activations {
@@ -41,7 +41,7 @@ private[torch] trait Activations {
   ): Tensor[Out] =
     val nativeDType =
       if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(dtype.toScalarType)
-    Tensor(torchNative.log_softmax(input.native, dim, nativeDType))
+    fromNative(torchNative.log_softmax(input.native, dim, nativeDType))
 
     /** Applies the rectified linear unit function element-wise.
       *
@@ -49,7 +49,7 @@ private[torch] trait Activations {
       *
       * @group nn_activation
       */
-  def relu[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.relu(input.native))
+  def relu[D <: DType](input: Tensor[D]): Tensor[D] = fromNative(torchNative.relu(input.native))
 
   /** Applies the element-wise function $\text{Sigmoid}(x) = \frac{1}{1 + \exp(-x)}$
     *
@@ -57,14 +57,16 @@ private[torch] trait Activations {
     *
     * @group nn_activation
     */
-  def sigmoid[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.sigmoid(input.native))
+  def sigmoid[D <: DType](input: Tensor[D]): Tensor[D] = fromNative(
+    torchNative.sigmoid(input.native)
+  )
 
   /** Applies the Sigmoid Linear Unit (SiLU) function, element-wise. The SiLU function is also known
     * as the swish function.
     *
     * @group nn_activation
     */
-  def silu[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.silu(input.native))
+  def silu[D <: DType](input: Tensor[D]): Tensor[D] = fromNative(torchNative.silu(input.native))
 
   /** Applies a softmax function.
     *
@@ -75,5 +77,5 @@ private[torch] trait Activations {
   ): Tensor[Out] =
     val nativeDType =
       if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(dtype.toScalarType)
-    Tensor(torchNative.softmax(input.native, dim, nativeDType))
+    fromNative(torchNative.softmax(input.native, dim, nativeDType))
 }

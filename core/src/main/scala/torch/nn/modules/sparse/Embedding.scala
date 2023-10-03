@@ -25,7 +25,7 @@ import sourcecode.Name
 import org.bytedeco.pytorch.EmbeddingImpl
 import org.bytedeco.pytorch.EmbeddingOptions
 import torch.nn.modules.{HasParams, HasWeight, TensorModule}
-import torch.internal.NativeConverters.{toNative, doubleToDoublePointer}
+import torch.internal.NativeConverters.{fromNative, toNative, doubleToDoublePointer}
 
 /** A simple lookup table that stores embeddings of a fixed dictionary and size.
   *
@@ -77,9 +77,9 @@ final class Embedding[ParamType <: FloatNN | ComplexNN: Default](
   override val nativeModule: EmbeddingImpl = EmbeddingImpl(options)
   nativeModule.to(paramType.toScalarType, false)
 
-  def weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)
+  def weight: Tensor[ParamType] = fromNative(nativeModule.weight)
   def weight_=(w: Tensor[ParamType]): Unit = nativeModule.weight(w.native)
 
-  def apply(t: Tensor[Int64]): Tensor[ParamType] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[Int64]): Tensor[ParamType] = fromNative(nativeModule.forward(t.native))
 
   override def toString(): String = s"${getClass().getSimpleName()}(numEmbeddings=$numEmbeddings)"

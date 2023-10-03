@@ -18,6 +18,7 @@ package torch
 package ops
 
 import org.bytedeco.pytorch.global.torch as torchNative
+import internal.NativeConverters.fromNative
 
 /** Comparison Ops
   *
@@ -74,7 +75,7 @@ private[torch] trait ComparisonOps {
       // TODO implement stable, there are two boolean args in argsort and are not in order
       // stable: Boolean = false
   ): Tensor[Int64] =
-    Tensor(
+    fromNative(
       torchNative.argsort(input.native, dim.toLong, descending)
     )
 }

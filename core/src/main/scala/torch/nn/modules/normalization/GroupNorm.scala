@@ -21,7 +21,7 @@ package normalization
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{GroupNormImpl, GroupNormOptions}
-import torch.{DType, Tensor}
+import torch.internal.NativeConverters.fromNative
 
 /** Applies Group Normalization over a mini-batch of inputs
   *
@@ -48,8 +48,8 @@ final class GroupNorm[ParamType <: FloatNN | ComplexNN: Default](
 
   override private[torch] val nativeModule: GroupNormImpl = GroupNormImpl(options)
 
-  val weight: Tensor[ParamType] = Tensor[ParamType](nativeModule.weight)
-  val bias: Tensor[ParamType] = Tensor[ParamType](nativeModule.bias)
+  val weight: Tensor[ParamType] = fromNative[ParamType](nativeModule.weight)
+  val bias: Tensor[ParamType] = fromNative[ParamType](nativeModule.bias)
 
   def apply(t: Tensor[ParamType]): Tensor[ParamType] =
-    Tensor[ParamType](nativeModule.forward(t.native))
+    fromNative[ParamType](nativeModule.forward(t.native))

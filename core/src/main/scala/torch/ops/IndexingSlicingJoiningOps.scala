@@ -65,7 +65,9 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def adjoint[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.adjoint(input.native))
+  def adjoint[D <: DType](input: Tensor[D]): Tensor[D] = fromNative(
+    torchNative.adjoint(input.native)
+  )
 
   /** Returns a tensor containing the indices of all non-zero elements of `input`. Each row in the
     * result contains the indices of a non-zero element in `input`. The result is sorted
@@ -87,7 +89,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def argwhere[D <: DType](input: Tensor[D]): Tensor[Int64] = Tensor(
+  def argwhere[D <: DType](input: Tensor[D]): Tensor[Int64] = fromNative(
     torchNative.argwhere(input.native)
   )
 
@@ -123,7 +125,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def cat[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
+  def cat[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = fromNative(
     torchNative.cat(toArrayRef(tensors), dim.toLong)
   )
 
@@ -161,7 +163,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def conj[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.conj(input.native))
+  def conj[D <: DType](input: Tensor[D]): Tensor[D] = fromNative(torchNative.conj(input.native))
 
   /** Attempts to split a tensor into the specified number of chunks. Each chunk is a view of the
     * input tensor.
@@ -227,7 +229,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     */
   def chunk[D <: DType](input: Tensor[D], chunks: Int, dim: Int = 0): Seq[Tensor[D]] = {
     val tensors = torchNative.chunk(input.native, chunks, dim.toLong)
-    (0L until tensors.size()).map(i => Tensor(tensors.get(i)))
+    (0L until tensors.size()).map(i => fromNative(tensors.get(i)))
   }
 
   /** Splits `input`, a tensor with three or more dimensions, into multiple tensors depthwise
@@ -265,7 +267,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     */
   def dsplit[D <: DType](input: Tensor[D], indicesOrSections: Int*): Seq[Tensor[D]] = {
     val tensors = torchNative.dsplit(input.native, indicesOrSections.map(_.toLong)*)
-    (0L until tensors.size()).map(i => Tensor(tensors.get(i)))
+    (0L until tensors.size()).map(i => fromNative(tensors.get(i)))
   }
 
   /** Creates a new tensor by horizontally stacking the tensors in `tensors`.
@@ -297,7 +299,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def columnStack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] =
-    Tensor(torchNative.column_stack(toArrayRef(tensors)))
+    fromNative(torchNative.column_stack(toArrayRef(tensors)))
 
   /** Stack tensors in sequence depthwise (along third axis).
     *
@@ -325,7 +327,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def dstack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] = Tensor(
+  def dstack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] = fromNative(
     torchNative.dstack(toArrayRef(tensors))
   )
 
@@ -369,7 +371,7 @@ private[torch] trait IndexingSlicingJoiningOps {
       index: Tensor[Int64],
       sparseGrad: Boolean = false
   ): Tensor[D] =
-    Tensor(torchNative.gather(input.native, dim.toLong, index.native, sparseGrad))
+    fromNative(torchNative.gather(input.native, dim.toLong, index.native, sparseGrad))
 
   /** Splits `input`, a tensor with one or more dimensions, into multiple tensors horizontally
     * according to `indices_or_sections`. Each split is a view of `input`.
@@ -403,7 +405,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     */
   def hsplit[D <: DType](input: Tensor[D], indicesOrSections: Int*): Seq[Tensor[D]] = {
     val tensors = torchNative.hsplit(input.native, indicesOrSections.toArray.map(_.toLong)*)
-    (0L until tensors.size()).map(i => Tensor(tensors.get(i)))
+    (0L until tensors.size()).map(i => fromNative(tensors.get(i)))
   }
 
   /** Stack tensors in sequence horizontally (column wise).
@@ -431,7 +433,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def hstack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] =
-    Tensor(torchNative.hstack(toArrayRef(tensors)))
+    fromNative(torchNative.hstack(toArrayRef(tensors)))
 
   /** Accumulate the elements of `source` into the `input` tensor by adding to the indices in the
     * order given in `index`.
@@ -467,7 +469,7 @@ private[torch] trait IndexingSlicingJoiningOps {
       index: Tensor[Int64],
       source: Tensor[D]
   ): Tensor[D] =
-    Tensor(torchNative.index_add(input.native, dim.toLong, index.native, source.native))
+    fromNative(torchNative.index_add(input.native, dim.toLong, index.native, source.native))
 
   /** Copies the elements of tensor into the self tensor by selecting the indices in the order given
     * in index. For example, if dim == 0 and index[i] == j, then the ith row of tensor is copied to
@@ -507,7 +509,7 @@ private[torch] trait IndexingSlicingJoiningOps {
       index: Tensor[Int64],
       source: Tensor[D]
   ): Tensor[D] =
-    Tensor(torchNative.index_copy(input.native, dim.toLong, index.native, source.native))
+    fromNative(torchNative.index_copy(input.native, dim.toLong, index.native, source.native))
 
   // TODO index_reduce
   // TODO Enum for reduce: String
@@ -544,7 +546,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def indexSelect[D <: DType](input: Tensor[D], dim: Int, index: Tensor[Int64]): Tensor[D] =
-    Tensor(torchNative.index_select(input.native, dim.toLong, index.native))
+    fromNative(torchNative.index_select(input.native, dim.toLong, index.native))
 
   /** Returns a new 1-D tensor which indexes the `input` tensor according to the boolean mask `mask`
     * which is a <span class="title-ref">BoolTensor</span>.
@@ -575,7 +577,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def maskedSelect[D <: DType](input: Tensor[D], mask: Tensor[Bool]): Tensor[D] =
-    Tensor(torchNative.masked_select(input.native, mask.native))
+    fromNative(torchNative.masked_select(input.native, mask.native))
 
   /** Moves the dimension(s) of `input` at the position(s) in `source` to the position(s) in
     * `destination`.
@@ -624,9 +626,9 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def movedim[D <: DType](input: Tensor[D], source: Int, destination: Int): Tensor[D] =
-    Tensor(torchNative.movedim(input.native, source.toLong, destination.toLong))
+    fromNative(torchNative.movedim(input.native, source.toLong, destination.toLong))
   def movedim[D <: DType](input: Tensor[D], source: Seq[Int], destination: Seq[Int]): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.movedim(input.native, source.map(_.toLong).toArray, destination.map(_.toLong)*)
     )
 
@@ -674,9 +676,9 @@ private[torch] trait IndexingSlicingJoiningOps {
     */
 
   def moveaxis[D <: DType](input: Tensor[D], source: Int, destination: Int): Tensor[D] =
-    Tensor(torchNative.moveaxis(input.native, source.toLong, destination.toLong))
+    fromNative(torchNative.moveaxis(input.native, source.toLong, destination.toLong))
   def moveaxis[D <: DType](input: Tensor[D], source: Seq[Int], destination: Seq[Int]): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.moveaxis(input.native, source.map(_.toLong).toArray, destination.map(_.toLong)*)
     )
 
@@ -729,7 +731,7 @@ private[torch] trait IndexingSlicingJoiningOps {
       * @group indexing_slicing_joining_mutating_ops
       */
   def narrow[D <: DType](input: Tensor[D], dim: Int, start: Int, length: Int): Tensor[D] =
-    Tensor(torchNative.narrow(input.native, dim.toLong, start.toLong, length.toLong))
+    fromNative(torchNative.narrow(input.native, dim.toLong, start.toLong, length.toLong))
 
   /** Same as `torch.narrow` except this returns a copy rather than shared storage. This is
     * primarily for sparse tensors, which do not have a shared-storage narrow method.
@@ -774,7 +776,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def narrowCopy[D <: DType](input: Tensor[D], dim: Int, start: Int, length: Int): Tensor[D] =
-    Tensor(torchNative.narrow_copy(input.native, dim.toLong, start.toLong, length.toLong))
+    fromNative(torchNative.narrow_copy(input.native, dim.toLong, start.toLong, length.toLong))
 
   /** Returns a tensor containing the indices of all non-zero elements of `input`. Each row in the
     * result contains the indices of a non-zero element in `input`. The result is sorted
@@ -812,7 +814,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def nonzero[D <: DType](input: Tensor[D]): Tensor[Int64] = Tensor(
+  def nonzero[D <: DType](input: Tensor[D]): Tensor[Int64] = fromNative(
     torchNative.nonzero(input.native)
   )
 
@@ -836,7 +838,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *   The desired ordering of dimensions, must be unique
     */
   def permute[D <: DType](input: Tensor[D], dims: Int*): Tensor[D] =
-    Tensor(torchNative.permute(input.native, dims.map(_.toLong)*))
+    fromNative(torchNative.permute(input.native, dims.map(_.toLong)*))
 
   /** Returns a tensor with the same data and number of elements as `input`, but with the specified
     * shape. When possible, the returned tensor will be a view of `input`. Otherwise, it will be a
@@ -868,7 +870,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def reshape[D <: DType](input: Tensor[D], shape: Int*): Tensor[D] =
-    Tensor(torchNative.reshape(input.native, shape.map(_.toLong)*))
+    fromNative(torchNative.reshape(input.native, shape.map(_.toLong)*))
 
   /** Slices the `input` tensor along the selected dimension at the given index. This function
     * returns a view of the original tensor with the given dimension removed.
@@ -889,7 +891,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *   the index to select with
     */
   def select[D <: DType](input: Tensor[D], dim: Int, index: Int): Tensor[D] =
-    Tensor(torchNative.select(input.native, dim.toLong, index.toLong))
+    fromNative(torchNative.select(input.native, dim.toLong, index.toLong))
 
   // TODO Add docs for scatter
   // TODO Add reduction arg
@@ -899,7 +901,7 @@ private[torch] trait IndexingSlicingJoiningOps {
       index: Tensor[Int64],
       source: Tensor[D]
   ): Tensor[D] =
-    Tensor(torchNative.scatter(input.native, dim.toLong, index.native, source.native))
+    fromNative(torchNative.scatter(input.native, dim.toLong, index.native, source.native))
 
   // TODO Add docs diagonalScatter
   def diagonalScatter[D <: DType](
@@ -909,7 +911,7 @@ private[torch] trait IndexingSlicingJoiningOps {
       dim1: Int = 0,
       dim2: Int = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.diagonal_scatter(
         input.native,
         src.native,
@@ -921,7 +923,7 @@ private[torch] trait IndexingSlicingJoiningOps {
 
   // TODO Add docs selectScatter
   def selectScatter[D <: DType](input: Tensor[D], src: Tensor[D], dim: Int, index: Int): Tensor[D] =
-    Tensor(torchNative.select_scatter(input.native, src.native, dim.toLong, index.toLong))
+    fromNative(torchNative.select_scatter(input.native, src.native, dim.toLong, index.toLong))
 
   // TODO Add docs for sliceScatterd
   // TODO Review default start and end
@@ -933,7 +935,7 @@ private[torch] trait IndexingSlicingJoiningOps {
       end: Int | Option[Int] = None,
       step: Int = 1
   ): Tensor[D] =
-    Tensor(
+    fromNative(
       torchNative.slice_scatter(
         input.native,
         src.native,
@@ -951,12 +953,12 @@ private[torch] trait IndexingSlicingJoiningOps {
       index: Tensor[Int64],
       src: Tensor[D]
   ): Tensor[D] =
-    Tensor(torchNative.scatter_add(input.native, dim.toLong, index.native, src.native))
+    fromNative(torchNative.scatter_add(input.native, dim.toLong, index.native, src.native))
 
   // TODO scatter_reduce
   // TODO enum for reduce options?
   // def scatterReduce[D <: DType](input: Tensor[D], dim: Int, index: Tensor[Int64], src: Tensor[D], reduce: String, includeSelf: Boolean): Tensor[D] =
-  //   Tensor(torchNative.scatter_reduce(input.native, dim.toLong, index.native, src.native, reduce))
+  //   fromNative(torchNative.scatter_reduce(input.native, dim.toLong, index.native, src.native, reduce))
 
   /** Splits the tensor into chunks. Each chunk is a view of the original tensor.
     *
@@ -1016,7 +1018,7 @@ private[torch] trait IndexingSlicingJoiningOps {
         case i: Int      => torchNative.split(input.native, i.toLong, dim.toLong)
         case s: Seq[Int] => torchNative.split(input.native, s.map(_.toLong).toArray, dim.toLong)
       }
-    (0L until result.size()).map(i => Tensor(result.get(i)))
+    (0L until result.size()).map(i => fromNative(result.get(i)))
   }
 
   /** Returns a tensor with all specified dimensions of `input` of size 1 removed.
@@ -1067,8 +1069,8 @@ private[torch] trait IndexingSlicingJoiningOps {
   def squeeze[D <: DType](input: Tensor[D], dim: Int*): Tensor[D] =
     // NOTE: There are different runtime behaviours betwen passing an empty dim and passing no dim, so we need to check for it
     dim match {
-      case Nil => Tensor(torchNative.squeeze(input.native))
-      case _   => Tensor(torchNative.squeeze(input.native, dim.map(_.toLong)*))
+      case Nil => fromNative(torchNative.squeeze(input.native))
+      case _   => fromNative(torchNative.squeeze(input.native, dim.map(_.toLong)*))
     }
 
   /** Concatenates a sequence of tensors along a new dimension.
@@ -1081,7 +1083,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *   dimension to insert. Has to be between 0 and the number of dimensions of concatenated
     *   tensors (inclusive)
     */
-  def stack[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = Tensor(
+  def stack[D <: DType](tensors: Seq[Tensor[D]], dim: Int = 0): Tensor[D] = fromNative(
     torchNative.stack(toArrayRef(tensors), dim)
   )
 
@@ -1120,7 +1122,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def swapaxes[D <: DType](input: Tensor[D], axis1: Int, axis2: Int): Tensor[D] =
-    Tensor(torchNative.swapaxes(input.native, axis1.toLong, axis2.toLong))
+    fromNative(torchNative.swapaxes(input.native, axis1.toLong, axis2.toLong))
 
   /** Alias for `torch.transpose`.
     *
@@ -1157,7 +1159,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def swapdims[D <: DType](input: Tensor[D], axis1: Int, axis2: Int): Tensor[D] =
-    Tensor(torchNative.swapdims(input.native, axis1.toLong, axis2.toLong))
+    fromNative(torchNative.swapdims(input.native, axis1.toLong, axis2.toLong))
 
   /** Expects `input` to be <= 2-D tensor and transposes dimensions 0 and 1.
     *
@@ -1180,7 +1182,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def t[D <: DType](input: Tensor[D]): Tensor[D] = Tensor(torchNative.t(input.native))
+  def t[D <: DType](input: Tensor[D]): Tensor[D] = fromNative(torchNative.t(input.native))
 
   /** Returns a new tensor with the elements of `input` at the given indices. The input tensor is
     * treated as if it were viewed as a 1-D tensor. The result takes the same shape as the indices.
@@ -1198,7 +1200,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def take[D <: DType](input: Tensor[D], index: Tensor[Int64]): Tensor[D] =
-    Tensor(torchNative.take(input.native, index.native))
+    fromNative(torchNative.take(input.native, index.native))
 
   /** Selects values from `input` at the 1-dimensional indices from `indices` along the given `dim`.
     *
@@ -1232,7 +1234,7 @@ private[torch] trait IndexingSlicingJoiningOps {
       index: Tensor[Int64],
       dim: Int | Option[Int] = None
   ): Tensor[D] =
-    Tensor(torchNative.take_along_dim(input.native, index.native, dim.toOptional))
+    fromNative(torchNative.take_along_dim(input.native, index.native, dim.toOptional))
 
   /** Splits a tensor into multiple sub-tensors, all of which are views of `input`, along dimension
     * `dim` according to the indices or number of sections specified by `indices_or_sections`. This
@@ -1305,7 +1307,7 @@ private[torch] trait IndexingSlicingJoiningOps {
       case s: Seq[Int] =>
         torchNative.tensor_split(input.native, s.toArray.map(_.toLong), dim.toLong)
     }
-    (0L until result.size()).map(i => Tensor(result.get(i)))
+    (0L until result.size()).map(i => fromNative(result.get(i)))
   }
 
   /** Constructs a tensor by repeating the elements of `input`. The `dims` argument specifies the
@@ -1342,7 +1344,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *   the number of repetitions per dimension.
     */
   def tile[D <: DType](input: Tensor[D], reps: Int*): Tensor[D] =
-    Tensor(torchNative.tile(input.native, reps.map(_.toLong)*))
+    fromNative(torchNative.tile(input.native, reps.map(_.toLong)*))
 
   /** Returns a tensor that is a transposed version of `input`. The given dimensions `dim0` and
     * `dim1` are swapped.
@@ -1384,7 +1386,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     * @group indexing_slicing_joining_mutating_ops
     */
   def transpose[D <: DType](input: Tensor[D], dim0: Int, dim1: Int): Tensor[D] =
-    Tensor(torchNative.transpose(input.native, dim0.toLong, dim1.toLong))
+    fromNative(torchNative.transpose(input.native, dim0.toLong, dim1.toLong))
 
   /** Removes a tensor dimension.
     *
@@ -1412,7 +1414,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     */
   def unbind[D <: DType](input: Tensor[D], dim: Int = 0): Seq[Tensor[D]] = {
     val result = torchNative.unbind(input.native, dim.toLong)
-    (0L until result.size()).map(i => Tensor(result.get(i)))
+    (0L until result.size()).map(i => fromNative(result.get(i)))
   }
 
   /** Returns a new tensor with a dimension of size one inserted at the specified position.
@@ -1443,7 +1445,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *   the index at which to insert the singleton dimension
     */
   def unsqueeze[D <: DType](input: Tensor[D], dim: Int): Tensor[D] =
-    Tensor(torchNative.unsqueeze(input.native, dim.toLong))
+    fromNative(torchNative.unsqueeze(input.native, dim.toLong))
 
   /** Splits `input`, a tensor with two or more dimensions, into multiple tensors vertically
     * according to `indicesOrSections`. Each split is a view of `input`.
@@ -1471,7 +1473,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     */
   def vsplit[D <: DType](input: Tensor[D], splitSizeOrSections: Int*): Seq[Tensor[D]] = {
     val result = torchNative.vsplit(input.native, splitSizeOrSections.map(_.toLong)*)
-    (0L until result.size()).map(i => Tensor(result.get(i)))
+    (0L until result.size()).map(i => fromNative(result.get(i)))
   }
 
   /** Stack tensors in sequence vertically (row wise).
@@ -1492,7 +1494,7 @@ private[torch] trait IndexingSlicingJoiningOps {
     *
     * @group indexing_slicing_joining_mutating_ops
     */
-  def vstack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] = Tensor(
+  def vstack[D <: DType](tensors: Seq[Tensor[D]]): Tensor[D] = fromNative(
     torchNative.vstack(toArrayRef(tensors))
   )
 
@@ -1541,11 +1543,11 @@ private[torch] trait IndexingSlicingJoiningOps {
     *   When True (nonzero), yield input, otherwise yield other
     */
   def where[D <: DType](condition: Tensor[Bool], input: Tensor[D], other: Tensor[D]): Tensor[D] =
-    Tensor(torchNative.where(condition.native, input.native, other.native))
+    fromNative(torchNative.where(condition.native, input.native, other.native))
   def where[D <: DType](condition: Tensor[Bool], input: Tensor[D], other: ScalaType): Tensor[D] =
-    Tensor(torchNative.where(condition.native, input.native, other.toScalar))
+    fromNative(torchNative.where(condition.native, input.native, other.toScalar))
   def where[D <: DType](condition: Tensor[Bool], input: ScalaType, other: Tensor[D]): Tensor[D] =
-    Tensor(torchNative.where(condition.native, input.toScalar, other.native))
+    fromNative(torchNative.where(condition.native, input.toScalar, other.native))
   def where[D <: DType](condition: Tensor[Bool], input: ScalaType, other: ScalaType): Tensor[D] =
-    Tensor(torchNative.where(condition.native, input.toScalar, other.toScalar))
+    fromNative(torchNative.where(condition.native, input.toScalar, other.toScalar))
 }

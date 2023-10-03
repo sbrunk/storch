@@ -18,6 +18,7 @@ package torch
 
 import org.bytedeco.pytorch.global.torch.make_generator_cpu
 import org.bytedeco.pytorch.global.torch_cuda.make_generator_cuda
+import torch.internal.NativeConverters.fromNative
 
 /** Creates and returns a generator object that manages the state of the algorithm which produces
   * pseudo random numbers.
@@ -29,7 +30,7 @@ class Generator(val device: Device = Device.CPU) {
     case _               => throw new IllegalArgumentException("Unsupported generator device")
 
   /** Returns the Generator state as a [[torch.Tensor[UInt8]]. */
-  def getState: Tensor[UInt8] = Tensor(native.get_state())
+  def getState: Tensor[UInt8] = fromNative(native.get_state())
 
   /** Sets the Generator state.
     *

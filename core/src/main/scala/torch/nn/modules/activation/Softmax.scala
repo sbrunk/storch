@@ -21,8 +21,7 @@ package activation
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.SoftmaxImpl
-import torch.nn.modules.Module
-import torch.{DType, Tensor}
+import torch.internal.NativeConverters.fromNative
 
 /** Applies the Softmax function to an n-dimensional input Tensor rescaling them so that the
   * elements of the n-dimensional output Tensor lie in the range [0,1] and sum to 1.
@@ -34,4 +33,4 @@ import torch.{DType, Tensor}
 final class Softmax[D <: DType: Default](dim: Int) extends TensorModule[D]:
   override val nativeModule: SoftmaxImpl = SoftmaxImpl(dim)
 
-  def apply(t: Tensor[D]): Tensor[D] = Tensor(nativeModule.forward(t.native))
+  def apply(t: Tensor[D]): Tensor[D] = fromNative(nativeModule.forward(t.native))
