@@ -25,15 +25,15 @@ class OtherOpsSuite extends TensorCheckSuite {
     val b = torch.arange(end = 5)
     assert(torch.einsum("ii", a) equal torch.trace(a))
     // diagonal
-    assert(torch.einsum("ii->i", a) equal Tensor[Int](Seq(0, 6, 12, 18, 24)))
+    assert(torch.einsum("ii->i", a) equal Tensor(Seq(0, 6, 12, 18, 24)))
     // inner product
-    assert(torch.einsum("i,i", b, b) equal Tensor[Int](30))
+    assert(torch.einsum("i,i", b, b) equal Tensor(30))
     // matrix vector multiplication
-    assert(torch.einsum("ij,j", a, b) equal Tensor[Int](Seq(30, 80, 130, 180, 230)))
+    assert(torch.einsum("ij,j", a, b) equal Tensor(Seq(30, 80, 130, 180, 230)))
   }
 
   test("trace") {
     val t = torch.arange(1f, 10f).view(3, 3)
-    assert(torch.trace(t) equal Tensor[Float](15f))
+    assert(torch.trace(t) equal Tensor(15f))
   }
 }
