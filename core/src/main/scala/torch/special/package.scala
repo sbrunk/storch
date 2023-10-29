@@ -44,7 +44,7 @@ package object special:
     fromNative(torchNative.exp2(input.native))
 
   /** Computes the exponential of the elements minus 1 of `input`. */
-  def expm1[D <: RealNN](input: Tensor[D]): Tensor[FloatPromoted[D]] =
+  def expm1[D <: DType](input: Tensor[D]): Tensor[FloatPromoted[D]] =
     fromNative(torchNative.expm1(input.native))
 
   /** Computes the zeroth order modified Bessel function of the first kind for each element of

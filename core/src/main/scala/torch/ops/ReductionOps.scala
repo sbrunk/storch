@@ -683,7 +683,7 @@ private[torch] trait ReductionOps {
       torchNative.std(
         input.native,
         dim.toArray,
-        correction.toOptional,
+        correction.toScalarOptional,
         keepdim
       )
     )
@@ -722,7 +722,7 @@ private[torch] trait ReductionOps {
       torchNative.std_mean(
         input.native,
         dim.toArray,
-        correction.toOptional,
+        correction.toScalarOptional,
         keepdim
       )
     (fromNative[D](nativeTuple.get0), fromNative[D](nativeTuple.get1))
@@ -828,7 +828,7 @@ private[torch] trait ReductionOps {
       torchNative.`var`(
         input.native,
         dim.toArray,
-        correction.toOptional,
+        correction.toScalarOptional,
         keepdim
       )
     )
@@ -867,7 +867,7 @@ private[torch] trait ReductionOps {
       torchNative.var_mean(
         input.native,
         dim.toArray,
-        correction.toOptional,
+        correction.toScalarOptional,
         keepdim
       )
     (fromNative[D](nativeTuple.get0), fromNative[D](nativeTuple.get1))

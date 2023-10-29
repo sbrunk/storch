@@ -24,8 +24,8 @@ ThisBuild / tlSitePublishBranch := Some("main")
 ThisBuild / apiURL := Some(new URL("https://storch.dev/api/"))
 
 val scrImageVersion = "4.0.34"
-val pytorchVersion = "2.0.1"
-val cudaVersion = "12.1-8.9"
+val pytorchVersion = "2.1.0"
+val cudaVersion = "12.3-8.9"
 val openblasVersion = "0.3.23"
 val mklVersion = "2023.1"
 ThisBuild / scalaVersion := "3.3.1"

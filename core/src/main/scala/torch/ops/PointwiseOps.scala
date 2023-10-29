@@ -631,7 +631,7 @@ private[torch] trait PointwiseOps {
     *
     * @group pointwise_ops
     */
-  def nanToNum[D <: RealNN](
+  def nanToNum[D <: DType](
       input: Tensor[D],
       nan: Option[Double] = None,
       posinf: Option[Double] = None,
