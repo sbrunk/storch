@@ -24,6 +24,7 @@ import org.bytedeco.pytorch.{
   DeviceOptional,
   DoubleOptional,
   BoolOptional,
+  LongArrayRefOptional,
   LongOptional,
   TensorOptional
 }
@@ -59,6 +60,8 @@ private[torch] object NativeConverters:
           val scalar = toScalar(r)
           pytorch.ScalarOptional(scalar)
       )
+
+  extension (i: Int) def toScalarOptional = pytorch.ScalarOptional(pytorch.Scalar(i))
 
   extension [D <: DType](t: Tensor[D] | Option[Tensor[D]])
     def toOptional: TensorOptional =
