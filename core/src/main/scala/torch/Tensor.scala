@@ -409,6 +409,13 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
       case BFloat16               => native.item().toBFloat16.asFloat()
       case QUInt4x2               => ???
       case QUInt2x4               => ???
+      case Bits1x8                => ???
+      case Bits2x4                => ???
+      case Bits4x2                => ???
+      case Bits8                  => ???
+      case Bits16                 => ???
+      case Float8_e5m2            => native.item().toFloat8_e5m2().asFloat()
+      case Float8_e4m3fn          => native.item().toFloat8_e4m3fn().asFloat()
       case Undefined | NumOptions => ???
     out.asInstanceOf[DTypeToScala[D]]
 
@@ -735,15 +742,22 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
       case ComplexFloat => writeArray[Complex[Float], FloatBuffer](b => Complex(b.get(), b.get()))
       case ComplexDouble =>
         writeArray[Complex[Double], DoubleBuffer](b => Complex(b.get(), b.get()))
-      case Bool       => writeArray[Boolean, ByteBuffer](b => b.get > 0)
-      case QInt8      => ???
-      case QUInt8     => ???
-      case QInt32     => ???
-      case BFloat16   => to(dtype = float32).toArray
-      case QUInt4x2   => ???
-      case QUInt2x4   => ???
-      case Undefined  => ???
-      case NumOptions => ???
+      case Bool          => writeArray[Boolean, ByteBuffer](b => b.get > 0)
+      case QInt8         => ???
+      case QUInt8        => ???
+      case QInt32        => ???
+      case BFloat16      => to(dtype = float32).toArray
+      case QUInt4x2      => ???
+      case QUInt2x4      => ???
+      case Bits1x8       => ???
+      case Bits2x4       => ???
+      case Bits4x2       => ???
+      case Bits8         => ???
+      case Bits16        => ???
+      case Float8_e5m2   => to(dtype = float32).toArray
+      case Float8_e4m3fn => to(dtype = float32).toArray
+      case Undefined     => ???
+      case NumOptions    => ???
     out.asInstanceOf[Array[DTypeToScala[D]]]
 
   def toSeq: Seq[DTypeToScala[D]] = ArraySeq.unsafeWrapArray(toArray)
@@ -843,63 +857,91 @@ sealed class Int64Tensor(native: pytorch.Tensor) extends Tensor[Int64](native) {
   requireNativeType(ScalarType.Long)
   override def dtype: Int64 = int64
 }
-sealed class Float32Tensor(native: pytorch.Tensor) extends Tensor[Float32](native) { /* 5, Float */
-  requireNativeType(ScalarType.Float)
-  override def dtype: Float32 = float32
-}
-sealed class Float64Tensor(native: pytorch.Tensor) extends Tensor[Float64](native) { /* 6, Double */
-  requireNativeType(ScalarType.Double)
-  override def dtype: Float64 = float64
-}
-sealed class Complex32Tensor(native: pytorch.Tensor) extends Tensor[Complex32](native) { /* 7, ComplexHalf */
-  requireNativeType(ScalarType.ComplexHalf)
-  override def dtype: Complex32 = complex32
-}
-sealed class Complex64Tensor(native: pytorch.Tensor) extends Tensor[Complex64](native) { /* 8, ComplexFloat */
-  requireNativeType(ScalarType.ComplexFloat)
-  override def dtype: Complex64 = complex64
-}
-sealed class Complex128Tensor(native: pytorch.Tensor) extends Tensor[Complex128](native) { /* 9, ComplexDouble */
-  requireNativeType(ScalarType.ComplexDouble)
-  override def dtype: Complex128 = complex128
-}
-sealed class BoolTensor(native: pytorch.Tensor) extends Tensor[Bool](native) { /* 10 Bool */
-  requireNativeType(ScalarType.Bool)
-  override def dtype: Bool = bool
-}
-sealed class QInt8Tensor(native: pytorch.Tensor) extends Tensor[QInt8](native) { /* 11 */
-  requireNativeType(ScalarType.QInt8)
-  override def dtype: QInt8 = qint8
-}
-sealed class QUInt8Tensor(native: pytorch.Tensor) extends Tensor[QUInt8](native) { /* 12 */
-  requireNativeType(ScalarType.QUInt8)
-  override def dtype: QUInt8 = quint8
-}
-sealed class QInt32Tensor(native: pytorch.Tensor) extends Tensor[QInt32](native) { /* 13 */
-  requireNativeType(ScalarType.QInt32)
-  override def dtype: QInt32 = qint32
-}
-sealed class BFloat16Tensor(native: pytorch.Tensor) extends Tensor[BFloat16](native) { /* 14 */
-  requireNativeType(ScalarType.BFloat16)
-  override def dtype: BFloat16 = bfloat16
-}
-sealed class QUInt4x2Tensor(native: pytorch.Tensor) extends Tensor[Complex32](native) { /* 15 */
-  requireNativeType(ScalarType.QUInt4x2)
-  override def dtype: Complex32 = complex32
-}
-sealed class QUInt2x4Tensor(native: pytorch.Tensor) extends Tensor[QUInt4x2](native) { /* 16 */
-  requireNativeType(ScalarType.QUInt2x4)
-  override def dtype: QUInt4x2 = quint4x2
-}
-sealed class Float16Tensor(native: pytorch.Tensor) extends Tensor[Float16](native) { /* 17, Half */
+sealed class Float16Tensor(native: pytorch.Tensor) extends Tensor[Float16](native) { /* 5, Half */
   requireNativeType(ScalarType.Half)
   override def dtype: Float16 = float16
 }
-sealed class UndefinedTensor(native: pytorch.Tensor) extends Tensor[Undefined](native) { /* 18 */
+sealed class Float32Tensor(native: pytorch.Tensor) extends Tensor[Float32](native) { /* 6, Float */
+  requireNativeType(ScalarType.Float)
+  override def dtype: Float32 = float32
+}
+sealed class Float64Tensor(native: pytorch.Tensor) extends Tensor[Float64](native) { /* 7, Double */
+  requireNativeType(ScalarType.Double)
+  override def dtype: Float64 = float64
+}
+sealed class Complex32Tensor(native: pytorch.Tensor) extends Tensor[Complex32](native) { /* 8, ComplexHalf */
+  requireNativeType(ScalarType.ComplexHalf)
+  override def dtype: Complex32 = complex32
+}
+sealed class Complex64Tensor(native: pytorch.Tensor) extends Tensor[Complex64](native) { /* 9, ComplexFloat */
+  requireNativeType(ScalarType.ComplexFloat)
+  override def dtype: Complex64 = complex64
+}
+sealed class Complex128Tensor(native: pytorch.Tensor) extends Tensor[Complex128](native) { /* 10, ComplexDouble */
+  requireNativeType(ScalarType.ComplexDouble)
+  override def dtype: Complex128 = complex128
+}
+sealed class BoolTensor(native: pytorch.Tensor) extends Tensor[Bool](native) { /* 11 Bool */
+  requireNativeType(ScalarType.Bool)
+  override def dtype: Bool = bool
+}
+sealed class QInt8Tensor(native: pytorch.Tensor) extends Tensor[QInt8](native) { /* 12 */
+  requireNativeType(ScalarType.QInt8)
+  override def dtype: QInt8 = qint8
+}
+sealed class QUInt8Tensor(native: pytorch.Tensor) extends Tensor[QUInt8](native) { /* 13 */
+  requireNativeType(ScalarType.QUInt8)
+  override def dtype: QUInt8 = quint8
+}
+sealed class QInt32Tensor(native: pytorch.Tensor) extends Tensor[QInt32](native) { /* 14 */
+  requireNativeType(ScalarType.QInt32)
+  override def dtype: QInt32 = qint32
+}
+sealed class BFloat16Tensor(native: pytorch.Tensor) extends Tensor[BFloat16](native) { /* 15 */
+  requireNativeType(ScalarType.BFloat16)
+  override def dtype: BFloat16 = bfloat16
+}
+sealed class QUInt4x2Tensor(native: pytorch.Tensor) extends Tensor[QUInt4x2](native) { /* 16 */
+  requireNativeType(ScalarType.QUInt4x2)
+  override def dtype: QUInt4x2 = quint4x2
+}
+sealed class QUInt2x4Tensor(native: pytorch.Tensor) extends Tensor[QUInt2x4](native) { /* 16 */
+  requireNativeType(ScalarType.QUInt2x4)
+  override def dtype: QUInt2x4 = quint2x4
+}
+sealed class Bits1x8Tensor(native: pytorch.Tensor) extends Tensor[Bits1x8](native) { /* 18 */
+  requireNativeType(ScalarType.Bits1x8)
+  override def dtype: Bits1x8 = bits1x8
+}
+sealed class Bits2x4Tensor(native: pytorch.Tensor) extends Tensor[Bits2x4](native) { /* 19 */
+  requireNativeType(ScalarType.Bits2x4)
+  override def dtype: Bits2x4 = bits2x4
+}
+sealed class Bits4x2Tensor(native: pytorch.Tensor) extends Tensor[Bits4x2](native) { /* 20 */
+  requireNativeType(ScalarType.Bits4x2)
+  override def dtype: Bits4x2 = bits4x2
+}
+sealed class Bits8Tensor(native: pytorch.Tensor) extends Tensor[Bits8](native) { /* 21 */
+  requireNativeType(ScalarType.Bits8)
+  override def dtype: Bits8 = bits8
+}
+sealed class Bits16Tensor(native: pytorch.Tensor) extends Tensor[Bits16](native) { /* 22 */
+  requireNativeType(ScalarType.Bits16)
+  override def dtype: Bits16 = bits16
+}
+sealed class Float8_e5m2Tensor(native: pytorch.Tensor) extends Tensor[Float8_e5m2](native) { /* 23 */
+  requireNativeType(ScalarType.Float8_e5m2)
+  override def dtype: Float8_e5m2 = float8_e5m2
+}
+sealed class Float8_e4m3fnTensor(native: pytorch.Tensor) extends Tensor[Float8_e4m3fn](native) { /* 34 */
+  requireNativeType(ScalarType.Float8_e4m3fn)
+  override def dtype: Float8_e4m3fn = float8_e4m3fn
+}
+sealed class UndefinedTensor(native: pytorch.Tensor) extends Tensor[Undefined](native) { /* 25 */
   requireNativeType(ScalarType.Undefined)
   override def dtype: Undefined = undefined
 }
-sealed class NumOptionsTensor(native: pytorch.Tensor) extends Tensor[NumOptions](native) { /* 19 */
+sealed class NumOptionsTensor(native: pytorch.Tensor) extends Tensor[NumOptions](native) { /* 26 */
   requireNativeType(ScalarType.NumOptions)
   override def dtype: NumOptions = numoptions
 }
@@ -929,6 +971,13 @@ object Tensor:
       case ScalarType.BFloat16      => new BFloat16Tensor(native)
       case ScalarType.QUInt4x2      => new QUInt4x2Tensor(native)
       case ScalarType.QUInt2x4      => new QUInt2x4Tensor(native)
+      case ScalarType.Bits1x8       => new Bits1x8Tensor(native)
+      case ScalarType.Bits2x4       => new Bits2x4Tensor(native)
+      case ScalarType.Bits4x2       => new Bits4x2Tensor(native)
+      case ScalarType.Bits8         => new Bits8Tensor(native)
+      case ScalarType.Bits16        => new Bits16Tensor(native)
+      case ScalarType.Float8_e5m2   => new Float8_e5m2Tensor(native)
+      case ScalarType.Float8_e4m3fn => new Float8_e4m3fnTensor(native)
       case ScalarType.Undefined     => new UndefinedTensor(native)
       case ScalarType.NumOptions    => new NumOptionsTensor(native)
     ).asInstanceOf[Tensor[D]]
