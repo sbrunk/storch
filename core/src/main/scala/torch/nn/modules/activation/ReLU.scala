@@ -31,7 +31,9 @@ final class ReLU[D <: DType: Default](inplace: Boolean = false) extends TensorMo
   private val options = new ReLUOptions()
   options.inplace().put(inplace)
 
-  override protected[torch] val nativeModule: ReLUImpl = ReLUImpl()
+  override protected[torch] val nativeModule: ReLUImpl = ReLUImpl(options)
+
+  override def hasBias(): Boolean = false
 
   def apply(t: Tensor[D]): Tensor[D] = fromNative(nativeModule.forward(t.native))
 

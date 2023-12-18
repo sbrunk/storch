@@ -42,6 +42,8 @@ final class MaxPool2d[D <: BFloat16 | Float32 | Float64: Default](
 
   override private[torch] val nativeModule: MaxPool2dImpl = MaxPool2dImpl(options)
 
+  override def hasBias(): Boolean = false
+
   override def toString(): String =
     s"MaxPool2d(kernelSize=$kernelSize, stride=$stride, padding=$padding, dilation=$dilation, ceilMode=$ceilMode)"
 

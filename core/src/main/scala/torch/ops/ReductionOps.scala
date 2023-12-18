@@ -783,6 +783,36 @@ private[torch] trait ReductionOps {
       )
     )
 
+/** Returns the lower triangular part of the matrix (2-D tensor) or batch of matrices `input`, the other 
+    * elements of the result tensor `out` are set to 0.
+    * 
+    * The lower triangular part of the matrix is defined as the elements on and below the diagonal.
+    * 
+    * The argument [[torch.diagonal diagonal]] controls which diagonal to consider. If `diagonal = 0`, 
+    * all elements on and below the main diagonal are retained. A positive value includes just as many
+    * diagonals above the main diagonal, and similarly a negative value excludes just as many diagonals 
+    * below the main diagonal. The main diagonal are the set of indices ${(i,i)}$ for $i \in [0,min⁡{d1,d2}−1]$
+    * where $d_1​,d_2​$ are the dimensions of the matrix.
+    * 
+    * @example
+    * {{{
+    * val a = torch.randn(3, 3)
+    * torch.tril(a)
+    * val b = torch.randn(4, 6)
+    * torch.tril(b, diagonal=1)
+    * torch.tril(b, diagonal=-1)
+    * }}}
+    *
+    * @param input 
+    *   the input tensor.
+    * @param diagonal 
+    *   the diagonal to consider
+    * @return out 
+    * the output tensor.
+    */
+  def tril[D <: DType](input: Tensor[D], diagonal: Int = 0): Tensor[D] =
+    fromNative(torchNative.tril(input.native, diagonal.toLong))    
+
     // TODO unique Returns the unique elements of the `input` tensor.
     // seems to be implemented in https://github.com/pytorch/pytorch/blob/main/torch/functional.py
     // and calls different native functions depending on dim unique_dim or _unique2

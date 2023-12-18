@@ -21,6 +21,7 @@ package activation
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.SoftmaxImpl
+import org.bytedeco.pytorch.SoftmaxOptions
 import torch.internal.NativeConverters.fromNative
 
 /** Applies the Softmax function to an n-dimensional input Tensor rescaling them so that the
@@ -31,6 +32,10 @@ import torch.internal.NativeConverters.fromNative
   * When the input Tensor is a sparse tensor then the unspecifed values are treated as ``-inf``.
   */
 final class Softmax[D <: DType: Default](dim: Int) extends TensorModule[D]:
-  override val nativeModule: SoftmaxImpl = SoftmaxImpl(dim)
+  private val options = new SoftmaxOptions(dim)
+
+  override val nativeModule: SoftmaxImpl = SoftmaxImpl(options)
+
+  override def hasBias(): Boolean = false
 
   def apply(t: Tensor[D]): Tensor[D] = fromNative(nativeModule.forward(t.native))

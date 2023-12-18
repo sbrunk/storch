@@ -114,6 +114,8 @@ final class BatchNorm2d[ParamType <: FloatNN | ComplexNN: Default](
   val bias: Tensor[ParamType] = fromNative[ParamType](nativeModule.bias)
   // TODO running_mean, running_var, num_batches_tracked
 
+  override def hasBias(): Boolean = true
+
   def apply(t: Tensor[ParamType]): Tensor[ParamType] = fromNative(nativeModule.forward(t.native))
 
   override def toString(): String = s"${getClass().getSimpleName()}(numFeatures=$numFeatures)"

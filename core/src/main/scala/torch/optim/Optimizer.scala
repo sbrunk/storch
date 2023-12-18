@@ -33,4 +33,6 @@ abstract class Optimizer {
 
   /** Sets the gradients of all optimized `Tensor`s to zero. */
   def zeroGrad(): Unit = native.zero_grad()
+  def zeroGrad(setToNone: Boolean = true): Unit = native.zero_grad(setToNone)
+
 }

@@ -27,6 +27,8 @@ import torch.internal.NativeConverters.fromNative
 final class CrossEntropyLoss extends Module {
   override private[torch] val nativeModule: CrossEntropyLossImpl = CrossEntropyLossImpl()
 
+  override def hasBias(): Boolean = false
+
   def apply[D <: DType](input: Tensor[D], target: Tensor[?]): Tensor[D] = fromNative(
     nativeModule.forward(input.native, target.native)
   )

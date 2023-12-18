@@ -29,6 +29,8 @@ final class Sequential[D <: DType](override val modules: TensorModule[D]*)
     this.register(module)(using Name(index.toString()))
   )
 
+  override def hasBias(): Boolean = modules.exists(_.hasBias())
+
   override def apply(input: Tensor[D]): Tensor[D] =
     modules.foldLeft(input)((i, module) => module(i))
 

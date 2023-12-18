@@ -68,6 +68,8 @@ import org.bytedeco.pytorch.SymIntOptional
 import org.bytedeco.pytorch.ScalarTypeOptional
 import scala.annotation.implicitNotFound
 
+import torch.nn.functional as F
+
 case class TensorTuple[D <: DType](
     values: Tensor[D],
     indices: Tensor[Int64]
@@ -439,6 +441,22 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def `@`[D2 <: DType](u: Tensor[D2]): Tensor[Promoted[D, D2]] = matmul(u)
 
+
+  /** Fills elements of self tensor with value where mask is `true`. The shape of mask must be 
+    * [broadcastable](https://pytorch.org/docs/stable/notes/broadcasting.html#broadcasting-semantics) with the shape 
+    * of the underlying tensor.
+    *
+    * @param mask
+    *   the boolean mask
+    * @param value
+    *   the value to fill in with
+    * @return
+    *   Tensor with masked elements set to `value`
+    */
+  def maskedFill[S <: ScalaType](mask: Tensor[Bool], value: S): Tensor[Promoted[D, ScalaToDType[S]]] =
+    fromNative(native.masked_fill(mask.native, toScalar(value)))
+
+
   /** Returns the maximum value of all elements of this tensor. */
   def max(): Tensor[D] = fromNative(native.max())
 
@@ -541,6 +559,11 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def shape: Seq[Int] = size
 
+  def softmax[Out <: FloatNN | Derive](
+      dim: Long,
+      dtype: Out = derive
+  ): Tensor[DTypeOrDeriveFromTensor[D, Out]] = F.softmax(input = this, dim = dim, dtype = dtype)
+
   def square = fromNative(native.square())
 
   def squeeze: Tensor[D] = fromNative(native.squeeze())
@@ -554,6 +577,22 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   /** Returns the sum of all elements of this tensor. */
   def sum: Tensor[Sum[D]] = fromNative(native.sum())
+  def sum[D2 <: DType | Derive](
+        dim: Int | Seq[Int] = Seq.empty,
+        keepdim: Boolean = false,
+        dtype: D2 = derive
+    ): Tensor[DTypeOrDeriveFromTensor[D, D2]] =
+      val derivedDType = dtype match
+        case _: Derive => this.dtype
+        case d: DType  => d
+      fromNative(
+        torchNative.sum(
+          native,
+          dim.toArray,
+          keepdim,
+          new ScalarTypeOptional(derivedDType.toScalarType)
+        )
+      )
 
   /** Expects `input` to be \<= 2-D tensor and transposes dimensions 0 and 1.
     *
@@ -561,6 +600,46 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     * `transpose(input, 0, 1)`.
     */
   def t: Tensor[D] = fromNative(native.t())
+
+  /** Returns a tensor that is a transposed version of `input` (this Tensor). The given dimensions 
+    * `dim0` and `dim1` are swapped.
+    * 
+    * If `input` is a strided tensor then the resulting `out` tensor shares its underlying storage with 
+    * the `input` tensor, so changing the content of one would change the content of the other.
+    * 
+    * If `input` is a [[https://pytorch.org/docs/stable/sparse.html#sparse-docs sparse tensor]] then the 
+    * resulting `out` tensor does not share the underlying storage with the input tensor.
+    * 
+    * If input is a [[https://pytorch.org/docs/stable/sparse.html#sparse-docs sparse tensor]] with 
+    * compressed layout (SparseCSR, SparseBSR, SparseCSC or SparseBSC) the arguments `dim0` and `dim1` 
+    * must be both batch dimensions, or must both be sparse dimensions. The batch dimensions of a sparse 
+    * tensor are the dimensions preceding the sparse dimensions.
+    * 
+    * @note Transpositions which interchange the sparse dimensions of a *SparseCSR* or *SparseCSC* 
+    * layout tensor will result in the layout changing between the two options. Transposition of the 
+    * sparse dimensions of a `SparseBSR` or `SparseBSC` layout tensor will likewise generate a result 
+    * with the opposite layout.
+    * 
+    * @example:
+    * {{{
+    *  val x = torch.randn(2, 3)
+    *  println(x)
+    *  val y = torch.transpose(x, 0, 1)
+    *  println(y)
+    * }}}
+    * 
+    * @param input
+    *   the input tensor.
+    * @param dim0
+    *   the first dimension to be transposed
+    * @param dim1
+    *   the second dimension to be transposed
+    * @return Tensor[D]
+    * 
+    * @see [[Tensor.mT]]
+    * 
+    */
+  def transpose(dim0: Int, dim1: Int): Tensor[D] = fromNative(native.transpose(dim0, dim1))
 
   /** Calculates the variance of all elements of this tensor. */
   def variance = fromNative(native.`var`())

@@ -50,14 +50,19 @@ import internal.NativeConverters.fromNative
 final class Linear[ParamType <: FloatNN: Default](
     inFeatures: Long,
     outFeatures: Long,
-    hasBias: Boolean = true
+    addBias: Boolean = true
     // dtype: ParamType = defaultDType[ParamType]
 ) extends HasParams[ParamType]
+    with HasWeight[ParamType]
     with TensorModule[ParamType]:
+
   private val options = new LinearOptions(inFeatures, outFeatures)
-  options.bias().put(hasBias)
+  options.bias().put(addBias)
+
   override private[torch] val nativeModule: LinearImpl = new LinearImpl(options)
   nativeModule.to(paramType.toScalarType, false)
+  
+  override def hasBias(): Boolean = options.bias().get()
 
   def weight = fromNative[ParamType](nativeModule.weight())
   def weight_=(t: Tensor[ParamType]): Unit = nativeModule.weight(t.native)
@@ -70,4 +75,4 @@ final class Linear[ParamType <: FloatNN: Default](
   )
 
   override def toString =
-    s"${getClass.getSimpleName}(inFeatures=$inFeatures, outFeatures=$outFeatures, bias=$hasBias)"
+    s"${getClass.getSimpleName}(inFeatures=$inFeatures, outFeatures=$outFeatures, bias=$addBias)"

@@ -49,6 +49,8 @@ final class AdaptiveAvgPool2d[D <: BFloat16 | Float32 | Float64: Default](
     nativeOutputSize.get(0)
   )
 
+  override def hasBias(): Boolean = false
+  
   def apply(t: Tensor[D]): Tensor[D] = fromNative(
     nativeModule.forward(t.native)
   )

@@ -63,6 +63,8 @@ final class Conv2d[ParamType <: FloatNN | ComplexNN: Default](
 
   def weight: Tensor[ParamType] = fromNative(nativeModule.weight)
 
+  override def hasBias(): Boolean = options.bias().get()
+
   override def toString =
     s"Conv2d($inChannels, $outChannels, kernelSize=$kernelSize, stride=$stride, padding=$padding, bias=$bias)"
 
