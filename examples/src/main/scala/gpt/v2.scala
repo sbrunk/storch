@@ -966,6 +966,8 @@ object V2:
   def main(args: Array[String]): Unit =
     println("V2")
 
+    torch.manualSeed(1337)
+
     /*
     model = GPTLanguageModel()
     m = model.to(device)
