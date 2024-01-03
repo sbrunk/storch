@@ -800,7 +800,7 @@ object V2:
 
     // better init, not covered in the original GPT video, but important, will cover in followup video
     // self.apply(self._init_weights)
-    modules.foreach(init_weights)
+    // modules.foreach(init_weights)
 
     /*
     def _init_weights(self, module):
@@ -961,7 +961,8 @@ object V2:
     val perIteration = humanReadableDuration(total / maxIterations)
     println(s"step ${maxIterations}: train loss ${losses("train")}, val loss ${losses("val")}, @ ${accumulated}, mean $perIteration")
 
-
+  // sbt "set ThisBuild / enableGPU := true" "examples/runMain gpt.V2"
+  // nohup sbt "set ThisBuild / enableGPU := true" "examples/runMain gpt.V2" > tmp.txt 2>&1 &
   def main(args: Array[String]): Unit =
     println("V2")
 
