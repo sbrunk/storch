@@ -33,11 +33,11 @@ import torch.Device.CPU
 import torch.nn.functional as F
 import torch.nn.modules.Module
 import torch.nn.modules.HasParams
+import torch.nn.modules.HasWeight
 import torch.{---, Slice}
 import torch.optim.Adam
 import torch.DType.float32
 import org.bytedeco.javacpp.Pointer
-import torch.nn.modules.HasWeight
 import org.bytedeco.pytorch.cuda.Stat
 import org.bytedeco.pytorch.cuda.CheckpointDelta
 import org.bytedeco.pytorch.cuda.SnapshotInfo
@@ -48,7 +48,9 @@ import org.bytedeco.pytorch.cuda.DeviceStats
 import org.bytedeco.javacpp.BoolPointer
 import org.bytedeco.pytorch.global.torch_cuda
 
-
+import gpt.Utils
+import gpt.Utils.Modules as UtilsM
+import gpt.Utils.CUDAMemory as Mem
 
 /**
   * This is code translated from Andrej Karpathy's [[video https://www.youtube.com/watch?v=kCc8FmEb1nY]]
@@ -66,218 +68,6 @@ import org.bytedeco.pytorch.global.torch_cuda
   * @see https://github.com/karpathy/ng-video-lecture/blob/master/gpt.py
   */
 object V2:
-
-  // Utility functions
-
-  def moduleName(m: Module): String =
-      //m.getClass().getSimpleName()
-      m.toString()
-
-  def moduleClass(m: Module): String =
-      m.getClass().getSimpleName()
-
-  /**
-    * Collects information of a module and returns this as a string. Complex modules
-    * are shown hierarchically. Information includes the modules `toString` output
-    * that usually holds the variable name and class parameter values. We also add
-    * the number of tensor parameter amd their value in the leaf modules. For the 
-    * other modules the sum of the number of tensor parameters are shown. 
-    * 
-    * Use this output to "debug" your networks
-    *
-    * @param m
-    * @return string
-    */
-  def doModuleInfoString(m:Module, indent: Int): String =
-    val parametersCount = m.parameters.size
-    if m.modules.isEmpty 
-    then 
-      val parametersSize = m.parameters.map(_.numel).mkString("<", ",", ">")
-      val thisModule = s"${moduleName(m)}: #$parametersCount $parametersSize "
-      thisModule
-    else
-      val parametersSize = m.parameters.map(_.numel).sum
-      val thisModule = s"${moduleName(m)}: #$parametersCount $parametersSize "
-      thisModule + m.namedChildren
-        .map((name, module) => s"${" " * (indent + 2)}$name: " + doModuleInfoString(module, indent + 2))
-        .mkString("(\n", "\n", s"\n${" " * indent})")
-
-  /**
-    * Collects information of a module and returns this as a string. Complex modules
-    * are shown hierarchically. Information includes the modules `toString` output
-    * that usually holds the variable name and class parameter values. We also add
-    * the number of tensor parameter amd their value in the leaf modules. For the 
-    * other modules the sum of the number of tensor parameters are shown. 
-    * 
-    * Use this output to "debug" your networks
-    *
-    * @param m
-    * @return string
-    */
-  def moduleInfoString(m:Module): String =
-    doModuleInfoString(m, 0)        
-
-
-  
-  def statToDict(stat: Stat, name: String, dict: scala.collection.mutable.Map[String, Long]) =
-    dict(s"$name.current")   = stat.current()
-    dict(s"$name.peak")      = stat.peak()
-    dict(s"$name.allocated") = stat.allocated()
-    dict(s"$name.freed")     = stat.freed()
-
-  def statArrayToDict(
-          statArray: Stat, 
-          name: String, 
-          dict: scala.collection.mutable.Map[String, Long]) =
-
-    val statTypeNames = Array("all", "small_pool", "large_pool")
-    for i <- 0 until statTypeNames.length
-    do
-      statToDict(statArray.position(i), s"$name.${statTypeNames(i)}", dict)
-
-
-  /**
-    * Equivalent to PyTorch memory_stats. 
-    * Returns a dictionary of CUDA memory allocator statistics for a given device.
-    * The return value of this function is a dictionary of statistics, each of which is a non-negative integer.
-    * 
-    * Reference implementation
-    * @see https://pytorch.org/docs/stable/generated/torch.cuda.memory_stats.html
-    * @see https://github.com/pytorch/pytorch/blob/main/torch/csrc/cuda/Module.cpp#L1243
-    * @see https://github.com/pytorch/pytorch/blob/main/torch/cuda/memory.py#L165
-    * 
-    * JavaCPP references
-    * @see https://github.com/bytedeco/javacpp-presets/blob/master/pytorch/src/gen/java/org/bytedeco/pytorch/cuda/DeviceStats.java#L26
-    * @see https://github.com/bytedeco/javacpp-presets/blob/master/pytorch/src/gen/java/org/bytedeco/pytorch/global/torch_cuda.java#L766
-    * @see https://github.com/bytedeco/javacpp-presets/issues/1422
-    * 
-    * @param device
-    * @return
-    */
-  def memoryStats(device: Int): scala.collection.mutable.Map[String, Long] =
-    // get the device
-    val cudaAllocator = torch_cuda.getAllocator()
-    println( cudaAllocator.initialized() )
-    val stats = cudaAllocator.getDeviceStats(device)
-
-    // Collect the statistics
-    val result = scala.collection.mutable.Map[String, Long]()
-    result("num_alloc_retries") = stats.num_alloc_retries
-    result("num_ooms") = stats.num_ooms
-    result("max_split_size") = stats.max_split_size
-
-    // Stat(stats.allocation) casts a Pointer to a Stats pointer. Can be an array 
-    statArrayToDict(Stat(stats.allocation),           "allocation",           result)
-    statArrayToDict(Stat(stats.segment),              "segment",              result)
-    statArrayToDict(Stat(stats.active),               "active",               result)
-    statArrayToDict(Stat(stats.inactive_split),       "inactive_split",       result)
-    statArrayToDict(Stat(stats.allocated_bytes),      "allocated_bytes",      result)
-    statArrayToDict(Stat(stats.reserved_bytes),       "reserved_bytes",       result)
-    statArrayToDict(Stat(stats.active_bytes),         "active_bytes",         result)
-    statArrayToDict(Stat(stats.inactive_split_bytes), "inactive_split_bytes", result)
-    statArrayToDict(Stat(stats.requested_bytes),      "requested_bytes",      result)
-
-    statToDict(stats.oversize_allocations, "oversize_allocations", result)
-    statToDict(stats.oversize_segments,    "oversize_segments",    result)
-    result
-
-  def memory_summary(device: Int, abbreviated: Boolean = false) =
-    val result = memoryStats(device)
-    val l = result.toList.sortBy(_._1)
-    l.map((a,b) => s"$a : ${humanReadableSize(b)}")
-     .mkString("\n")
-    
-
-  def printMemoryInfo(device: Int) =
-    println(memory_summary(device))
-    
-
-  def len[T <: torch.DType](t: Tensor[T]): Int = 
-    // t.size.sum
-    t.shape.sum
-
-  def register_i[M1 <: Module, M2 <: Module](parent: M1, child: M2, i: Int, n: String = "")(using name: sourcecode.Name): M2 =
-    val name_ = if n.trim().isEmpty() then name.value else n.trim()
-    val name_i = s"${name_}_$i"
-    parent.register(child, name_i)
-
-  def totalNuParameters(m: Module): String =
-    val nuParams = m.parameters.map(_.numel).sum
-    if nuParams < 1e5
-    then 
-      s"${nuParams} parameters"
-    else if nuParams < 1e6
-    then 
-      s"${nuParams/1e3}K parameters"
-    else 
-      s"${nuParams/1e6}M parameters"
-
-  val SI = (BigInt(1000), Vector("B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"))
-  val BINARY = (BigInt(1024), Vector("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"))
-
-  /**
-    * Converts a number of bytes into a human-readable string
-    * such as `2.2 MB` or `8.0 EiB`.
-    *
-    * @param bytes the number of bytes we want to convert
-    * @param si    if true, we use base 10 SI units where 1000 bytes are 1 kB.
-    *              If false, we use base 2 IEC units where 1024 bytes are 1 KiB.
-    * @return the bytes as a human-readable string
-    * 
-    * @see https://stackoverflow.com/questions/45885151/bytes-in-human-readable-format-with-idiomatic-scala
-    * @see https://stackoverflow.com/questions/3758606/how-can-i-convert-byte-size-into-a-human-readable-format-in-java
-    */
-  def humanReadableSize(bytes: BigInt, si: Boolean = false): String = 
-    // See https://en.wikipedia.org/wiki/Byte
-    val (baseValue, unitStrings) =
-      if (si)
-        SI
-      else
-        BINARY
-
-    def getExponent(curBytes: BigInt, baseValue: BigInt, curExponent: Int = 0): Int =
-      if (curBytes < baseValue) 
-      then
-        curExponent
-      else
-        val newExponent = 1 + curExponent
-        // getExponent(curBytes / (baseValue * newExponent), baseValue, newExponent)
-        getExponent(curBytes / baseValue, baseValue, newExponent)
-
-    val exponent = getExponent(bytes, baseValue)
-    val divisor = baseValue.pow( exponent)
-    val unitString = unitStrings(exponent)
-
-    // Divide the bytes and show one digit after the decimal point
-    f"${bytes.toDouble / divisor.toDouble}%.1f $unitString"
-
-
-  inline def elapsed[R](inline block: => R): (Long, R) = {
-    val t0 = System.nanoTime()
-    val r = block
-    val t1 = System.nanoTime()
-    val elapsed = t1 - t0
-    // elapsed time in nanoseconds
-    (elapsed, r)
-  }
-
-  inline def elapsedOnly[R](inline block: => R): Long = elapsed(block)._1
-    
-  def durationParts(nanoSeconds: Long) =
-    val duration = java.time.Duration.ofNanos(nanoSeconds)
-    val d = duration.toDaysPart()
-    val hh = duration.toHoursPart()
-    val mm = duration.toMinutesPart()
-    val ss = duration.toSecondsPart()
-    val ms = duration.toMillisPart()
-    val ns = duration.toNanosPart()
-    (d, hh, mm, ss, ms,ns)
-  
-  def humanReadableDuration(nanoSeconds: Long) =
-    val (d, hh, mm, ss, ms, ns) = durationParts(nanoSeconds)
-    String.format("%02d %02d:%02d:%02d.%03d", d, hh, mm, ss, ms)
-
-  // Code starts here
 
   /*
   # hyperparameters
@@ -383,7 +173,7 @@ object V2:
 
   // Train and test splits
   val data = torch.Tensor(encode(text)).long
-  val n = (0.9 * len(data)).toInt // first 90% will be train, rest val
+  val n = (0.9 * Utils.len(data)).toInt // first 90% will be train, rest val
   val train_data = data(Slice(None, n))
   val val_data = data(Slice(n, None))
 
@@ -403,7 +193,7 @@ object V2:
   def getBatch(split: String) = 
     // generate a small batch of data of inputs x and targets y
     val data = if split == "train" then train_data else val_data
-    val ix = torch.randint(0, len(data) - block_size, Seq(batch_size)).to(dtype = int32)
+    val ix = torch.randint(0, Utils.len(data) - block_size, Seq(batch_size)).to(dtype = int32)
     val stacks_x = ix.toSeq.map(i => data(Slice(i, i+block_size)))
     val x = torch.stack(stacks_x)
     val stacks_y = ix.toSeq.map(i => data(Slice(i+1, i+block_size+1)))
@@ -609,8 +399,8 @@ object V2:
 
     // Cannot register with the same name
     // val hs = 0 until numHeads map{ _ => register(Head_2(nEmbed, headSize, blockSize)) }
-    val hs = 0 until numHeads map{ i => register_i(this, Head_2(nEmbed, headSize, blockSize), i) }
-    // val hs = 0 until numHeads map{ i => register_i(this, Head(nEmbed, headSize, blockSize, dropout), i) }
+    val hs = 0 until numHeads map{ i => Utils.register_i(this, Head_2(nEmbed, headSize, blockSize), i) }
+    // val hs = 0 until numHeads map{ i => Utils.register_i(this, Head(nEmbed, headSize, blockSize, dropout), i) }
     val heads = register( nn.ModuleList( hs:_* ) )
     // TODO: BUG - self.proj = nn.Linear(head_size * num_heads, n_embd)
     val proj = register( nn.Linear(headSize * numHeads, nEmbed) )
@@ -853,7 +643,7 @@ object V2:
 
     def generate(idx: Tensor[Int64], max_new_tokens: Int) =
       var idx_ = idx.copy_(idx)
-      printMemoryInfo(0)
+      Mem.printMemoryInfo(0)
 
       // idx is (B, T) array of indices in the current context
       for i <- 0 until max_new_tokens
@@ -870,7 +660,7 @@ object V2:
         val idx_next = torch.multinomial(probs, numSamples=1) // (B, 1)
         // append sampled index to the running sequence
         idx_ = torch.cat(Seq(idx_, idx_next), dim=1) // (B, T+1)
-        printMemoryInfo(0)
+        Mem.printMemoryInfo(0)
       idx_
 
     def apply(x: Tensor[Int64], y: Tensor[Int64]) =
@@ -915,7 +705,7 @@ object V2:
     println(s"init_mean = ${init_mean}")
     println(s"init_std = ${init_std}")
     val nBytes = m.parameters.map(t => t.native.nbytes()).sum
-    println(s"${nuParams} parameters >= ${nBytes} bytes = ${humanReadableSize(nBytes)}")
+    println(s"${nuParams} parameters = ${nBytes} bytes = ${Utils.humanReadableSize(nBytes)}")
     
 
     m.train()
@@ -933,16 +723,16 @@ object V2:
         if (iter % eval_interval == 0) || (iter == maxIterations - 1)
         then
           val losses = estimateLoss(m)
-          val memoryBytes = humanReadableSize( Pointer.physicalBytes() )
+          val memoryBytes = Utils.humanReadableSize( Pointer.physicalBytes() )
           delta = delta / eval_interval
-          val accumulated = humanReadableDuration(total)
-          val perIteration = humanReadableDuration(delta)
+          val accumulated = Utils.humanReadableDuration(total)
+          val perIteration = Utils.humanReadableDuration(delta)
           println(s"step ${iter}: train loss ${losses("train")}, val loss ${losses("val")}, mem $memoryBytes @ ${accumulated}, mean $perIteration")
           //printMemoryInfo(device.index)
           //printMemoryInfo(0)
           delta = 0L
 
-        val elapsed = elapsedOnly {
+        val elapsed = Utils.elapsedOnly {
           // sample a batch of datas
           val (xb, yb) = getBatch("train")
 
@@ -957,8 +747,8 @@ object V2:
       }
       
     val losses = estimateLoss(m)
-    val accumulated = humanReadableDuration(total)
-    val perIteration = humanReadableDuration(total / maxIterations)
+    val accumulated = Utils.humanReadableDuration(total)
+    val perIteration = Utils.humanReadableDuration(total / maxIterations)
     println(s"step ${maxIterations}: train loss ${losses("train")}, val loss ${losses("val")}, @ ${accumulated}, mean $perIteration")
 
   // sbt "set ThisBuild / enableGPU := true" "examples/runMain gpt.V2"
@@ -976,10 +766,10 @@ object V2:
     */
 
     val model = GPTLanguageModel(vocabSize = vocab_size, blockSize = block_size, nEmbed = n_embed, nBlocks = n_layer, nHead = n_head, dropout= dropout)
-    println(totalNuParameters(model))
-    println(moduleInfoString(model))
-    //printMemoryInfo(device.index)
-    printMemoryInfo(0)
+    println(Utils.totalNuParameters(model))
+    println(UtilsM.moduleInfoString(model))
+    //Mem.printMemoryInfo(device.index)
+    Mem.printMemoryInfo(0)
 
     /*
     # create a PyTorch optimizer
