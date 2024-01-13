@@ -45,6 +45,5 @@ package object nn {
   export modules.sparse.Embedding
   export modules.regularization.Dropout
 
-
   export loss.CrossEntropyLoss
 }

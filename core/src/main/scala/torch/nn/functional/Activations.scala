@@ -46,7 +46,8 @@ private[torch] trait Activations {
       case _: Derive => input.dtype
       case d: DType  => d
     val nativeDType =
-      if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(derivedDType.toScalarType)
+      if dtype == input.dtype then ScalarTypeOptional()
+      else ScalarTypeOptional(derivedDType.toScalarType)
     fromNative(torchNative.log_softmax(input.native, dim, nativeDType))
 
     /** Applies the rectified linear unit function element-wise.
@@ -87,6 +88,7 @@ private[torch] trait Activations {
       case _: Derive => input.dtype
       case d: DType  => d
     val nativeDType =
-      if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(derivedDType.toScalarType)
+      if dtype == input.dtype then ScalarTypeOptional()
+      else ScalarTypeOptional(derivedDType.toScalarType)
     fromNative(torchNative.softmax(input.native, dim, nativeDType))
 }

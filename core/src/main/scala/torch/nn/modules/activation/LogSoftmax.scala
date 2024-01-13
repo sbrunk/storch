@@ -41,7 +41,7 @@ import torch.internal.NativeConverters.fromNative
 final class LogSoftmax[D <: DType: Default](dim: Int) extends TensorModule[D]:
   private val options = new LogSoftmaxOptions(dim)
   options.dim().put(dim)
-  
+
   override val nativeModule: LogSoftmaxImpl = LogSoftmaxImpl(options)
 
   override def hasBias(): Boolean = false

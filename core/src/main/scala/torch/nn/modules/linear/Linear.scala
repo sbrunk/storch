@@ -61,7 +61,7 @@ final class Linear[ParamType <: FloatNN: Default](
 
   override private[torch] val nativeModule: LinearImpl = new LinearImpl(options)
   nativeModule.to(paramType.toScalarType, false)
-  
+
   override def hasBias(): Boolean = options.bias().get()
 
   def weight = fromNative[ParamType](nativeModule.weight())

@@ -40,7 +40,7 @@ final class Tanh[D <: DType: Default] extends TensorModule[D]:
   override protected[torch] val nativeModule: TanhImpl = new TanhImpl()
 
   override def hasBias(): Boolean = false
-  
+
   def apply(t: Tensor[D]): Tensor[D] = fromNative(nativeModule.forward(t.native))
 
   override def toString = getClass().getSimpleName()

@@ -71,9 +71,9 @@ import torch.internal.NativeConverters.fromNative
 // format: on
 final class Dropout[ParamType <: FloatNN | ComplexNN: Default](
     p: Double = 0.5,
-    inplace: Boolean = false,
-  ) extends HasParams[ParamType] 
-  with TensorModule[ParamType]:
+    inplace: Boolean = false
+) extends HasParams[ParamType]
+    with TensorModule[ParamType]:
 
   private val options: DropoutOptions = DropoutOptions(p)
   options.inplace().put(inplace)

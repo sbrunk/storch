@@ -73,8 +73,7 @@ abstract class Module {
 
   def apply(fn: Module => Unit): this.type =
     for (_, module) <- namedModules
-    do
-      module(fn)
+    do module(fn)
     this
 
   def register[M <: Module](child: M, n: String = "")(using name: sourcecode.Name): M =
@@ -84,11 +83,11 @@ abstract class Module {
     nativeModule.register_module(name_, child.nativeModule)
     child
 
-  def registerModule[M <: Module](child: M, n: String = "")(using name: sourcecode.Name): M = 
+  def registerModule[M <: Module](child: M, n: String = "")(using name: sourcecode.Name): M =
     register(child = child)(using name)
 
-  def registerParameter[D <: DType](t: Tensor[D], requiresGrad: Boolean = true, n: String = "")(using
-      name: sourcecode.Name
+  def registerParameter[D <: DType](t: Tensor[D], requiresGrad: Boolean = true, n: String = "")(
+      using name: sourcecode.Name
   ): Tensor[D] =
     val name_ = if n.trim().isEmpty() then name.value else n.trim()
     nativeModule.register_parameter(name_, t.native, requiresGrad)
