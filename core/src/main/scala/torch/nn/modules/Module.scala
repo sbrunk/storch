@@ -26,6 +26,7 @@ import Tensor.fromNative
 import java.nio.CharBuffer
 import scala.collection.immutable.{ArraySeq, SeqMap, TreeSeqMap}
 import scala.reflect.ClassTag
+import scala.annotation.targetName
 
 abstract class Module {
 
@@ -70,21 +71,40 @@ abstract class Module {
   def namedModules: SeqMap[String, Module] =
     namedChildren.flatMap((name, module) => module.namedModules)
 
-  def register[M <: Module](child: M)(using name: sourcecode.Name) =
-    // println(s"registering ${name.value}:$child")
-    childModules = childModules.updated(name.value, child)
-    nativeModule.register_module(name.value, child.nativeModule)
+  def apply(fn: Module => Unit): this.type =
+    for (_, module) <- namedModules
+    do module(fn)
+    this
+
+  def register[M <: Module](child: M, n: String = "")(using name: sourcecode.Name): M =
+    val name_ = if n.trim().isEmpty() then name.value else n.trim()
+    // println(s"registering ${name_}:$child")
+    childModules = childModules.updated(name_, child)
+    nativeModule.register_module(name_, child.nativeModule)
     child
 
-  def register[D <: DType](t: Tensor[D], requiresGrad: Boolean = true)(using
+  def registerModule[M <: Module](child: M, n: String = "")(using name: sourcecode.Name): M =
+    register(child = child)(using name)
+
+  def registerParameter[D <: DType](t: Tensor[D], requiresGrad: Boolean = true, n: String = "")(
+      using name: sourcecode.Name
+  ): Tensor[D] =
+    val name_ = if n.trim().isEmpty() then name.value else n.trim()
+    nativeModule.register_parameter(name_, t.native, requiresGrad)
+    t
+
+  def registerBuffer[D <: DType](t: Tensor[D], n: String = "")(using
       name: sourcecode.Name
   ): Tensor[D] =
-    nativeModule.register_parameter(name.value, t.native, requiresGrad)
+    val name_ = if n.trim().isEmpty() then name.value else n.trim()
+    nativeModule.register_buffer(name_, t.native)
     t
 
   /** Adds a buffer to the module. */
   def registerBuffer[D <: DType](name: String, tensor: Tensor[D]): Tensor[D] =
     fromNative(nativeModule.register_buffer(name, tensor.native))
+
+  def hasBias(): Boolean = modules.exists(_.hasBias())
 
   def eval(): Unit = nativeModule.eval()
 

@@ -30,4 +30,6 @@ import torch.internal.NativeConverters.fromNative
 final class Identity[D <: DType: Default](args: Any*) extends TensorModule[D]:
   override val nativeModule: IdentityImpl = IdentityImpl()
 
+  override def hasBias(): Boolean = false
+
   def apply(t: Tensor[D]): Tensor[D] = fromNative(nativeModule.forward(t.native))

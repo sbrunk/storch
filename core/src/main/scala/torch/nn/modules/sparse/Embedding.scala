@@ -27,6 +27,7 @@ import org.bytedeco.pytorch.EmbeddingOptions
 import torch.nn.modules.{HasParams, HasWeight, TensorModule}
 import torch.internal.NativeConverters.{fromNative, toNative, doubleToDoublePointer}
 
+// format: off
 /** A simple lookup table that stores embeddings of a fixed dictionary and size.
   *
   * This module is often used to store word embeddings and retrieve them using indices. The input to
@@ -54,7 +55,11 @@ import torch.internal.NativeConverters.{fromNative, toNative, doubleToDoublePoin
   * @param sparse
   *   If ``True``, gradient w.r.t. `weight` matrix will be a sparse tensor. See Notes for more
   *   details regarding sparse gradients.
+  * 
+  * @see See [[https://pytorch.org/cppdocs/api/classtorch_1_1nn_1_1_embedding.html#class-embedding Pytorch C++ Embedding]]
+  * @see See [[https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html Pytorch Python Embedding]]
   */
+// format: on
 final class Embedding[ParamType <: FloatNN | ComplexNN: Default](
     numEmbeddings: Int,
     embeddingDim: Int,
@@ -77,9 +82,19 @@ final class Embedding[ParamType <: FloatNN | ComplexNN: Default](
   override val nativeModule: EmbeddingImpl = EmbeddingImpl(options)
   nativeModule.to(paramType.toScalarType, false)
 
+  override def hasBias(): Boolean = false
+
   def weight: Tensor[ParamType] = fromNative(nativeModule.weight)
   def weight_=(w: Tensor[ParamType]): Unit = nativeModule.weight(w.native)
 
   def apply(t: Tensor[Int64]): Tensor[ParamType] = fromNative(nativeModule.forward(t.native))
 
-  override def toString(): String = s"${getClass().getSimpleName()}(numEmbeddings=$numEmbeddings)"
+  override def toString(): String =
+    val numEmbed = s"numEmbeddings=$numEmbeddings"
+    val dim = s"embeddingDim=$embeddingDim"
+    val padding = s"paddingIdx=$paddingIdx"
+    val maxN = s"maxNorm=$maxNorm"
+    val normT = s"normType=$normType"
+    val scale = s"scaleGradByFreq=$scaleGradByFreq"
+    val s = s"sparse=$sparse"
+    s"${getClass().getSimpleName()}($numEmbed, $dim, $padding, $maxN, $normT, $scale, $s )"

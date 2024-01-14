@@ -21,6 +21,7 @@ package activation
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.LogSoftmaxImpl
+import org.bytedeco.pytorch.LogSoftmaxOptions
 import torch.internal.NativeConverters.fromNative
 
 /** Applies the log(Softmax(x)) function to an n-dimensional input Tensor. The LogSoftmax
@@ -38,6 +39,11 @@ import torch.internal.NativeConverters.fromNative
   * ```
   */
 final class LogSoftmax[D <: DType: Default](dim: Int) extends TensorModule[D]:
-  override val nativeModule: LogSoftmaxImpl = LogSoftmaxImpl(dim)
+  private val options = new LogSoftmaxOptions(dim)
+  options.dim().put(dim)
+
+  override val nativeModule: LogSoftmaxImpl = LogSoftmaxImpl(options)
+
+  override def hasBias(): Boolean = false
 
   def apply(t: Tensor[D]): Tensor[D] = fromNative(nativeModule.forward(t.native))

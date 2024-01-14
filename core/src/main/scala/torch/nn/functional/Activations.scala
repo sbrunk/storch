@@ -18,6 +18,7 @@ package torch
 package nn
 package functional
 
+import Derive.derive
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.global.torch as torchNative
 import org.bytedeco.javacpp.LongPointer
@@ -36,11 +37,17 @@ private[torch] trait Activations {
     *
     * @group nn_activation
     */
-  def logSoftmax[In <: DType, Out <: DType](input: Tensor[In], dim: Long)(
-      dtype: Out = input.dtype
-  ): Tensor[Out] =
+  def logSoftmax[In <: DType, Out <: FloatNN | Derive](
+      input: Tensor[In],
+      dim: Long,
+      dtype: Out = derive
+  ): Tensor[DTypeOrDeriveFromTensor[In, Out]] =
+    val derivedDType = dtype match
+      case _: Derive => input.dtype
+      case d: DType  => d
     val nativeDType =
-      if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(dtype.toScalarType)
+      if dtype == input.dtype then ScalarTypeOptional()
+      else ScalarTypeOptional(derivedDType.toScalarType)
     fromNative(torchNative.log_softmax(input.native, dim, nativeDType))
 
     /** Applies the rectified linear unit function element-wise.
@@ -72,10 +79,16 @@ private[torch] trait Activations {
     *
     * @group nn_activation
     */
-  def softmax[In <: DType, Out <: DType](input: Tensor[In], dim: Long)(
-      dtype: Out = input.dtype
-  ): Tensor[Out] =
+  def softmax[In <: DType, Out <: FloatNN | Derive](
+      input: Tensor[In],
+      dim: Long,
+      dtype: Out = derive
+  ): Tensor[DTypeOrDeriveFromTensor[In, Out]] =
+    val derivedDType = dtype match
+      case _: Derive => input.dtype
+      case d: DType  => d
     val nativeDType =
-      if dtype == input.dtype then ScalarTypeOptional() else ScalarTypeOptional(dtype.toScalarType)
+      if dtype == input.dtype then ScalarTypeOptional()
+      else ScalarTypeOptional(derivedDType.toScalarType)
     fromNative(torchNative.softmax(input.native, dim, nativeDType))
 }

@@ -25,7 +25,7 @@ class NormalizationSuite extends munit.FunSuite {
       torch.manualSeed(0)
       val (batch, sentenceLength, embeddingDim) = (2, 2, 3)
       val embedding = torch.randn(Seq(batch, sentenceLength, embeddingDim))
-      val layerNorm = nn.LayerNorm(embeddingDim)
+      val layerNorm = nn.LayerNorm(Seq(embeddingDim))
       val output = layerNorm(embedding)
       assertEquals(output.shape, embedding.shape)
       val expectedOutput = Tensor(
