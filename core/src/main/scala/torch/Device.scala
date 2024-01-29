@@ -20,9 +20,8 @@ import org.bytedeco.pytorch
 import scala.collection.immutable.ArraySeq
 
 enum DeviceType:
-  case CPU, CUDA, MKLDNN, OPENGL, OPENCL, IDEEP, HIP, FPGA, ORT, XLA, Vulkan, Metal, XPU, MLC, Meta,
-    HPU, VE, Lazy,
-    COMPILE_TIME_MAX_DEVICE_TYPES
+  case CPU, CUDA, MKLDNN, OPENGL, OPENCL, IDEEP, HIP, FPGA, ORT, XLA, Vulkan, Metal, XPU, MPS, Meta,
+    HPU, VE, Lazy, IPU, MTIA, PrivateUse1, COMPILE_TIME_MAX_DEVICE_TYPES
 
 object DeviceType:
   val deviceTypesLowerCase: Seq[String] =
