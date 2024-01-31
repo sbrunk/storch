@@ -26,10 +26,10 @@ ThisBuild / apiURL := Some(new URL("https://storch.dev/api/"))
 val scrImageVersion = "4.0.34"
 val pytorchVersion = "2.1.2"
 val cudaVersion = "12.3-8.9"
-val openblasVersion = "0.3.25"
+val openblasVersion = "0.3.26"
 val mklVersion = "2024.0"
 ThisBuild / scalaVersion := "3.3.1"
-ThisBuild / javaCppVersion := "1.5.10-SNAPSHOT"
+ThisBuild / javaCppVersion := "1.5.10"
 ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
