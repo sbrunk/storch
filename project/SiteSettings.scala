@@ -18,30 +18,21 @@ import laika.helium.config.Favicon
 import laika.helium.config.HeliumIcon
 import laika.helium.config.IconLink
 import laika.helium.config.ImageLink
-import laika.rewrite.nav.{ChoiceConfig, Selections, SelectionConfig}
-import laika.rewrite.link.{ApiLinks, LinkConfig}
+import laika.config.{ApiLinks, LinkConfig, ChoiceConfig, SelectionConfig, Selections}
 
 import laika.sbt.LaikaPlugin
 import laika.theme.ThemeProvider
-
-import java.net.URL
+import laika.theme.config.{CrossOrigin, ScriptAttributes, StyleAttributes}
 
 object StorchSitePlugin extends AutoPlugin {
 
   override def requires = TypelevelSitePlugin
   override def projectSettings = Seq(
-    tlSiteRelatedProjects := Seq(
-      "PyTorch" -> new URL("https://pytorch.org/"),
-      "JavaCPP" -> new URL("https://github.com/bytedeco/javacpp")
-    ),
     laikaConfig := LaikaConfig.defaults.withRawContent
       .withConfigValue(
-        LinkConfig(apiLinks =
-          Seq(
-            // ApiLinks(baseUri = "http://localhost:4242/api/")
-            ApiLinks(baseUri = "https://storch.dev/api/")
-          )
-        )
+        LinkConfig.empty
+          // .addApiLinks(ApiLinks(baseUri = "http://localhost:4242/api/")
+          .addApiLinks(ApiLinks(baseUri = "https://storch.dev/api/"))
       )
       .withConfigValue(
         Selections(
@@ -52,7 +43,7 @@ object StorchSitePlugin extends AutoPlugin {
           ).withSeparateEbooks
         )
       ),
-    tlSiteHeliumConfig := Helium.defaults.site
+    tlSiteHelium := tlSiteHelium.value.site
       .metadata(
         title = Some("Storch"),
         authors = developers.value.map(_.name),
@@ -87,6 +78,16 @@ object StorchSitePlugin extends AutoPlugin {
           )
           //            IconLink.external("https://discord.gg/XF3CXcMzqD", HeliumIcon.chat),
           //            IconLink.external("https://twitter.com/typelevel", HeliumIcon.twitter)
+        )
+      )
+      .site
+      .mainNavigation(
+        appendLinks = Seq(
+          ThemeNavigationSection(
+            "Related Projects",
+            TextLink.external("https://pytorch.org/", "PyTorch"),
+            TextLink.external("https://github.com/bytedeco/javacpp", "JavaCPP")
+          )
         )
       )
       .site
@@ -142,5 +143,31 @@ object StorchSitePlugin extends AutoPlugin {
           )
         )
       )
+      .site
+      .internalCSS(Root / "css") // custom styles
+      // KaTeX
+      .site
+      .externalCSS(
+        url = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css",
+        attributes = StyleAttributes.defaults
+          .withIntegrity("sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV")
+          .withCrossOrigin(CrossOrigin.Anonymous)
+      )
+      .site
+      .externalJS(
+        url = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js",
+        attributes = ScriptAttributes.defaults.defer
+          .withIntegrity("sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8")
+          .withCrossOrigin(CrossOrigin.Anonymous)
+      )
+      .site
+      .externalJS(
+        url = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js",
+        attributes = ScriptAttributes.defaults.defer
+          .withIntegrity("sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05")
+          .withCrossOrigin(CrossOrigin.Anonymous)
+      )
+      .site
+      .internalJS(Root / "js" / "render-katex.js")
   )
 }

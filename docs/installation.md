@@ -77,13 +77,13 @@ fork := true
 There is one downside to this approach. Because `pytorch-platform` depends on the native libraries for all supported
 platforms, it will download and cache **all** these libraries, no matter on which platform you actually are.
 
-One way to avoid the overhead, is to explicitly depend on the native libraries for **your** platform instead of using
-`pytorch-platform`.
+One way to avoid the overhead is to explicitly depend on the native libraries for **your** platform instead of using
+`pytorch-platform`. As of JavaCPP `1.5.10` the platform approach also doesn't work for `macosx-arm64` because the native dependencies are missing in the current version of `pytorch-platform` (should be fixed in the next release).
 
 ### Via classifier
 
 This can be done by providing dependency classifiers specifically for your platform.
-Currently supported are `linux-x86_64`, `macosx-x86_64` and `windows-x86_64`.
+Currently supported are `linux-x86_64`, `macosx-x86_64`, `macosx-arm64` and `windows-x86_64`.
 
 @:select(build-tool)
 

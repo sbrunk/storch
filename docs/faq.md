@@ -24,5 +24,5 @@ export CUDA_CACHE_MAXSIZE=4294967296
 
 Recent PyTorch versions provide a new backend based on Apple’s Metal Performance Shaders (MPS).
 The MPS backend enables GPU-accelerated training on the M1/M2 architecture.
-Right now, there's no ARM build of PyTorch in JavaCPP and MPS ist not enabled.
-If you have an M1/M2 machine and want to help, check the umbrella [issue for macosx-aarch64 support](https://github.com/bytedeco/javacpp-presets/issues/1069).
+While we have an ARM build of PyTorch in JavaCPP as of version `1.5.10`, MPS ist not enabled as the CI runners currently run on a macOS version that is too old.
+If you want to help getting this to work, check out [the corresponding issue](https://github.com/bytedeco/javacpp-presets/issues/1464).
