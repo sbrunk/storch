@@ -1,136 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
+  
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="Laika 0.18.1 + Helium Theme" />
-    <title>Build the Neural Network</title>
-    
-      <meta name="author" content="Sören Brunk"/>
-    
-    
-      <meta name="description" content="docs"/>
-    
-    
-    
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
-    
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
-    
-    <link rel="stylesheet" type="text/css" href="../helium/icofont.min.css" />
-    <link rel="stylesheet" type="text/css" href="../helium/laika-helium.css" />
-    <link rel="stylesheet" type="text/css" href="../site/styles.css" />
-    <script src="../helium/laika-helium.js"></script>
-    
-    
-    <script> /* for avoiding page load transitions */ </script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
-    <!-- The loading of KaTeX is deferred to speed up page rendering -->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js" integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
-    <!-- To automatically render math in text elements, include the auto-render extension: -->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
-        onload="renderMathInElement(document.body);"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-          renderMathInElement(document.body, {
-            // customised options
-            // • auto-render specific keys, e.g.:
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false},
-            ],
-            // • rendering keys, e.g.:
-            throwOnError : false
-          });
-      });
-    </script>
-  </head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Typelevel Laika + Helium Theme" />
+  <title>Build the Neural Network</title>
+  
+  <meta name="author" content="Sören Brunk"/>
+  
+  <meta name="author" content="Sören Brunk"/>
+  
+  <meta name="author" content="Sören Brunk"/>
+  
+  
+  <meta name="description" content="docs"/>
+  
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono:500">
+  
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="../helium/site/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/site/laika-helium.css" />
+    <link rel="stylesheet" type="text/css" href="../css/custom.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <script src="../helium/site/laika-helium.js"></script>
+    <script src="../js/render-katex.js"></script>
+  
+  
+  <script> /* for avoiding page load transitions */ </script>
+</head>
 
   <body>
 
-    <header id="top-bar">
+    <header id="top-bar" class="light-default dark-default">
 
-      <div class="row">
-        <a id="nav-icon">
-          <i class="icofont-laika" title="Navigation">&#xefa2;</i>
-        </a>
-        
-      </div>
+  <div class="row">
+    <a id="nav-icon">
+      <i class="icofont-laika navigationMenu" title="Navigation">&#xefa2;</i>
+    </a>
+    
+    
+  </div>
 
-      <a class="icon-link" href="../index.html"><i class="icofont-laika" title="Home">&#xef47;</i></a>
+  <a class="icon-link glyph-link" href="../"><i class="icofont-laika home" title="Home">&#xef47;</i></a>
 
-      <span class="row links"><a class="icon-link svg-link" href="../api/index.html"><span title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-  <g class="svg-shape">
-    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
-  </g>
-</svg></span></a><a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-  <g class="svg-shape">
-    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
-  </g>
-</svg></span></a></span>
-
-    </header>
-
-    <nav id="sidebar">
-
-      <div class="row">
-        <a class="icon-link svg-link" href="../api/index.html"><span title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-  <g class="svg-shape">
-    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
-  </g>
-</svg></span></a><a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <div class="row links">
+    
+    <a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span class="github" title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
   <g class="svg-shape">
     <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
   </g>
 </svg></span></a>
-      </div>
+    
+    <a class="icon-link svg-link" href="../api/"><span class="api" title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
+  </g>
+</svg></span></a>
+    
+    <a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span class="github" title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
+  </g>
+</svg></span></a>
+    
+  </div>  
 
-      <ul class="nav-list">
-        <li class="level1"><a href="../about.html">About</a></li>
-        <li class="level1"><a href="../installation.html">Installation</a></li>
-        <li class="level1"><a href="../modules.html">Modules</a></li>
-        <li class="level1"><a href="../examples.html">Examples</a></li>
-        <li class="level1"><a href="../pre-trained-weights.html">Converting pre-trained weights</a></li>
-        <li class="level1"><a href="../faq.html">Frequently Asked Questions</a></li>
-        <li class="level1"><a href="../contributing.html">How to Contribute</a></li>
-        <li class="level1 nav-header">tutorial</li>
-        <li class="level2"><a href="tensors.html">Tensors</a></li>
-        <li class="level2 active"><a href="#">Build the Neural Network</a></li>
-        <li class="level2"><a href="autograd.html">Automatic Differentiation</a></li>
-      </ul>
+</header>
+    
+    <nav id="sidebar">
 
-      <ul class="nav-list">
-        <li class="level1 nav-header">Related Projects</li>
-        
-          <li class="level2"><a href="https://pytorch.org/">PyTorch</a></li>
-        
-          <li class="level2"><a href="https://github.com/bytedeco/javacpp">JavaCPP</a></li>
-        
-      </ul>
+  <div class="row">
+    
+    <a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span class="github" title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
+  </g>
+</svg></span></a>
+    
+    <a class="icon-link svg-link" href="../api/"><span class="api" title="API"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M75,47.5c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm-50,-0c13.246,-0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,-0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm2.705,16.735l7.239,0l0.622,-4.904l-21.833,0l-0,4.904l7.589,0l0,22.067l6.383,0l-0,-22.067Zm58.076,7.265c-0,-8.757 -3.698,-14.166 -10.781,-14.166c-7.083,-0 -10.781,5.604 -10.781,14.166c0,8.757 3.698,14.166 10.781,14.166c7.083,0 10.781,-5.604 10.781,-14.166Zm-6.539,0c0,6.538 -1.128,9.496 -4.242,9.496c-2.997,0 -4.242,-2.88 -4.242,-9.496c-0,-6.616 1.206,-9.496 4.242,-9.496c3.036,-0 4.242,2.88 4.242,9.496Zm-29.242,-67c13.246,0 24,10.754 24,24c0,13.246 -10.754,24 -24,24c-13.246,0 -24,-10.754 -24,-24c0,-13.246 10.754,-24 24,-24Zm0.512,9.834c-7.122,-0 -12.609,5.098 -12.609,14.127c-0,9.263 5.215,14.205 12.532,14.205c4.164,0 7.083,-1.634 9.068,-3.658l-2.88,-3.697c-1.518,1.206 -3.153,2.413 -5.838,2.413c-3.697,-0 -6.266,-2.763 -6.266,-9.263c-0,-6.616 2.724,-9.379 6.149,-9.379c2.102,-0 3.892,0.778 5.371,1.984l3.113,-3.775c-2.257,-1.868 -4.748,-2.957 -8.64,-2.957Z"/>
+  </g>
+</svg></span></a>
+    
+    <a class="icon-link svg-link" href="https://github.com/sbrunk/storch"><span class="github" title="Source Code"><svg class="svg-icon" width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <g class="svg-shape">
+    <path d="M49.995,1c-27.609,-0 -49.995,22.386 -49.995,50.002c-0,22.09 14.325,40.83 34.194,47.444c2.501,0.458 3.413,-1.086 3.413,-2.412c0,-1.185 -0.043,-4.331 -0.067,-8.503c-13.908,3.021 -16.843,-6.704 -16.843,-6.704c-2.274,-5.773 -5.552,-7.311 -5.552,-7.311c-4.54,-3.103 0.344,-3.042 0.344,-3.042c5.018,0.356 7.658,5.154 7.658,5.154c4.46,7.64 11.704,5.433 14.552,4.156c0.454,-3.232 1.744,-5.436 3.174,-6.685c-11.102,-1.262 -22.775,-5.553 -22.775,-24.713c-0,-5.457 1.949,-9.92 5.147,-13.416c-0.516,-1.265 -2.231,-6.348 0.488,-13.233c0,0 4.199,-1.344 13.751,5.126c3.988,-1.108 8.266,-1.663 12.518,-1.682c4.245,0.019 8.523,0.574 12.517,1.682c9.546,-6.47 13.736,-5.126 13.736,-5.126c2.728,6.885 1.013,11.968 0.497,13.233c3.204,3.496 5.141,7.959 5.141,13.416c0,19.209 -11.691,23.436 -22.83,24.673c1.795,1.544 3.394,4.595 3.394,9.26c0,6.682 -0.061,12.076 -0.061,13.715c0,1.338 0.899,2.894 3.438,2.406c19.853,-6.627 34.166,-25.354 34.166,-47.438c-0,-27.616 -22.389,-50.002 -50.005,-50.002"/>
+  </g>
+</svg></span></a>
+    
+  </div>
 
-    </nav>
+  <ul class="nav-list">
+    <li class="level1 nav-leaf"><a href="../about.html">About</a></li>
+    <li class="level1 nav-leaf"><a href="../installation.html">Installation</a></li>
+    <li class="level1 nav-leaf"><a href="../modules.html">Modules</a></li>
+    <li class="level1 nav-leaf"><a href="../examples.html">Examples</a></li>
+    <li class="level1 nav-leaf"><a href="../pre-trained-weights.html">Converting pre-trained weights</a></li>
+    <li class="level1 nav-leaf"><a href="../faq.html">Frequently Asked Questions</a></li>
+    <li class="level1 nav-leaf"><a href="../contributing.html">How to Contribute</a></li>
+    <li class="level1 nav-header">tutorial</li>
+    <li class="level2 nav-leaf"><a href="tensors.html">Tensors</a></li>
+    <li class="level2 active nav-leaf"><a href="#">Build the Neural Network</a></li>
+    <li class="level2 nav-leaf"><a href="autograd.html">Automatic Differentiation</a></li>
+    <li class="level1 nav-header">Related Projects</li>
+    <li class="level2 nav-leaf"><a href="https://pytorch.org/">PyTorch</a></li>
+    <li class="level2 nav-leaf"><a href="https://github.com/bytedeco/javacpp">JavaCPP</a></li>
+  </ul>
+
+</nav>
 
     <div id="container">
 
-      <nav id="page-nav">
-        <p class="header"><a href="#">Build the Neural Network</a></p>
+      
+<nav id="page-nav">
+  <p class="header"><a href="#">Build the Neural Network</a></p>
 
-        <ul class="nav-list">
-          <li class="level1"><a href="#get-device-for-training">Get Device for Training</a></li>
-          <li class="level1"><a href="#define-the-class">Define the Class</a></li>
-          <li class="level1"><a href="#model-layers">Model Layers</a></li>
-          <li class="level2"><a href="#nn-flatten">nn.Flatten</a></li>
-          <li class="level2"><a href="#nn-linear">nn.Linear</a></li>
-          <li class="level2"><a href="#nn-relu">nn.ReLU</a></li>
-          <li class="level2"><a href="#nn-sequential">nn.Sequential</a></li>
-          <li class="level2"><a href="#nn-softmax">nn.Softmax</a></li>
-          <li class="level1"><a href="#model-parameters">Model Parameters</a></li>
-          <li class="level1"><a href="#further-reading">Further Reading</a></li>
-        </ul>
+  <ul class="nav-list">
+    <li class="level1 nav-leaf"><a href="#get-device-for-training">Get Device for Training</a></li>
+    <li class="level1 nav-leaf"><a href="#define-the-class">Define the Class</a></li>
+    <li class="level1 nav-node"><a href="#model-layers">Model Layers</a></li>
+    <li class="level2 nav-leaf"><a href="#nn-flatten">nn.Flatten</a></li>
+    <li class="level2 nav-leaf"><a href="#nn-linear">nn.Linear</a></li>
+    <li class="level2 nav-leaf"><a href="#nn-relu">nn.ReLU</a></li>
+    <li class="level2 nav-leaf"><a href="#nn-sequential">nn.Sequential</a></li>
+    <li class="level2 nav-leaf"><a href="#nn-softmax">nn.Softmax</a></li>
+    <li class="level1 nav-leaf"><a href="#model-parameters">Model Parameters</a></li>
+    <li class="level1 nav-leaf"><a href="#further-reading">Further Reading</a></li>
+  </ul>
 
-        <p class="footer"></p>
-      </nav>
+  <p class="footer"></p>
+</nav>
+
 
       <main class="content">
 
@@ -145,14 +154,14 @@
         Save &amp; Load Model</p>
         <h1 id="build-the-neural-network" class="title">Build the Neural Network</h1>
         <p>Neural networks comprise of layers/modules that perform operations on data.
-        The <a href="https://storch.dev/api/torch/nn.html">nn</a> namespace provides all the building blocks you need to
-        build your own neural network. Every module in PyTorch subclasses the <a href="https://storch.dev/api/torch/nn/modules/Module.html">Module</a>.
+        The <a class="api" href="https://storch.dev/api/torch/nn.html">nn</a> namespace provides all the building blocks you need to
+        build your own neural network. Every module in PyTorch subclasses the <a class="api" href="https://storch.dev/api/torch/nn/modules/Module.html">Module</a>.
         A neural network is a module itself that consists of other modules (layers). This nested structure allows for
         building and managing complex architectures easily.</p>
         <p>In the following sections, we&#39;ll build a neural network to classify images in the FashionMNIST dataset.</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">torch</span><span>.*</span></code></pre>
         
-        <h2 id="get-device-for-training" class="section">Get Device for Training<a class="anchor-link right" href="#get-device-for-training"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <h2 id="get-device-for-training" class="section">Get Device for Training<a class="anchor-link right" href="#get-device-for-training"><i class="icofont-laika link">&#xef71;</i></a></h2>
         <p>We want to be able to train our model on a hardware accelerator like the GPU,
         if it is available. Let&#39;s check to see if
         <a href="https://pytorch.org/docs/stable/notes/cuda.html">torch.cuda</a> is available, else we
@@ -163,7 +172,7 @@
 </span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;Using </span><span class="substitution">$device</span><span class="string-literal"> device&quot;</span><span>)
 </span><span class="comment">// Using Device(CPU,-1) device</span></code></pre>
         
-        <h2 id="define-the-class" class="section">Define the Class<a class="anchor-link right" href="#define-the-class"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <h2 id="define-the-class" class="section">Define the Class<a class="anchor-link right" href="#define-the-class"><i class="icofont-laika link">&#xef71;</i></a></h2>
         <p>We define our neural network by subclassing <code>nn.Module</code>, and
         initialize the neural network layers in the constructor. Every <code>nn.Module</code> subclass implements
         the operations on input data in the <code>apply</code> method.</p>
@@ -213,7 +222,7 @@
 // [1]</span></code></pre>
         <hr>
         
-        <h2 id="model-layers" class="section">Model Layers<a class="anchor-link right" href="#model-layers"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <h2 id="model-layers" class="section">Model Layers<a class="anchor-link right" href="#model-layers"><i class="icofont-laika link">&#xef71;</i></a></h2>
         <p>Let&#39;s break down the layers in the FashionMNIST model. To illustrate it, we
         will take a sample minibatch of 3 images of size 28x28 and see what happens to it as
         we pass it through the network.</p>
@@ -245,8 +254,8 @@
 </span><span class="identifier">print</span><span>(</span><span class="identifier">inputImage</span><span>.</span><span class="identifier">size</span><span>)
 </span><span class="comment">// ArraySeq(3, 28, 28)</span></code></pre>
         
-        <h3 id="nn-flatten" class="section">nn.Flatten<a class="anchor-link right" href="#nn-flatten"><i class="icofont-laika">&#xef71;</i></a></h3>
-        <p>We initialize the <a href="https://storch.dev/api/torch/nn/modules/flatten/Flatten.html">Flatten</a>
+        <h3 id="nn-flatten" class="section">nn.Flatten<a class="anchor-link right" href="#nn-flatten"><i class="icofont-laika link">&#xef71;</i></a></h3>
+        <p>We initialize the <a class="api" href="https://storch.dev/api/torch/nn/modules/flatten/Flatten.html">Flatten</a>
         layer to convert each 2D 28x28 image into a contiguous array of 784 pixel values (
         the minibatch dimension (at dim=0) is maintained).</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">flatten</span><span> = </span><span class="identifier">nn</span><span>.</span><span class="type-name">Flatten</span><span>()
@@ -259,8 +268,8 @@
 </span><span class="identifier">println</span><span>(</span><span class="identifier">flatImage</span><span>.</span><span class="identifier">size</span><span>)
 </span><span class="comment">// ArraySeq(3, 784)</span></code></pre>
         
-        <h3 id="nn-linear" class="section">nn.Linear<a class="anchor-link right" href="#nn-linear"><i class="icofont-laika">&#xef71;</i></a></h3>
-        <p>The <a href="https://storch.dev/api/torch/nn/modules/linear/Linear.html">Linear</a> layer
+        <h3 id="nn-linear" class="section">nn.Linear<a class="anchor-link right" href="#nn-linear"><i class="icofont-laika link">&#xef71;</i></a></h3>
+        <p>The <a class="api" href="https://storch.dev/api/torch/nn/modules/linear/Linear.html">Linear</a> layer
         is a module that applies a linear transformation on the input using its stored weights and biases.</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">layer1</span><span> = </span><span class="identifier">nn</span><span>.</span><span class="type-name">Linear</span><span>(</span><span class="identifier">inFeatures</span><span>=</span><span class="number-literal">28</span><span>*</span><span class="number-literal">28</span><span>, </span><span class="identifier">outFeatures</span><span>=</span><span class="number-literal">20</span><span>)
 </span><span class="comment">// layer1: Linear[Float32] = Linear(inFeatures=784, outFeatures=20, bias=true)
@@ -272,11 +281,11 @@
 </span><span class="identifier">println</span><span>(</span><span class="identifier">hidden1</span><span>.</span><span class="identifier">size</span><span>)
 </span><span class="comment">// ArraySeq(3, 20)</span></code></pre>
         
-        <h3 id="nn-relu" class="section">nn.ReLU<a class="anchor-link right" href="#nn-relu"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <h3 id="nn-relu" class="section">nn.ReLU<a class="anchor-link right" href="#nn-relu"><i class="icofont-laika link">&#xef71;</i></a></h3>
         <p>Non-linear activations are what create the complex mappings between the model&#39;s inputs and outputs.
         They are applied after linear transformations to introduce <em>nonlinearity</em>, helping neural networks
         learn a wide variety of phenomena.</p>
-        <p>In this model, we use <a href="https://storch.dev/api/torch/nn/modules/activation/ReLU.html">ReLU</a> between our
+        <p>In this model, we use <a class="api" href="https://storch.dev/api/torch/nn/modules/activation/ReLU.html">ReLU</a> between our
         linear layers, but there&#39;s other activations to introduce non-linearity in your model.</p>
         <pre><code class="nohighlight"><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;Before ReLU: </span><span class="substitution">$hidden1</span><span class="escape-sequence">\n\n</span><span class="string-literal">&quot;</span><span>)
 </span><span class="comment">// Before ReLU: tensor dtype=float32, shape=[3, 20], device=CPU 
@@ -294,8 +303,8 @@
 //  [0.3284, 0.1825, 0.0000, ..., 0.0910, 0.0000, 0.7398],
 //  [0.0927, 0.3688, 0.4693, ..., 0.0000, 0.0000, 0.7332]]</span></code></pre>
         
-        <h3 id="nn-sequential" class="section">nn.Sequential<a class="anchor-link right" href="#nn-sequential"><i class="icofont-laika">&#xef71;</i></a></h3>
-        <p><a href="https://storch.dev/api/torch/nn/modules/container/Sequential.html">Sequential</a> is an ordered
+        <h3 id="nn-sequential" class="section">nn.Sequential<a class="anchor-link right" href="#nn-sequential"><i class="icofont-laika link">&#xef71;</i></a></h3>
+        <p><a class="api" href="https://storch.dev/api/torch/nn/modules/container/Sequential.html">Sequential</a> is an ordered
         container of modules. The data is passed through all the modules in the same order as defined. You can use
         sequential containers to put together a quick network like <code>seqModules</code>.</p>
         <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">seqModules</span><span> = </span><span class="identifier">nn</span><span>.</span><span class="type-name">Sequential</span><span>(
@@ -336,9 +345,9 @@
 //  [0.1888, -0.2687, -0.0310, ..., 0.3105, -0.3418, -0.1508],
 //  [0.2109, -0.3151, -0.1185, ..., 0.2616, -0.3061, -0.2284]]</span></code></pre>
         
-        <h3 id="nn-softmax" class="section">nn.Softmax<a class="anchor-link right" href="#nn-softmax"><i class="icofont-laika">&#xef71;</i></a></h3>
+        <h3 id="nn-softmax" class="section">nn.Softmax<a class="anchor-link right" href="#nn-softmax"><i class="icofont-laika link">&#xef71;</i></a></h3>
         <p>The last linear layer of the neural network returns <code>logits</code> - raw values in $[-\infty, \infty]$ - which are passed to the
-        <a href="https://storch.dev/api/torch/nn/modules/activation/Softmax.html">Softmax</a> module. The logits are scaled to values
+        <a class="api" href="https://storch.dev/api/torch/nn/modules/activation/Softmax.html">Softmax</a> module. The logits are scaled to values
         [0, 1] representing the model&#39;s predicted probabilities for each class. <code>dim</code> parameter indicates the dimension along
         which the values must sum to 1.</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">softmax</span><span> = </span><span class="identifier">nn</span><span>.</span><span class="type-name">Softmax</span><span>(</span><span class="identifier">dim</span><span>=</span><span class="number-literal">1</span><span>)
@@ -349,7 +358,7 @@
 //  [0.1168, 0.0739, 0.0937, ..., 0.1319, 0.0687, 0.0831],
 //  [0.1224, 0.0723, 0.0880, ..., 0.1287, 0.0730, 0.0789]]</span></code></pre>
         
-        <h2 id="model-parameters" class="section">Model Parameters<a class="anchor-link right" href="#model-parameters"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <h2 id="model-parameters" class="section">Model Parameters<a class="anchor-link right" href="#model-parameters"><i class="icofont-laika link">&#xef71;</i></a></h2>
         <p>Many layers inside a neural network are <em>parameterized</em>, i.e. have associated weights
         and biases that are optimized during training. Subclassing <code>nn.Module</code> automatically
         tracks all fields defined inside your model object, and makes all parameters
@@ -383,14 +392,22 @@
 // [0.0432, 0.0425]</span></code></pre>
         <hr>
         
-        <h2 id="further-reading" class="section">Further Reading<a class="anchor-link right" href="#further-reading"><i class="icofont-laika">&#xef71;</i></a></h2>
+        <h2 id="further-reading" class="section">Further Reading<a class="anchor-link right" href="#further-reading"><i class="icofont-laika link">&#xef71;</i></a></h2>
         <ul>
-          <li>torch.<a href="https://storch.dev/api/torch/nn.html">nn</a> API</li>
+          <li>torch.<a class="api" href="https://storch.dev/api/torch/nn.html">nn</a> API</li>
         </ul>
+
+        
+<hr class="footer-rule"/>
+<footer>
+  Site generated by <a href="https://typelevel.org/Laika/">Laika</a> with the Helium theme.
+</footer>
+
 
       </main>
 
     </div>
 
   </body>
+
 </html>
