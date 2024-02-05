@@ -16,9 +16,6 @@
 
 package torch
 
-import org.scalacheck.Prop.*
-import Generators.given
-
 class TensorSuite extends TensorCheckSuite {
 
   test("tensor properties") {

@@ -34,7 +34,6 @@ object hub:
     if !os.exists(cachedFile) then
       System.err.println(s"Downloading: $url to $cachedFile")
       Using.resource(URL(url).openStream()) { inputStream =>
-        Files.copy(inputStream, cachedFile.toNIO)
-        ()
+        val _ = Files.copy(inputStream, cachedFile.toNIO)
       }
     torch.pickleLoad(cachedFile.toNIO)
