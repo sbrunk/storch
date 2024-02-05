@@ -19,7 +19,6 @@ package nn
 package functional
 
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.TensorOptional
 import org.bytedeco.pytorch.global.torch as torchNative
 import torch.internal.NativeConverters.*
 

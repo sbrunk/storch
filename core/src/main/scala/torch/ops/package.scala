@@ -17,9 +17,8 @@
 package torch
 
 import internal.NativeConverters.{fromNative, tensorOptions}
-import org.bytedeco.pytorch.global.torch as torchNative
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.{MemoryFormatOptional, TensorArrayRef, TensorVector}
+import org.bytedeco.pytorch.MemoryFormatOptional
 
 package object ops {
 

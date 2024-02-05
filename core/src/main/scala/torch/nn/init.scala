@@ -94,12 +94,13 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1ab0aeccca28b2225ee9aab809ec38a801.html#exhale-function-namespacetorch-1-1nn-1-1init-1ab0aeccca28b2225ee9aab809ec38a801
     */
-  def uniform_(
-      t: Tensor[?],
+  def uniform_[D <: DType](
+      t: Tensor[D],
       a: Double = 0,
       b: Double = 1
-  ): Unit =
+  ): Tensor[D] =
     torchNative.uniform_(t.native, a, b)
+    t
 
   /** Fills the he given 2-dimensional input Tensor with values drawn from the normal distribution
     * $N(\text{mean},\text{std}^2)$. No gradient will be recorded for this operation.
@@ -113,12 +114,13 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1a105c2a8ef81c6faa82a01cf35ce9f3b1.html#exhale-function-namespacetorch-1-1nn-1-1init-1a105c2a8ef81c6faa82a01cf35ce9f3b1
     */
-  def normal_(
-      t: Tensor[?],
+  def normal_[D <: DType](
+      t: Tensor[D],
       mean: Double = 0,
       std: Double = 0
-  ): Unit =
+  ): t.type =
     torchNative.normal_(t.native, mean, std)
+    t
 
   // TODO valid for all scala types
   /** Fills the input Tensor with the value valval.
@@ -131,8 +133,9 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1a9c886724aac3a487553dc0a406565c83.html#exhale-function-namespacetorch-1-1nn-1-1init-1a9c886724aac3a487553dc0a406565c83
     */
-  def constant_(t: Tensor[?], fillValue: Double): Unit =
-    torchNative.constant_(t.native, Scalar(fillValue)): Unit
+  def constant_[D <: DType](t: Tensor[D], fillValue: Double): t.type =
+    torchNative.constant_(t.native, Scalar(fillValue))
+    t
 
   /** Fills the input Tensor with the scalar value 1. No gradient will be recorded for this
     * operation.
@@ -142,10 +145,11 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1a9dcc2051aadbe8ddb37d58bbd2b7943a.html#exhale-function-namespacetorch-1-1nn-1-1init-1a9dcc2051aadbe8ddb37d58bbd2b7943a
     */
-  def ones_(
-      t: Tensor[?]
-  ): Unit =
+  def ones_[D <: DType](
+      t: Tensor[D]
+  ): t.type =
     torchNative.ones_(t.native)
+    t
 
   /** Fills the input Tensor with the scalar value 0. No gradient will be recorded for this
     * operation.
@@ -155,10 +159,11 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1af7e7736ba2d050adc0523d84285564e8.html#exhale-function-namespacetorch-1-1nn-1-1init-1af7e7736ba2d050adc0523d84285564e8
     */
-  def zeros_(
-      t: Tensor[?]
-  ): Unit =
+  def zeros_[D <: DType](
+      t: Tensor[D]
+  ): t.type =
     torchNative.zeros_(t.native)
+    t
 
   /** Fills the given 2-dimensional matrix with an identity matrix. No gradient will be recorded for
     * this operation.
@@ -171,10 +176,11 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1a77eb9bba76a93da5b33e7770f9113015.html#exhale-function-namespacetorch-1-1nn-1-1init-1a77eb9bba76a93da5b33e7770f9113015
     */
-  def eye_(
-      t: Tensor[?]
-  ): Unit =
+  def eye_[D <: DType](
+      t: Tensor[D]
+  ): t.type =
     torchNative.eye_(t.native)
+    t
 
   // TODO: no groups available
   /** From libTorch Fills the given tensor with the Dirac delta function in-place, and returns it.
@@ -193,10 +199,11 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1ab9fa9ea51c05df8a5c9dcca7a54dd628.html#exhale-function-namespacetorch-1-1nn-1-1init-1ab9fa9ea51c05df8a5c9dcca7a54dd628
     */
-  def dirac_(
-      t: Tensor[?]
-  ): Unit =
+  def dirac_[D <: DType](
+      t: Tensor[D]
+  ): t.type =
     torchNative.dirac_(t.native)
+    t
 
   /** Fills the input [[Tensor]] with values according to the method described in "Understanding the
     * difficulty of training deep feedforward neural networks"" - Glorot, X. & Bengio, Y. (2010),
@@ -212,11 +219,12 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1a86191a828a085e1c720dbce185d6c307.html#exhale-function-namespacetorch-1-1nn-1-1init-1a86191a828a085e1c720dbce185d6c307
     */
-  def xavierNormal_(
-      t: Tensor[?],
+  def xavierNormal_[D <: DType](
+      t: Tensor[D],
       gain: Double = 1.0
-  ): Unit =
+  ): t.type =
     torchNative.xavier_normal_(t.native, gain)
+    t
 
   /** Fills the input [[Tensor]] with values according to the method described in "Understanding the
     * difficulty of training deep feedforward neural networks"" - Glorot, X. & Bengio, Y. (2010),
@@ -231,11 +239,12 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1ace282f75916a862c9678343dfd4d5ffe.html#exhale-function-namespacetorch-1-1nn-1-1init-1ace282f75916a862c9678343dfd4d5ffe
     */
-  def xavierUniform_(
-      t: Tensor[?],
+  def xavierUniform_[D <: DType](
+      t: Tensor[D],
       gain: Double = 1.0
-  ): Unit =
+  ): t.type =
     torchNative.xavier_uniform_(t.native, gain)
+    t
 
   /** Fills the input Tensor with values according to the method described in Delving deep into
     * rectifiers: Surpassing human-level performance on ImageNet classification - He, K. et al.
@@ -260,13 +269,14 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1a5e807af188fc8542c487d50d81cb1aa1.html#exhale-function-namespacetorch-1-1nn-1-1init-1a5e807af188fc8542c487d50d81cb1aa1
     */
-  def kaimingUniform_(
-      t: Tensor[?],
+  def kaimingUniform_[D <: DType](
+      t: Tensor[D],
       a: Double = 0,
       mode: Mode = Mode.FanIn,
       nonlinearity: NonLinearity = NonLinearity.LeakyReLU
-  ): Unit =
+  ): t.type =
     torchNative.kaiming_uniform_(t.native, a, mode.toNative, nonlinearity.toNative)
+    t
 
   /** Fills the input Tensor with values according to the method described in "Delving deep into
     * rectifiers: Surpassing human-level performance on ImageNet classification - He, K. et al.
@@ -291,13 +301,14 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1ac8a913c051976a3f41f20df7d6126e57.html#exhale-function-namespacetorch-1-1nn-1-1init-1ac8a913c051976a3f41f20df7d6126e57
     */
-  def kaimingNormal_(
-      t: Tensor[?],
+  def kaimingNormal_[D <: DType](
+      t: Tensor[D],
       a: Double = 0,
       mode: Mode = Mode.FanIn,
       nonlinearity: NonLinearity = NonLinearity.LeakyReLU
-  ): Unit =
+  ): t.type =
     torchNative.kaiming_normal_(t.native, a, mode.toNative, nonlinearity.toNative)
+    t
 
   // TODO: no trunc normal as per the PyTorch API. C++ docs not commented. Not part of init but of function
   // /**
@@ -313,10 +324,11 @@ object init:
   //   * @param b (float) – the maximum cutoff value
   //   * @see https://pytorch.org/cppdocs/api/function_namespaceat_1aa604fcef7ea09fc379dc92c5d92a06ab.html
   //   */
-  def trunc_(
-      t: Tensor[?]
-  ): Unit =
+  def trunc_[D <: DType](
+      t: Tensor[D]
+  ): t.type =
     torchNative.trunc_(t.native)
+    t
 
   /** Fills the input Tensor with a (semi) orthogonal matrix, as described in Exact solutions to the
     * nonlinear dynamics of learning in deep linear neural networks - Saxe, A. et al. (2013). The
@@ -330,11 +342,12 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1a5978fcc257460475f635b5960e892a8e.html#exhale-function-namespacetorch-1-1nn-1-1init-1a5978fcc257460475f635b5960e892a8e
     */
-  def orthogonal_(
-      t: Tensor[?],
+  def orthogonal_[D <: DType](
+      t: Tensor[D],
       gain: Double = 1.0
-  ): Unit =
+  ): t.type =
     torchNative.orthogonal_(t.native, gain)
+    t
 
   /** Fills the 2D input Tensor as a sparse matrix, where the non-zero elements will be drawn from
     * the normal distribution $N(0,0.01)$, as described in "Deep learning via Hessian-free
@@ -352,12 +365,13 @@ object init:
     * @see
     *   https://pytorch.org/cppdocs/api/function_namespacetorch_1_1nn_1_1init_1a82f2e5810880c7cc60c84516eb283be6.html#exhale-function-namespacetorch-1-1nn-1-1init-1a82f2e5810880c7cc60c84516eb283be6
     */
-  def sparse_(
-      t: Tensor[?],
+  def sparse_[D <: DType](
+      t: Tensor[D],
       sparsity: Double,
       std: Double = 0.01
-  ): Unit =
+  ): t.type =
     torchNative.sparse_(t.native, sparsity, std)
+    t
 
   enum Mode:
     case FanIn, FanOut

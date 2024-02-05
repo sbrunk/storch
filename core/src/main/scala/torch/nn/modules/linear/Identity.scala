@@ -22,12 +22,14 @@ package linear
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.IdentityImpl
 import torch.internal.NativeConverters.fromNative
+import scala.annotation.nowarn
 
 /** A placeholder identity operator that is argument-insensitive.
   *
   * @group nn_linear
   */
-final class Identity[D <: DType: Default](args: Any*) extends TensorModule[D]:
+final class Identity[D <: DType: Default](@nowarn("msg=unused explicit parameter") args: Any*)
+    extends TensorModule[D]:
   override val nativeModule: IdentityImpl = IdentityImpl()
 
   override def hasBias(): Boolean = false

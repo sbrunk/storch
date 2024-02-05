@@ -19,7 +19,6 @@ package nn
 package modules
 package pooling
 
-import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{MaxPool2dImpl, MaxPool2dOptions}
 import torch.internal.NativeConverters.{fromNative, toNative}

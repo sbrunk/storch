@@ -16,22 +16,9 @@
 
 package torch
 
-import org.bytedeco.javacpp.{DoublePointer, FloatPointer}
 import org.bytedeco.pytorch.global.torch.ScalarType
-import org.bytedeco.pytorch.Scalar
 
-import java.nio.{
-  Buffer,
-  ByteBuffer,
-  CharBuffer,
-  DoubleBuffer,
-  FloatBuffer,
-  IntBuffer,
-  LongBuffer,
-  ShortBuffer
-}
-import scala.annotation.{targetName, unused}
-import scala.reflect.ClassTag
+import java.nio.{Buffer, ByteBuffer, DoubleBuffer, FloatBuffer, IntBuffer, LongBuffer, ShortBuffer}
 import spire.math.{Complex, UByte}
 
 import scala.compiletime.{erasedValue, summonFrom}

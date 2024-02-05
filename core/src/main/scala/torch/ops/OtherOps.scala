@@ -20,8 +20,6 @@ package ops
 import internal.NativeConverters.*
 import org.bytedeco.javacpp.BytePointer
 import org.bytedeco.pytorch.global.torch as torchNative
-import org.bytedeco.pytorch.LongArrayRef
-import org.bytedeco.pytorch.ScalarTypeOptional
 
 /** Other Ops
   *

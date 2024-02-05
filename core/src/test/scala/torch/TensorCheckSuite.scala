@@ -19,7 +19,7 @@ package torch
 import munit.ScalaCheckSuite
 import shapeless3.typeable.{TypeCase, Typeable}
 import shapeless3.typeable.syntax.typeable.*
-import Generators.{*, given}
+import Generators.*
 import org.scalacheck.Prop.*
 
 import scala.util.Try

@@ -19,10 +19,8 @@ package nn
 package modules
 package batchnorm
 
-import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch.{BatchNorm2dImpl, BatchNormOptions}
 import org.bytedeco.pytorch
-import sourcecode.Name
 import torch.internal.NativeConverters.fromNative
 
 /** Applies Batch Normalization over a 4D input as described in the paper [Batch Normalization:

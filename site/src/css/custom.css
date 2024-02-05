@@ -1,0 +1,34 @@
+/* Adjust a few styles from landing-page.css */
+
+#header {
+  padding-top: 20px;
+}
+
+#header-left h1, #header-left h2 {
+  color: var(--component-color);
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+#header-left h1 {
+  font-size: 40px;
+}
+
+#header-left h2 {
+  font-size: 22px;
+  margin-top: 0.7em;
+}
+
+.teaser h2 {
+  font-size: 20px;
+  margin-bottom: 0.25em;
+  margin-top: 0;
+}
+  
+.teaser p {
+  font-size: 15px;
+}
+
+.teasers {
+  margin: 15px auto 0 auto;
+}

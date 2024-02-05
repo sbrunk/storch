@@ -25,43 +25,22 @@ import org.bytedeco.javacpp.{
   LongPointer,
   ShortPointer
 }
-import org.bytedeco.javacpp.indexer.{Indexer, IntIndexer, LongIndexer}
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.{LongOptional, Scalar, TensorIndexArrayRef}
+import org.bytedeco.pytorch.TensorIndexArrayRef
 import org.bytedeco.pytorch.global.torch as torchNative
 import Tensor.*
 import org.bytedeco.pytorch.global.torch.ScalarType
-import org.bytedeco.pytorch.NoGradGuard
 
-import java.nio.{
-  Buffer,
-  ByteBuffer,
-  CharBuffer,
-  DoubleBuffer,
-  FloatBuffer,
-  IntBuffer,
-  LongBuffer,
-  ShortBuffer
-}
+import java.nio.{Buffer, ByteBuffer, DoubleBuffer, FloatBuffer, IntBuffer, LongBuffer, ShortBuffer}
 import scala.collection.immutable.ArraySeq
 import scala.reflect.ClassTag
-import scala.annotation.{targetName, unused}
-import org.bytedeco.pytorch.global.torch.DeviceType
 import internal.NativeConverters.{toOptional, toScalar}
 import spire.math.{Complex, UByte}
 
-import scala.reflect.Typeable
 import internal.NativeConverters
 import internal.NativeConverters.toArray
 import Device.CPU
 import Layout.Strided
-import org.bytedeco.pytorch.ByteArrayRef
-import org.bytedeco.pytorch.ShortArrayRef
-import org.bytedeco.pytorch.BoolArrayRef
-import org.bytedeco.pytorch.IntArrayRef
-import org.bytedeco.pytorch.LongArrayRef
-import org.bytedeco.pytorch.FloatArrayRef
-import org.bytedeco.pytorch.DoubleArrayRef
 import org.bytedeco.pytorch.EllipsisIndexType
 import org.bytedeco.pytorch.SymInt
 import org.bytedeco.pytorch.SymIntOptional
@@ -675,7 +654,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
     */
   def unsqueeze(dim: Int): Tensor[D] = fromNative(native.unsqueeze(dim))
 
-  def zero(): Unit = native.zero_()
+  def zero_(): this.type =
+    native.zero_()
+    this
 
   private def nativeIndices[T <: Boolean | Long: ClassTag](
       indices: (Slice | Int | Long | Tensor[Bool] | Tensor[UInt8] | Tensor[Int64] | Seq[T] |
@@ -731,7 +712,9 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
 
   def requiresGrad: Boolean = native.requires_grad()
 
-  def requiresGrad_=(requiresGrad: Boolean): Unit = native.requires_grad_(requiresGrad)
+  def requiresGrad_=(requiresGrad: Boolean): this.type =
+    native.requires_grad_(requiresGrad)
+    this
 
   def split(
       splitSize: Int | Seq[Int],
@@ -807,7 +790,8 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
         get: (Array[A], TypedBuffer[A]) => TypedBuffer[A]
     ): Array[A] =
       val a = new Array[A](numel.toInt)
-      if numel > 0 then get(a, tensor.native.contiguous.createBuffer[TypedBuffer[A]])
+      if numel > 0 then
+        val _ = get(a, tensor.native.contiguous.createBuffer[TypedBuffer[A]])
       a
 
     import ScalarType.*
@@ -867,7 +851,6 @@ sealed abstract class Tensor[D <: DType]( /* private[torch]  */ val native: pyto
       flattened: Boolean = false,
       includeInfo: Boolean = true
   ): String =
-    if dtype == int32 then max()
     def format(x: Any): String =
       x match
         case x: Float  => "%1.4f".format(x)

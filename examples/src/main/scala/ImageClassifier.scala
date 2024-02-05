@@ -17,22 +17,25 @@
 //> using scala "3.3"
 //> using repository "sonatype:snapshots"
 //> using repository "sonatype-s01:snapshots"
-//> using lib "dev.storch::vision:0.0-bbdc238-SNAPSHOT"
+//> using lib "dev.storch::vision:0.0-2fff591-SNAPSHOT"
 //> using lib "me.tongfei:progressbar:0.9.5"
 //> using lib "com.github.alexarchambault::case-app:2.1.0-M24"
 //> using lib "org.scala-lang.modules::scala-parallel-collections:1.0.4"
 // replace with pytorch-platform-gpu if you have a CUDA capable GPU
-//> using lib "org.bytedeco:pytorch-platform:2.0.1-1.5.10-SNAPSHOT"
+//> using lib "org.bytedeco:pytorch-platform:2.1.2-1.5.10"
 // enable for CUDA support
-////> using lib "org.bytedeco:cuda-platform-redist:12.1-8.9-1.5.10-SNAPSHOT"
+////> using lib "org.bytedeco:cuda-platform-redist:12.3-8.9-1.5.10"
+// enable for native Apple Silicon support
+// will not be needed with newer versions of pytorch-platform
+////> using lib "org.bytedeco:pytorch:2.1.2-1.5.10,classifier=macosx-arm64"
 
 import Commands.*
 import ImageClassifier.{Prediction, predict, train}
 import caseapp.*
 import caseapp.core.argparser.{ArgParser, SimpleArgParser}
 import caseapp.core.app.CommandsEntryPoint
-import com.sksamuel.scrimage.{ImmutableImage, ScaleMethod}
-import me.tongfei.progressbar.{ProgressBar, ProgressBarBuilder}
+import com.sksamuel.scrimage.ImmutableImage
+import me.tongfei.progressbar.ProgressBarBuilder
 import org.bytedeco.javacpp.PointerScope
 import org.bytedeco.pytorch.{InputArchive, OutputArchive}
 import os.Path
@@ -43,9 +46,6 @@ import torchvision.models.resnet.{ResNet, ResNetVariant}
 
 import java.nio.file.Paths
 import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Future}
 import scala.util.{Random, Try, Using}
 
 // format: off
@@ -130,7 +130,7 @@ object ImageClassifier extends CommandsEntryPoint:
       // Don't load the classification head weights, as we they are specific to the imagenet classes
       // and their output size (1000) usually won't match the number of classes of our dataset.
       model.loadStateDict(
-        weights.filterNot((k, v) => Set("fc.weight", "fc.bias").contains(k))
+        weights.filterNot((k, _) => Set("fc.weight", "fc.bias").contains(k))
       )
     model.to(device)
 

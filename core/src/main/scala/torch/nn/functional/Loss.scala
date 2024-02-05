@@ -18,11 +18,10 @@ package torch
 package nn
 package functional
 
-import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.{BCEWithLogitsLossOptions, TensorOptional}
+import org.bytedeco.pytorch.BCEWithLogitsLossOptions
 import org.bytedeco.pytorch.global.torch as torchNative
-import torch.internal.NativeConverters.{fromNative, toOptional}
+import torch.internal.NativeConverters.fromNative
 
 // Loss functions
 private[torch] trait Loss {

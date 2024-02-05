@@ -21,7 +21,6 @@ package linear
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{LinearImpl, LinearOptions}
-import torch.nn.modules.{HasParams}
 import internal.NativeConverters.fromNative
 
 /** Applies a linear transformation to the incoming data: $y = xA^T + b$
@@ -65,10 +64,14 @@ final class Linear[ParamType <: FloatNN: Default](
   override def hasBias(): Boolean = options.bias().get()
 
   def weight = fromNative[ParamType](nativeModule.weight())
-  def weight_=(t: Tensor[ParamType]): Unit = nativeModule.weight(t.native)
+  def weight_=(t: Tensor[ParamType]): Tensor[ParamType] =
+    nativeModule.weight(t.native)
+    t
 
   def bias = fromNative[ParamType](nativeModule.bias())
-  def bias_=(t: Tensor[ParamType]): Unit = nativeModule.bias(t.native)
+  def bias_=(t: Tensor[ParamType]): Tensor[ParamType] =
+    nativeModule.bias(t.native)
+    t
 
   def apply(input: Tensor[ParamType]): Tensor[ParamType] = fromNative(
     nativeModule.forward(input.native)
