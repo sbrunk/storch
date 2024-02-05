@@ -20,7 +20,6 @@ package modules
 package container
 
 import sourcecode.Name
-import scala.util.Random
 
 /** Holds submodules in a list.
   *
@@ -109,7 +108,7 @@ final class ModuleList[D <: DType](override val modules: TensorModule[D]*)
     // for i, module in enumerate(modules):
     //     self.add_module(str(offset + i), module)
     // return self
-    val offset = modules.length
+    // val offset = modules.length
     val all = modules ++ newModules
     // Not in Python
     newModules.zipWithIndex.foreach((module, index) =>

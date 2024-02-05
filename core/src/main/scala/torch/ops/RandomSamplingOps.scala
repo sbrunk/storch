@@ -23,7 +23,6 @@ import internal.NativeConverters
 import NativeConverters.*
 
 import org.bytedeco.pytorch.global.torch as torchNative
-import scala.util.Using
 
 /** Random Sampling
   *

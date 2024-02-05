@@ -19,7 +19,6 @@ package transforms
 
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.ScaleMethod
-import torch.Int32
 import torch.Tensor
 import torch.Float32
 import torchvision.transforms.functional.toTensor
@@ -39,13 +38,13 @@ object Presets:
           image.scaleTo(
             (resizeSize * (image.width / image.height.toDouble)).toInt,
             resizeSize,
-            ScaleMethod.Bilinear
+            interpolation
           )
         else
           image.scaleTo(
             resizeSize,
             (resizeSize * (image.height / image.width.toDouble)).toInt,
-            ScaleMethod.Bilinear
+            interpolation
           )
       val croppedImage = scaledImage.resizeTo(cropSize, cropSize)
       toTensor(croppedImage)
@@ -53,6 +52,6 @@ object Presets:
     def batchTransforms(input: Tensor[Float32]): Tensor[Float32] =
       torchvision.transforms.functional.normalize(
         input,
-        mean = Seq(0.485f, 0.456f, 0.406f),
-        std = Seq(0.229f, 0.224f, 0.225f)
+        mean = mean,
+        std = std
       )

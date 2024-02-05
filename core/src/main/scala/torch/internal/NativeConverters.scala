@@ -24,15 +24,12 @@ import org.bytedeco.pytorch.{
   DeviceOptional,
   DoubleOptional,
   BoolOptional,
-  LongArrayRefOptional,
   LongOptional,
   TensorOptional
 }
 
-import scala.reflect.Typeable
 import org.bytedeco.javacpp.{LongPointer, DoublePointer}
 import org.bytedeco.pytorch.GenericDict
-import org.bytedeco.pytorch.GenericDictIterator
 import spire.math.Complex
 import spire.math.UByte
 import scala.annotation.targetName

@@ -17,8 +17,6 @@
 package torch
 package nn
 
-import functional.*
-
 /** @groupname nn_conv Convolution functions
   * @groupname nn_pooling Pooling functions
   * @groupname nn_attention Attention mechanisms

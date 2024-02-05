@@ -30,17 +30,12 @@ from torch.nn import functional as F
 // cSpell: ignore xbow, xprev, isinstance, idx, tok_emb
 // cSpell: ignore Andrej, Karpathy
 
-import java.nio.file.Paths
 import java.nio.file.Files
-import java.net.URL
 import java.net.URI
 
-import scala.annotation.targetName
-import scala.util.Random
 import scala.util.Using
 import scala.collection.immutable.SortedSet
 
-import org.bytedeco.pytorch.OutputArchive
 import org.bytedeco.javacpp.PointerScope
 
 import torch.*
@@ -48,25 +43,12 @@ import torch.Device.CUDA
 import torch.Device.CPU
 import torch.nn.functional as F
 import torch.nn.modules.Module
-import torch.nn.modules.HasParams
-import torch.nn.modules.HasWeight
-import torch.{---, Slice}
-import torch.optim.Adam
-import torch.DType.float32
+import torch.Slice
 import org.bytedeco.javacpp.Pointer
-import org.bytedeco.pytorch.cuda.Stat
-import org.bytedeco.pytorch.cuda.CheckpointDelta
-import org.bytedeco.pytorch.cuda.SnapshotInfo
-import org.bytedeco.pytorch.cuda.CUDAAllocator
-import org.bytedeco.pytorch.cuda.SegmentInfo
-import org.bytedeco.pytorch.cuda.BlockInfo
-import org.bytedeco.pytorch.cuda.DeviceStats
-import org.bytedeco.javacpp.BoolPointer
-import org.bytedeco.pytorch.global.torch_cuda
 
-import gpt.Utils
 import gpt.Utils.Modules as UtilsM
 import gpt.Utils.CUDAMemory as Mem
+import scala.annotation.nowarn
 
 /** This is code translated from Andrej Karpathy's
   * [[video https://www.youtube.com/watch?v=kCc8FmEb1nY]] titled "Let's build GPT: from scratch, in
@@ -512,6 +494,8 @@ object V2:
       nEmbed: Int,
       nHead: Int,
       blockSize: Int,
+      // TODO check if we need this
+      @nowarn("msg=unused explicit parameter")
       vocabSize: Int,
       dropout: Double
   ) extends torch.nn.modules.TensorModule[D]:
@@ -636,6 +620,7 @@ object V2:
         elif isinstance(module, nn.Embedding):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
      */
+    @nowarn("msg=unused private member")
     private def init_weights(m: Module): Unit =
       m match
         case lm: nn.Linear[?] =>

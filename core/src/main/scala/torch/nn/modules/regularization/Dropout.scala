@@ -21,12 +21,9 @@ package nn
 package modules
 package regularization
 
-import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
-import sourcecode.Name
 import org.bytedeco.pytorch.DropoutImpl
 import org.bytedeco.pytorch.DropoutOptions
-import torch.nn.modules.{HasParams, HasWeight, TensorModule}
 import torch.internal.NativeConverters.fromNative
 
 // format: off

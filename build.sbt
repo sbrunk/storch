@@ -33,6 +33,7 @@ ThisBuild / javaCppVersion := "1.5.10"
 ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
+ThisBuild / githubWorkflowOSes := Seq("macos-latest", "ubuntu-latest", "windows-latest")
 
 val enableGPU = settingKey[Boolean]("enable or disable GPU support")
 
@@ -46,10 +47,11 @@ val hasMKL = {
 lazy val commonSettings = Seq(
   Compile / doc / scalacOptions ++= Seq("-groups", "-snippet-compiler:compile"),
   javaCppVersion := (ThisBuild / javaCppVersion).value,
-  javaCppPlatform := Seq()
+  javaCppPlatform := Seq(),
   // This is a hack to avoid depending on the native libs when publishing
   // but conveniently have them on the classpath during development.
   // There's probably a cleaner way to do this.
+  tlJdkRelease := Some(11)
 ) ++ tlReplaceCommandAlias(
   "tlReleaseLocal",
   List(
@@ -111,7 +113,11 @@ lazy val vision = project
 lazy val examples = project
   .in(file("examples"))
   .enablePlugins(NoPublishPlugin)
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    // disable discarded non-Unit value warnings in examples for now
+    scalacOptions ~= (_.filterNot(Set("-Wvalue-discard")))
+  )
   .settings(
     fork := true,
     libraryDependencies ++= Seq(

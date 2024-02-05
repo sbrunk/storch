@@ -17,21 +17,9 @@
 package torchvision
 package models
 
-import torch.{
-  BFloat16,
-  ComplexNN,
-  DType,
-  Default,
-  Float32,
-  Float32Tensor,
-  Float64,
-  FloatNN,
-  Tensor,
-  nn
-}
+import torch.{BFloat16, DType, Default, Float32, Float64, FloatNN, Tensor, nn}
 import torch.nn.init.{Mode, NonLinearity, constant_, kaimingNormal_}
 
-import scala.collection.mutable
 import torch.nn.modules.batchnorm.BatchNorm2d
 import torch.nn.modules.container.Sequential
 import torch.nn.modules.linear.Linear
@@ -42,9 +30,6 @@ import torch.nn.modules.pooling.{AdaptiveAvgPool2d, MaxPool2d}
 import torch.nn.modules.{HasWeight, Module}
 import torchvision.transforms.*
 
-import scala.util.Using
-import com.sksamuel.scrimage.ImmutableImage
-import torch.Int32
 import torch.nn.modules.TensorModule
 
 /** ResNet architecture implementations
@@ -110,7 +95,6 @@ object resnet:
       dilation: Int = 1,
       normLayer: => (Int => TensorModule[D])
   ) extends TensorModule[D] {
-    import BasicBlock.expansion
 
     if groups != 1 || baseWidth != 64 then
       throw new IllegalArgumentException("BasicBlock only supports groups=1 and baseWidth=64")

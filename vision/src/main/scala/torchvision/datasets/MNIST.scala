@@ -41,7 +41,7 @@ trait MNISTBase(
   private def downloadAndExtractArchive(url: URL, target: Path): Unit =
     println(s"downloading from $url")
     Using.resource(url.openStream()) { inputStream =>
-      Files.copy(GZIPInputStream(inputStream), target)
+      val _ = Files.copy(GZIPInputStream(inputStream), target)
     }
 
   if download then {
@@ -50,7 +50,7 @@ trait MNISTBase(
       val finalPath = root.resolve(filename.stripSuffix(".gz"))
       if !Files.exists(finalPath) then
         println(s"$finalPath not found")
-        mirrors.iterator
+        val _ = mirrors.iterator
           .map { mirror =>
             Try(downloadAndExtractArchive(URL(s"$mirror$filename"), finalPath))
           }

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package torch.optim
+package torch
+package optim
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{SGDOptions, TensorVector}
-import torch.{DType, Tensor}
 
 import scala.collection.immutable.Iterable
 

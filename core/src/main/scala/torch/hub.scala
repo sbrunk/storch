@@ -17,7 +17,6 @@
 package torch
 
 import dev.dirs.BaseDirectories
-import scala.io.Source
 import scala.util.Using
 import java.nio.file.Files
 import java.net.URL
@@ -36,5 +35,6 @@ object hub:
       System.err.println(s"Downloading: $url to $cachedFile")
       Using.resource(URL(url).openStream()) { inputStream =>
         Files.copy(inputStream, cachedFile.toNIO)
+        ()
       }
     torch.pickleLoad(cachedFile.toNIO)

@@ -19,13 +19,10 @@ package nn
 package modules
 package sparse
 
-import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
-import sourcecode.Name
 import org.bytedeco.pytorch.EmbeddingImpl
 import org.bytedeco.pytorch.EmbeddingOptions
-import torch.nn.modules.{HasParams, HasWeight, TensorModule}
-import torch.internal.NativeConverters.{fromNative, toNative, doubleToDoublePointer}
+import torch.internal.NativeConverters.{fromNative, toNative}
 
 // format: off
 /** A simple lookup table that stores embeddings of a fixed dictionary and size.
@@ -85,7 +82,9 @@ final class Embedding[ParamType <: FloatNN | ComplexNN: Default](
   override def hasBias(): Boolean = false
 
   def weight: Tensor[ParamType] = fromNative(nativeModule.weight)
-  def weight_=(w: Tensor[ParamType]): Unit = nativeModule.weight(w.native)
+  def weight_=(w: Tensor[ParamType]): Tensor[ParamType] =
+    nativeModule.weight(w.native)
+    w
 
   def apply(t: Tensor[Int64]): Tensor[ParamType] = fromNative(nativeModule.forward(t.native))
 

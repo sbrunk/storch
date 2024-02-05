@@ -23,7 +23,6 @@ package normalization
 
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{LayerNormImpl, LayerNormOptions, LongVector}
-import torch.nn.modules.TensorModule
 import internal.NativeConverters.fromNative
 
 // format: off

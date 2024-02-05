@@ -18,15 +18,11 @@ package torch
 package nn
 package modules
 
-import org.bytedeco.javacpp.CharPointer
 import org.bytedeco.pytorch
-import org.bytedeco.pytorch.{Conv2dImpl, InputArchive, OutputArchive}
+import org.bytedeco.pytorch.{InputArchive, OutputArchive}
 import Tensor.fromNative
 
-import java.nio.CharBuffer
 import scala.collection.immutable.{ArraySeq, SeqMap, TreeSeqMap}
-import scala.reflect.ClassTag
-import scala.annotation.targetName
 
 abstract class Module {
 
@@ -69,7 +65,7 @@ abstract class Module {
 
   def namedChildren: SeqMap[String, Module] = childModules
   def namedModules: SeqMap[String, Module] =
-    namedChildren.flatMap((name, module) => module.namedModules)
+    namedChildren.flatMap((_, module) => module.namedModules)
 
   def apply(fn: Module => Unit): this.type =
     for (_, module) <- namedModules

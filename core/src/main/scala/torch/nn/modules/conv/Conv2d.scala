@@ -19,10 +19,8 @@ package nn
 package modules
 package conv
 
-import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{Conv2dImpl, Conv2dOptions, kZeros, kReflect, kReplicate, kCircular}
-import sourcecode.Name
 import torch.internal.NativeConverters.{fromNative, toNative}
 import torch.nn.modules.conv.Conv2d.PaddingMode
 

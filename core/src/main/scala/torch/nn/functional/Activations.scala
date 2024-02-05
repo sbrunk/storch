@@ -21,9 +21,8 @@ package functional
 import Derive.derive
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.global.torch as torchNative
-import org.bytedeco.javacpp.LongPointer
-import torch.internal.NativeConverters.{fromNative, toNative, toOptional}
-import org.bytedeco.pytorch.{ScalarTypeOptional, TensorOptional}
+import torch.internal.NativeConverters.fromNative
+import org.bytedeco.pytorch.ScalarTypeOptional
 
 private[torch] trait Activations {
 

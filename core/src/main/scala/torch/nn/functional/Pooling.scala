@@ -18,7 +18,6 @@ package torch
 package nn
 package functional
 
-import org.bytedeco.javacpp.LongPointer
 import org.bytedeco.pytorch
 import org.bytedeco.pytorch.{
   AvgPool1dOptions,
@@ -26,8 +25,7 @@ import org.bytedeco.pytorch.{
   AvgPool3dOptions,
   MaxPool1dOptions,
   MaxPool2dOptions,
-  MaxPool3dOptions,
-  TensorOptional
+  MaxPool3dOptions
 }
 import org.bytedeco.pytorch.global.torch as torchNative
 import torch.internal.NativeConverters.*

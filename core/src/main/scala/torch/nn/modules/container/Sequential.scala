@@ -20,7 +20,6 @@ package modules
 package container
 
 import sourcecode.Name
-import scala.util.Random
 
 final class Sequential[D <: DType](override val modules: TensorModule[D]*)
     extends Module

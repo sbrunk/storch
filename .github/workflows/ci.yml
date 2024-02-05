@@ -27,12 +27,17 @@ jobs:
     name: Build and Test
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
         scala: [3]
         java: [temurin@11]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
+      - name: Ignore line ending differences in git
+        if: contains(runner.os, 'windows')
+        shell: bash
+        run: git config --global core.autocrlf false
+
       - name: Checkout current branch (full)
         uses: actions/checkout@v4
         with:
@@ -49,32 +54,40 @@ jobs:
 
       - name: sbt update
         if: matrix.java == 'temurin@11' && steps.setup-java-temurin-11.outputs.cache-hit == 'false'
+        shell: bash
         run: sbt +update
 
       - name: Check that workflows are up to date
+        shell: bash
         run: sbt githubWorkflowCheck
 
       - name: Check headers and formatting
-        if: matrix.java == 'temurin@11' && matrix.os == 'ubuntu-latest'
+        if: matrix.java == 'temurin@11' && matrix.os == 'macos-latest'
+        shell: bash
         run: sbt '++ ${{ matrix.scala }}' headerCheckAll scalafmtCheckAll 'project /' scalafmtSbtCheck
 
       - name: Test
+        shell: bash
         run: sbt '++ ${{ matrix.scala }}' test
 
       - name: Check binary compatibility
-        if: matrix.java == 'temurin@11' && matrix.os == 'ubuntu-latest'
+        if: matrix.java == 'temurin@11' && matrix.os == 'macos-latest'
+        shell: bash
         run: sbt '++ ${{ matrix.scala }}' mimaReportBinaryIssues
 
       - name: Generate API documentation
-        if: matrix.java == 'temurin@11' && matrix.os == 'ubuntu-latest'
+        if: matrix.java == 'temurin@11' && matrix.os == 'macos-latest'
+        shell: bash
         run: sbt '++ ${{ matrix.scala }}' doc
 
       - name: Make target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
+        shell: bash
         run: mkdir -p vision/target core/target project/target
 
       - name: Compress target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
+        shell: bash
         run: tar cf targets.tar vision/target core/target project/target
 
       - name: Upload target directories
@@ -90,10 +103,14 @@ jobs:
     if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [macos-latest]
         java: [temurin@11]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Ignore line ending differences in git
+        if: contains(runner.os, 'windows')
+        run: git config --global core.autocrlf false
+
       - name: Checkout current branch (full)
         uses: actions/checkout@v4
         with:
@@ -155,6 +172,10 @@ jobs:
         java: [temurin@11]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Ignore line ending differences in git
+        if: contains(runner.os, 'windows')
+        run: git config --global core.autocrlf false
+
       - name: Checkout current branch (full)
         uses: actions/checkout@v4
         with:
@@ -187,6 +208,10 @@ jobs:
         java: [temurin@11]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Ignore line ending differences in git
+        if: contains(runner.os, 'windows')
+        run: git config --global core.autocrlf false
+
       - name: Checkout current branch (full)
         uses: actions/checkout@v4
         with:

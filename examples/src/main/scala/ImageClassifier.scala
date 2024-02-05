@@ -34,8 +34,8 @@ import ImageClassifier.{Prediction, predict, train}
 import caseapp.*
 import caseapp.core.argparser.{ArgParser, SimpleArgParser}
 import caseapp.core.app.CommandsEntryPoint
-import com.sksamuel.scrimage.{ImmutableImage, ScaleMethod}
-import me.tongfei.progressbar.{ProgressBar, ProgressBarBuilder}
+import com.sksamuel.scrimage.ImmutableImage
+import me.tongfei.progressbar.ProgressBarBuilder
 import org.bytedeco.javacpp.PointerScope
 import org.bytedeco.pytorch.{InputArchive, OutputArchive}
 import os.Path
@@ -46,9 +46,6 @@ import torchvision.models.resnet.{ResNet, ResNetVariant}
 
 import java.nio.file.Paths
 import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Future}
 import scala.util.{Random, Try, Using}
 
 // format: off
@@ -133,7 +130,7 @@ object ImageClassifier extends CommandsEntryPoint:
       // Don't load the classification head weights, as we they are specific to the imagenet classes
       // and their output size (1000) usually won't match the number of classes of our dataset.
       model.loadStateDict(
-        weights.filterNot((k, v) => Set("fc.weight", "fc.bias").contains(k))
+        weights.filterNot((k, _) => Set("fc.weight", "fc.bias").contains(k))
       )
     model.to(device)
 
