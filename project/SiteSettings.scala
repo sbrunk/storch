@@ -70,11 +70,6 @@ object StorchSitePlugin extends AutoPlugin {
             Root / "api" / "index.html",
             HeliumIcon.api,
             options = Styles("svg-link")
-          ),
-          IconLink.external(
-            scmInfo.value.fold("https://github.com/sbrunk/storch")(_.browseUrl.toString),
-            HeliumIcon.github,
-            options = Styles("svg-link")
           )
           //            IconLink.external("https://discord.gg/XF3CXcMzqD", HeliumIcon.chat),
           //            IconLink.external("https://twitter.com/typelevel", HeliumIcon.twitter)
