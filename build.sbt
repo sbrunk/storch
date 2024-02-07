@@ -33,7 +33,8 @@ ThisBuild / javaCppVersion := "1.5.10"
 ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
-ThisBuild / githubWorkflowOSes := Seq("macos-latest", "ubuntu-latest", "windows-latest")
+// macos 12/14 to test on x86_64/arm64 respectively
+ThisBuild / githubWorkflowOSes := Seq("macos-12", "macos-14", "ubuntu-latest", "windows-latest")
 
 val enableGPU = settingKey[Boolean]("enable or disable GPU support")
 
